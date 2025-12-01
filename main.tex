@@ -1,0 +1,3806 @@
+% ####################################################################
+% #                     PREÂMBULO DO DOCUMENTO                       #
+% ####################################################################
+
+\documentclass[a4paper, 11pt]{article}
+% regex \
+
+% --- PACOTES BÁSICOS ---
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath, amssymb} % Pacotes de matemática
+\usepackage{graphicx}
+\usepackage[margin=1.5cm]{geometry} % Margens conforme originais
+\usepackage{parskip}                % Espaçamento entre parágrafos (sem indentação)
+\usepackage{float}                  % Para usar [H]
+
+% --- PACOTES DE TIPOGRAFIA E MELHORIAS ---
+\usepackage{microtype} % Melhora sutilmente a justificação e o espaçamento
+\usepackage{fancyhdr}  % Para cabeçalhos e rodapés
+\usepackage{booktabs}  % Para tabelas profissionais
+\usepackage{array}     % Para controle avançado de colunas em tabelas
+
+% --- PACOTES PARA LISTAGEM DE CÓDIGO ---
+\usepackage{xcolor}   % Necessário para definir cores
+\usepackage{listings} % O pacote de code listing
+
+% --- PACOTES DE NAVEGAÇÃO (CARREGAR POR ÚLTIMO) ---
+\usepackage[hidelinks]{hyperref} % Para índice clicável e links internos
+
+% --- DEFINIÇÃO DAS CORES PARA O CÓDIGO ---
+\definecolor{codegray}{rgb}{0.95,0.95,0.95}
+\definecolor{commentgreen}{rgb}{0,0.5,0}
+\definecolor{keywordblue}{rgb}{0.0,0.0,0.6}
+\definecolor{stringpurple}{rgb}{0.5,0.0.5}
+\definecolor{bashcommand}{rgb}{0.6,0.1,0.1} % Nova cor para comandos bash
+
+% --- CONFIGURAÇÃO GLOBAL DO `listings` ---
+% Esta é a aparência base para TODOS os blocos de código
+\lstset{
+ backgroundcolor=\color{white},         % Fundo branco
+ commentstyle=\color{commentgreen},     % Cor dos comentários
+ keywordstyle=\bfseries\color{keywordblue},% Estilo das palavras-chave
+ stringstyle=\color{stringpurple},        % Cor das strings
+ basicstyle=\ttfamily,                  % Fonte de máquina de escrever simples
+ showstringspaces=false,                % Não mostrar espaços em strings
+ breaklines=true,                       % Quebra de linha automática
+ frame=single,                          % Borda simples
+ framerule=0.5pt,
+ rulecolor=\color{black},
+ tabsize=4,
+ numbers=none,                          % Desligar números de linha por padrão
+ numberstyle=\tiny\color{gray},
+}
+
+% --- DEFINIÇÃO DE LINGUAGENS CUSTOMIZADAS ---
+
+% 1. Linguagem para PSpice (SPICE)
+\lstdefinelanguage{pspice}{%
+ sensitive=false, % pspice não é case-sensitive
+ morekeywords={.param, .global, .subckt, .ends, .lib, .include, .tran,
+ .dc, .ac, .meas, .mc, .option, .plot, .probe, .ic, .nodeset,
+ VDD, VSS, PULSE, sweep, trig, targ, rise, fall, param, abs,
+ WHEN, FIND, AVG, STDDEV, MAX, MIN, INCR,
+ MODN, MODP, RPOLYH, VERT10,
+ NMOS4, PMOS4, V, I, Is, Vout, Vdd},
+ morecomment=[l]{*}, % Comentários começam com *
+}
+
+% 2. Linguagem para Bash/Terminal
+\lstdefinelanguage{bash}{%
+ sensitive=true,
+ morekeywords={cd, source, ams_ics, eldo, ezwave, calibre, xwd, convert,
+ grep, find, cat, touch, vim, nano, cp, rm, mkdir,
+ DRC, LVS, PEX, history, exit, touch,},
+ keywordstyle=\bfseries\color{bashcommand},
+ morecomment=[l]{\#}, % Comentários começam com #
+ morestring=[b]", % Strings em aspas duplas
+ morestring=[b]', % Strings em aspas simples
+}
+
+% --- CONFIGURAÇÃO DO CABEÇALHO E RODAPÉ ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\footnotesize \nouppercase{\leftmark}} % Mostra a Seção atual
+\rhead{\footnotesize \nouppercase{\rightmark}} % Mostra a Subseção atual
+\cfoot{\footnotesize \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- AJUSTE PARA \leftmark E \rightmark FUNCIONAREM COM \section ---
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+\renewcommand{\subsectionmark}[1]{\markright{#1}}
+
+
+% ####################################################################
+% #           INFORMAÇÕES DA CAPA (DEFINIÇÕES GLOBAIS)               #
+% ####################################################################
+%
+% Estas definições alimentam a \begin{titlepage} abaixo.
+
+\title{Material de Consulta\\ \large SEL0621 - Projeto de Circuitos Integrados Digitais I}
+
+\author{
+    Felipi Adenildo Soares Sousa \\ felipiadenildo(at)usp.br
+}
+
+\newcommand{\professor}{Prof. Dr. João Navarro Soares Júnior \\ navarro(at)sc.usp.br}
+\newcommand{\dataEntrega}{13 de novembro de 2025}
+
+% ####################################################################
+% #                        FIM DO PREÂMBULO                          #
+% ####################################################################
+
+
+\begin{document}
+
+% ####################################################################
+% #                     CAPA CUSTOMIZADA (Titlepage)                 #
+% ####################################################################
+%
+% Esta é a estrutura da sua capa, usando as definições do preâmbulo.
+% Você pode colocar isso no início do seu \begin{document}.
+
+\begin{titlepage}
+    \centering
+    \makeatletter % Permite o uso de comandos com '@' (ex: \@title)
+
+    % --- CABEÇALHO DA UNIVERSIDADE ---
+    {\fontsize{16}{18}\selectfont\bfseries UNIVERSIDADE DE SÃO PAULO\par}
+    {\fontsize{14}{16}\selectfont ESCOLA DE ENGENHARIA DE SÃO CARLOS\par}
+    {\fontsize{12}{14}\selectfont Departamento de Engenharia Elétrica e de Computação\par}
+    
+    \vspace{2.5cm}
+    
+    % --- TÍTULO DO RELATÓRIO ---
+    % Usa o \title definido no preâmbulo
+    {\huge\bfseries \@title\par}
+    
+    \vfill % Adiciona espaço flexível
+    
+
+    % --- INFORMAÇÕES DO PROFESSOR ---
+    \begin{minipage}{0.9\textwidth}
+        \large
+        \begin{flushleft}
+            \textbf{Professor:} \\
+            \professor
+        \end{flushleft}
+    \end{minipage}
+
+    \vspace{1.5cm}
+
+    % --- INFORMAÇÕES DOS ALUNOS ---
+    \begin{minipage}{0.9\textwidth}
+        \large
+        \begin{flushleft}
+            \textbf{Aluno:} \\
+            \@author
+        \end{flushleft}
+    \end{minipage}
+    
+    \vfill % Adiciona mais espaço flexível
+    
+    % --- LOCAL E DATA ---
+    % Usa o \dataEntrega definido no preâmbulo
+    {\large São Carlos - SP\par}
+    {\large \dataEntrega\par}
+    
+    \makeatother % Restaura o comportamento normal do '@'
+\end{titlepage}
+
+
+% ####################################################################
+% #                          ÍNDICE (Sumário)                        #
+% ####################################################################
+\newpage
+\tableofcontents
+\thispagestyle{empty} % Remove cabeçalho e rodapé da pág. do índice
+
+\newpage
+
+% ####################################################################
+% #                    INÍCIO DO CONTEÚDO DO DOCUMENTO               #
+% ####################################################################
+
+
+\newpage
+\section{Projeto de Portas CMOS Estáticas}
+
+\subsection{Da Lógica ao Esquemático}
+Uma porta CMOS estática é composta por duas redes de transistores que são o dual uma da outra .
+
+\begin{itemize}
+    \item \textbf{Rede Pull-Up (PUN):}
+    \begin{itemize}
+        \item \textbf{Transistores:} \textbf{PMOS} (ficam "em cima").
+        \item \textbf{Conecta:} A saída (Y) ao \textbf{VDD}.
+    \end{itemize}
+    \item \textbf{Rede Pull-Down (PDN):}
+    \begin{itemize}
+        \item \textbf{Transistores:} \textbf{NMOS} (ficam "em baixo").
+        \item \textbf{Conecta:} A saída (Y) ao \textbf{VSS (GND)}.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{ Regras de Dualidade (Teorema de De Morgan)}
+A rede PDN implementa a lógica \textit{diretamente} (sem a negação final), enquanto a rede PUN implementa o DUAL. Esta dualidade é uma consequência direta do Teorema de De Morgan .
+
+\begin{itemize}
+    \item \textbf{Rede PUN (PMOS):}
+    \begin{itemize}
+        \item Operação \textbf{AND ($\cdot$)} $\rightarrow$ Transistores em \textbf{Paralelo}.
+        \item Operação \textbf{OR (+)} $\rightarrow$ Transistores em \textbf{Série}.
+    \end{itemize}
+    \item \textbf{Rede PDN (NMOS):}
+    \begin{itemize}
+        \item Operação \textbf{AND ($\cdot$)} $\rightarrow$ Transistores em \textbf{Série}.
+        \item Operação \textbf{OR (+)} $\rightarrow$ Transistores em \textbf{Paralelo}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Exemplo Passo-a-Passo: OAI21 - $Y = \overline{(A+B) \cdot C}$}
+Vamos projetar a porta "OR-AND-Invert" (OAI21), cuja lógica é $\neg(b(a+c))$ na Prova 2010.
+
+\begin{enumerate}
+    \item \textbf{Rede Pull-Up (PUN - PMOS):}
+    \begin{itemize}
+        \item A lógica é o DUAL da PDN: $(A \cdot B) + C$.
+        \item (A $\parallel$ B) na PDN $\rightarrow$ Transistores PMOS A e B ficam em \textbf{SÉRIE}.
+        \item em SÉRIE com C na PDN $\rightarrow$ O bloco (A $\cdot$ B) fica em \textbf{PARALELO} com o transistor PMOS C.
+    \end{itemize}
+
+    \item \textbf{Rede Pull-Down (PDN - NMOS):}
+    \begin{itemize}
+        \item A lógica (sem a inversão) é: $(A+B) \cdot C$.
+        \item \textbf{$(A+B)$ (OR):} Transistores NMOS A e B ficam em \textbf{PARALELO}.
+        \item \textbf{$\cdot C$ (AND):} O bloco (A $\parallel$ B) fica em \textbf{SÉRIE} com o transistor NMOS C.
+    \end{itemize}
+
+    
+    \item \textbf{Circuito Completo:}
+    \begin{itemize}
+        \item As entradas (A, B, C) são conectadas aos gates dos pares NMOS/PMOS.
+        \item A PUN é conectada ao VDD; a PDN é conectada ao VSS.
+        \item A Saída (Y ou 'out') é retirada da junção entre a PUN e a PDN.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+\subsection{Princípio Fundamental do Dimensionamento}
+O objetivo do dimensionamento (definir $W_n$ e $W_p$) é igualar as "forças" das redes pull-up e pull-down para que os tempos de subida e descida da porta sejam simétricos.
+
+\subsubsection{ Equações de Tempo de Propagação}
+Os tempos de subida e descida são dados aproximadamente por :
+$$ t_{phl} = \frac{1.6 \cdot C_L}{\mu_n C_{ox} (W/L)_{n,eff} V_{DD}} $$
+$$ t_{plh} = \frac{1.6 \cdot C_L}{\mu_p C_{ox} (W/L)_{p,eff} V_{DD}} $$
+Para igualar os tempos ($t_{phl} = t_{plh}$), os termos $1.6 \cdot C_L / (C_{ox} V_{DD})$ cancelam, resultando em:
+$$ \frac{1}{\mu_n (W/L)_{n,eff}} = \frac{1}{\mu_p (W/L)_{p,eff}} $$
+Assumindo que $L_n = L_p$ (comprimentos iguais), a condição de simetria torna-se:
+\begin{equation}
+\mu_n \cdot W_{n,eff} = \mu_p \cdot W_{p,eff}
+\end{equation}
+
+\subsubsection{ Razão de Mobilidade ($r$) e Modelos}
+Definimos a razão de mobilidade $r = \mu_n / \mu_p$. No entanto, este valor \textbf{não é constante}; ele depende do modelo de simulação (típico, pior velocidade, etc.) .
+
+\begin{itemize}
+    \item $\mu_n$: Mobilidade dos elétrons (NMOS).
+    \item $\mu_p$: Mobilidade das lacunas (PMOS).
+\end{itemize}
+Como $\mu_n > \mu_p$, os transistores PMOS precisam ser fisicamente \textbf{mais largos ($W_p$)} que os NMOS ($W_n$) para ter a mesma "força".
+
+\begin{table}[H]
+\centering
+\caption{Valores de Mobilidade (U0) e Razão (r) para Diferentes Modelos}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Modelo} & \textbf{U0 NMOS ($\mu_n$)} & \textbf{U0 PMOS ($\mu_p$)} & \textbf{Razão $r = \mu_n / \mu_p$} \\
+\midrule
+Constantes Gerais & 370  & 126  & $\approx 2.94$ \\
+Modelo Típico (tm) & 475.8  & 148.2  & $\approx 3.21$  \\
+Worst Power (wp) & 500.2  & 158.1  & $\approx 3.16$  \\
+Worst Speed (ws) & 467.1  & 131.4  & $\approx 3.55$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Relação de Largura para Força Equivalente:}
+\begin{equation}
+W_{p,eff} = r \cdot W_{n,eff}
+\end{equation}
+
+\subsection{Análise de Tempos (Melhor e Pior Caso)}
+A largura efetiva ($W_{eff}$) depende de quais transistores estão conduzindo.
+
+\begin{itemize}
+    \item $t_{PHL}$ (Tempo High-to-Low): Tempo de \textbf{descida}. Controlado pela \textbf{PDN (NMOS)}.
+    \item $t_{PLH}$ (Tempo Low-to-High): Tempo de \textbf{subida}. Controlado pela \textbf{PUN (PMOS)}.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Pior Caso (Worst Case):} Ocorre no caminho de \textbf{maior resistência} (mais transistores em série e menos em paralelo) . Resulta no tempo \textbf{mais longo}.
+    \item \textbf{Melhor Caso (Best Case):} Ocorre no caminho de \textbf{menor resistência} (todos transistores em paralelo ligados). Resulta no tempo \textbf{mais curto}.
+\end{itemize}
+
+\subsubsection{ Cálculo da Largura Efetiva ($W_{eff}$)}
+Assumindo transistores idênticos ($W, L$) :
+\begin{itemize}
+    \item \textbf{N Transistores em Série:} A resistência total aumenta. A largura efetiva é $N$ vezes menor.
+    $$ W_{eff} = \frac{W}{N} $$
+    \item \textbf{N Transistores em Paralelo:} A resistência total diminui. A largura efetiva é $N$ vezes maior.
+    $$ W_{eff} = N \cdot W $$
+\end{itemize}
+
+\newpage
+
+\subsection{Dimensionamento da Porta OAI21 - $Y = \overline{(A+B) \cdot C}$}
+Usamos as redes que derivamos acima e assumimos $W_{nA} = W_{nB} = W_{nC} = W_n$ e $W_{pA} = W_{pB} = W_{pC} = W_p$.
+
+\begin{table}[H]
+\centering
+\caption{Cálculo da Largura Efetiva ($W_{eff}$) para a porta OAI21 }
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Rede e Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+\textbf{Pior Subida} ($t_{PLH,worst}$) & PUN: Caminho por A e B em série. & $W_{p,eff} = W_p / 2$ \\
+\textbf{Melhor Subida} ($t_{PLH,best}$) & PUN: Caminho por C (em paralelo). & $W_{p,eff} = W_p$ \\
+\midrule
+\textbf{Pior Descida} ($t_{PHL,worst}$) & PDN: Caminho por A e C (ou B e C). & $W_{n,eff} = W_n / 2$ \\
+\textbf{Melhor Descida} ($t_{PHL,best}$) & PDN: Caminho por (A $\parallel$ B) e C. & $W_{n,eff} = (2W_n) / 3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Relações de Comparação para OAI21}
+Usando $W_{p,eff} = r \cdot W_{n,eff}$ (com $r \approx 2.94$ a $3.55$, dependendo do modelo):
+
+\begin{itemize}
+    \item \textbf{$t_{PLH,worst} = t_{PHL,worst}$} (Pior subida = Pior descida) 
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies \dfrac{W_p}{2} = r \cdot \left(\dfrac{W_n}{2}\right)$
+        \item $\mathbf{W_p = r \cdot W_n}$
+    \end{itemize}
+    
+    \item \textbf{$t_{PLH,best} = t_{PHL,best}$} (Melhor subida = Melhor descida)
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies W_p = r \cdot \left(\dfrac{2W_n}{3}\right)$
+        \item $\mathbf{W_p = \dfrac{2r}{3} W_n}$
+    \end{itemize}
+    
+    \item \textbf{$t_{PLH,worst} = t_{PHL,best}$} (Pior subida = Melhor descida) 
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies \dfrac{W_p}{2} = r \cdot \left(\dfrac{2W_n}{3}\right)$
+        \item $\mathbf{W_p = \dfrac{4r}{3} W_n}$
+    \end{itemize}
+    
+    \item \textbf{$t_{PLH,best} = t_{PHL,worst}$} (Melhor subida = Pior descida)
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies W_p = r \cdot \left(\dfrac{W_n}{2}\right)$
+        \item $\mathbf{W_p = \dfrac{r}{2} W_n}$
+    \end{itemize}
+\end{itemize}
+\newpage
+\section{Dimensionamento de Portas Lógicas Complexas}
+
+O objetivo do dimensionamento é encontrar as larguras ($W_n, W_p$) para que os tempos de subida e descida sejam simétricos. Para isso, igualamos a "força" das redes (PUN e PDN) usando a razão de mobilidade ($r \approx 2.94$ a $3.55$, dependendo do modelo) .
+
+A equação base é: $W_{p,eff} = r \cdot W_{n,eff}$. Assumimos $L_n = L_p$.
+
+\subsection{Porta NAND3 - $Y = \overline{A \cdot B \cdot C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} 3 transistores (A, B, C) em \textbf{Série}.
+    \item \textbf{PUN (PMOS):} 3 transistores (A, B, C) em \textbf{Paralelo}.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para NAND3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: Apenas 1 PMOS ligado & $W_{p,eff} = W_p$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: 3 PMOS ligados em paralelo & $W_{p,eff} = 3 W_p$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: 3 NMOS ligados em série & $W_{n,eff} = W_n / 3$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: 3 NMOS ligados em série & $W_{n,eff} = W_n / 3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Porta NOR3 - $Y = \overline{A + B + C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} 3 transistores (A, B, C) em \textbf{Paralelo}.
+    \item \textbf{PUN (PMOS):} 3 transistores (A, B, C) em \textbf{Série}.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para NOR3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: 3 PMOS ligados em série & $W_{p,eff} = W_p / 3$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: 3 PMOS ligados em série & $W_{p,eff} = W_p / 3$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: Apenas 1 NMOS ligado & $W_{n,eff} = W_n$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: 3 NMOS ligados em paralelo & $W_{n,eff} = 3 W_n$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Porta AOI21 - $Y = \overline{(A \cdot B) + C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} (A e B em \textbf{Série}) em \textbf{Paralelo} com C.
+    \item \textbf{PUN (PMOS):} (A e B em \textbf{Paralelo}) em \textbf{Série} com C.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para AOI21}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: Caminho por A e C (ou B e C) & $W_{p,eff} = W_p / 2$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: Caminho por (A$\parallel$B) e C & $W_{p,eff} = (2W_p) / 3$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: Caminho por A e B em série & $W_{n,eff} = W_n / 2$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: Caminho por C & $W_{n,eff} = W_n$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Porta OAI21 - $Y = \overline{(A + B) \cdot C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} (A e B em \textbf{Paralelo}) em \textbf{Série} com C.
+    \item \textbf{PUN (PMOS):} (A e B em \textbf{Série}) em \textbf{Paralelo} com C.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para OAI21}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: Caminho por A e B em série & $W_{p,eff} = W_p / 2$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: Caminho por C & $W_{p,eff} = W_p$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: Caminho por A e C (ou B e C) & $W_{n,eff} = W_n / 2$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: Caminho por (A$\parallel$B) e C & $W_{n,eff} = (2W_n) / 3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}[htb] % 'htb' é uma sugestão de posicionamento (here, top, bottom)
+    \centering % Centraliza todo o conteúdo da figura
+    
+    % --- Primeira Linha ---
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{nand3.png}
+        \caption{Diagrama esquemático da Porta NAND3}
+        \label{fig:nand3}
+    \end{subfigure}
+    \hfill % Adiciona espaço horizontal flexível entre as colunas
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{nor3.png}
+        \caption{Diagrama esquemático da NOR3}
+        \label{fig:nor3}
+    \end{subfigure}
+    
+    \vspace{0.5cm} % Adiciona um pequeno espaço vertical entre as linhas
+    
+    % --- Segunda Linha ---
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{aoi21.jpeg}
+        \caption{Diagrama esquemático da AOI21}
+        \label{fig:aoi21}
+    \end{subfigure}
+    \hfill % Adiciona espaço horizontal flexível entre as colunas
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{oai21.png}
+        \caption{Diagrama esquemático da OAI21}
+        \label{fig:oai21} % <-- Corrigi este label (estava duplicado)
+    \end{subfigure}
+    
+    % \caption{Caption geral para todas as figuras (opcional)}
+    % \label{fig:todos_diagramas}
+\end{figure}
+
+\newpage
+
+
+\subsection[\textcolor{red}{Exemplos Práticos de Provas}]{\textcolor{red}{Exemplos Práticos de Provas}}
+(Usando $r = 2.94$ para consistência com os cálculos originais)
+
+\subsubsection[\textcolor{red}{Exemplo 1: Prova 2016b (OAI21)}]{\textcolor{red}{Exemplo 1: Prova 2016b (OAI21)}}
+\begin{itemize}
+    \item \textbf{Lógica:} $D = \neg((A+B) \cdot C)$ (Porta OAI21).
+    \item \textbf{Dado:} $W_n = 3 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,worst}$ (pior subida = pior descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Pior Descida):} Da tabela OAI21, o pior caminho na PDN é por A-C (ou B-C).
+    \[ W_{n,eff} = \frac{W_n}{2} = \frac{3 \mu m}{2} = 1.5 \mu m \]
+    
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} Da tabela OAI21, o pior caminho na PUN é por A-B.
+    \[ W_{p,eff} = \frac{W_p}{2} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ \frac{W_p}{2} = r \cdot \left( \frac{W_n}{2} \right) \]
+    \[ W_p = r \cdot W_n \]
+    \[ W_p = 2.94 \cdot (3 \mu m) = \mathbf{8.82 \mu m} \]
+\end{enumerate}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Exemplo 2: Prova 2022a (AOI21)}]{\textcolor{red}{Exemplo 2: Prova 2022a (AOI21)}}
+\begin{itemize}
+    \item \textbf{Lógica:} $\neg(a \cdot b + c)$ (Porta AOI21).
+    \item \textbf{Dado:} $W_n = 4 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,best}$ (pior subida = melhor descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Melhor Descida):} Da tabela AOI21, o melhor caminho na PDN é pelo transistor C.
+    \[ W_{n,eff} = W_n = 4 \mu m \]
+    
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} Da tabela AOI21, o pior caminho na PUN é por A-C (ou B-C).
+    \[ W_{p,eff} = \frac{W_p}{2} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ \frac{W_p}{2} = r \cdot W_n \]
+    \[ W_p = 2 \cdot r \cdot W_n \]
+    \[ W_p = 2 \cdot 2.94 \cdot (4 \mu m) = \mathbf{23.52 \mu m} \]
+\end{enumerate}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Exemplo 3: Prova 2024 (OAI21)}]{\textcolor{red}{Exemplo 3: Prova 2024 (OAI21)}}
+(Nota: A prova pede a função $a(b+c)$. Uma porta CMOS estática é inerentemente inversora, então assumimos a implementação da função OAI21 $Y = \overline{A \cdot (B+C)}$ (que é topologicamente idêntica a $\overline{C \cdot (A+B)}$) e ignoramos a inversão final).
+\begin{itemize}
+    \item \textbf{Lógica (Assumida):} $Y = \overline{A \cdot (B+C)}$ (Porta OAI21).
+    \item \textbf{Dado:} $W_p = 15 \mu m$ (para todos os PMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,best}$ (pior subida = melhor descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} Da tabela OAI21 (assumindo $Y=\overline{C(A+B)}$), o pior caminho na PUN é A e B em série.
+    \[ W_{p,eff} = \frac{W_p}{2} = \frac{15 \mu m}{2} = 7.5 \mu m \]
+
+    \item \textbf{$W_{n,eff}$ (Melhor Descida):} Da tabela OAI21, o melhor caminho na PDN é (A$\parallel$B) e C em série.
+    \[ W_{n,eff} = \frac{1}{\frac{1}{W_n + W_n} + \frac{1}{W_n}} = \frac{1}{\frac{1}{2W_n} + \frac{1}{W_n}} = \frac{2W_n}{3} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ 7.5 \mu m = r \cdot \left( \frac{2W_n}{3} \right) \]
+    \[ W_n = \frac{3 \cdot 7.5 \mu m}{2 \cdot r} \]
+    \[ W_n = \frac{22.5 \mu m}{2 \cdot 2.94} = \frac{22.5 \mu m}{5.88} = \mathbf{3.83 \mu m} \]
+\end{enumerate}
+
+\newpage
+
+\subsection[\textcolor{red}{Exemplos Complementares (Topologias Básicas)}]{\textcolor{red}{Exemplos Complementares (Topologias Básicas)}}
+Estas questões cobrem topologias fundamentais (NAND e NOR) não presentes explicitamente nos enunciados das provas acima, mas essenciais para o entendimento.
+
+\subsubsection[\textcolor{red}{Exemplo Extra A: Porta NAND3}]{\textcolor{red}{Exemplo Extra A: Porta NAND3}}
+\begin{itemize}
+    \item \textbf{Lógica:} $Y = \overline{A \cdot B \cdot C}$ (NAND de 3 entradas).
+    \item \textbf{Dado:} $W_n = 6 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,worst}$ (pior subida = pior descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Pior Descida):} A rede PDN da NAND3 possui 3 transistores em série (A-B-C).
+    \[ W_{n,eff} = \frac{W_n}{3} = \frac{6 \mu m}{3} = 2.0 \mu m \]
+
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} A rede PUN possui 3 transistores em paralelo. O pior caso ocorre quando apenas 1 transistor conduz (maior resistência).
+    \[ W_{p,eff} = W_p \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ W_p = r \cdot (2.0 \mu m) \]
+    \[ W_p = 2.94 \cdot 2.0 \mu m = \mathbf{5.88 \mu m} \]
+\end{enumerate}
+
+\subsubsection[\textcolor{red}{Exemplo Extra B: Porta NOR3}]{\textcolor{red}{Exemplo Extra B: Porta NOR3}}
+\begin{itemize}
+    \item \textbf{Lógica:} $Y = \overline{A + B + C}$ (NOR de 3 entradas).
+    \item \textbf{Dado:} $W_n = 2 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,best}$ (pior subida = melhor descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Melhor Descida):} A rede PDN da NOR3 possui 3 transistores em paralelo. O melhor caso ocorre quando todos os 3 conduzem.
+    \[ W_{n,eff} = 3 \cdot W_n = 3 \cdot 2 \mu m = 6 \mu m \]
+
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} A rede PUN da NOR3 possui 3 transistores em série.
+    \[ W_{p,eff} = \frac{W_p}{3} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ \frac{W_p}{3} = r \cdot (6 \mu m) \]
+    \[ W_p = 3 \cdot 2.94 \cdot 6 \mu m = \mathbf{52.92 \mu m} \]
+    (Nota: O valor elevado de $W_p$ deve-se à condição extrema de comparar 3 PMOS em série com 3 NMOS em paralelo).
+\end{enumerate}
+
+\newpage
+
+\section{Schematic (Esquemático)}
+Esta seção detalha o processo de criação, verificação e exportação de esquemáticos usando o Design Architect (iniciado a partir do ICStudio).
+
+\subsection{Inicialização do Ambiente}
+
+\subsubsection{Comandos no Terminal}
+Primeiro, configure o ambiente Mentor Graphics e abra o projeto .
+\begin{lstlisting}[language=bash, caption={Inicialização do shell e abertura do projeto}]
+cd /local/users/cad/
+source .cshrc-mentor
+cd /local/users/cad/workavdl
+
+# Para criar um NOVO projeto
+ams_ics -project nome_projeto -t c35b4c3
+
+# Para abrir um projeto EXISTENTE
+ams_ics -p nome_projeto
+\end{lstlisting}
+
+\subsubsection{No ICStudio (Janela Principal)}
+\begin{enumerate}
+    \item \textbf{Criar Biblioteca:} No ICStudio, clique em \textbf{File $\rightarrow$ New $\rightarrow$ Library}. Use um nome em letras minúsculas (ex: \texttt{minha\_lib}).
+    \item \textbf{Criar Célula:} Selecione a biblioteca recém-criada, clique com o \textbf{botão direito $\rightarrow$ New View}.
+    \item \textbf{Configurar Célula:}
+    \begin{itemize}
+        \item \textbf{Cell Name}: \texttt{nome\_da\_celula} (ex: \texttt{inv}, \texttt{nand3}) 
+        \item \textbf{View Type}: Selecione \textbf{Schematic} 
+    \end{itemize}
+    \item Isso abrirá a ferramenta de esquemático \textbf{Design Architect}.
+\end{enumerate}
+
+\subsection{Construção do Esquemático}
+
+\subsubsection{Elementos Básicos (Paleta de Componentes)}
+Os componentes são adicionados usando a paleta lateral (aberta no \textit{"penúltimo ícone à esquerda"}  ou com o \textit{"botão do meio"} do mouse ) ou o menu \textbf{Add $\rightarrow$ Instance}.
+
+\begin{itemize}
+    \item \textbf{Transistores:}
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{HIT-KIT Utilities $\rightarrow$ Devices $\rightarrow$ MOS} 
+        \item \textbf{Células:} \textbf{NMOS4} e \textbf{PMOS4} 
+        \item \textbf{Configuração:} Após adicionar, selecione o transistor e em \texttt{Properties} (ou na janela pop-up ) configure:
+        \item \texttt{Wtot = largura\_em\_microns} (ex: 5u) 
+        \item \texttt{L = 0.35} (valor fixo da tecnologia) 
+    \end{itemize}
+    
+    \item \textbf{Fontes de Alimentação:}
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{MGC Library $\rightarrow$ Generic Lib} 
+        \item \textbf{Células:} \textbf{VDD} e \textbf{VSS} 
+    \end{itemize}
+    
+    \item \textbf{Portas de Entrada/Saída:}
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{MGC Library $\rightarrow$ Generic Lib} 
+        \item \textbf{Células:} \textbf{Portin} (Entrada) e \textbf{Portout} (Saída) 
+    \end{itemize}
+
+    \item \textbf{Resistores (quando necessário):} 
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{HIT-KIT Utilities $\rightarrow$ Devices $\rightarrow$ Resistors} 
+        \item \textbf{Célula:} \textbf{rpolyh} (Polisilício de alta resistividade) 
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Procedimento de Conexão}
+\begin{enumerate}
+    \item \textbf{Posicionar Componentes:} Adicione todos os transistores, portas e fontes necessários.
+    \item \textbf{Conectar com Wires:} Use a ferramenta de "wire" (linha) para conectar os terminais.
+    \item \textbf{Nomear Nets (Fios):}
+    \begin{itemize}
+        \item Selecione um wire $\rightarrow$ \textbf{Botão direito $\rightarrow$ Name Nets} .
+        \item Dê nomes claros (ex: \texttt{A}, \texttt{B}, \texttt{OUT}, \texttt{n1}).
+    \end{itemize}
+    \item \textbf{Verificar Conexões de Bulk (Substrato):} Esta é uma etapa \textbf{crítica}.
+    \begin{itemize}
+        \item O "bulk" de todos os \textbf{PMOS4} deve ser conectado ao \textbf{VDD}.
+        \item O "bulk" de todos os \textbf{NMOS4} deve ser conectado ao \textbf{VSS}.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Trabalhando com Hierarquia (Células Existentes)}
+Você pode instanciar outras células, incluindo bibliotecas padrão ou as que você mesmo criou.
+
+\begin{itemize}
+    \item \textbf{Adicionando Células da CORELIB:} 
+    \begin{itemize}
+        \item \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+        \item \textbf{Biblioteca}: \texttt{CORELIB}.
+        \item \textbf{Células comuns}: \texttt{inv0} (inversor), \texttt{df1} (flip-flop D), \texttt{dl1} (latch D) .
+    \end{itemize}
+    
+    \item \textbf{Adicionando Seus Próprios Símbolos:}
+    \begin{itemize}
+        \item \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+        \item Selecione o símbolo da célula que você criou e verificou anteriormente.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Verificações do Esquemático e Geração do Símbolo}
+Siga esta sequência para garantir que o esquemático e seu símbolo estejam corretos.
+
+\begin{enumerate}
+    \item \textbf{Primeira Verificação (Check Schematic):}
+    \begin{itemize}
+        \item \textbf{Comando:} \texttt{File $\rightarrow$ Check Schematic}.
+        \item \textbf{Resultado Esperado:} 0 Erros, 1 Warning .
+        \item \textbf{Warning Esperado:} \textit{"Warning: Interface ... has no pins"}.
+    \end{itemize}
+
+    \item \textbf{Geração do Símbolo:}
+    \begin{itemize}
+        \item \textbf{Comando:} \texttt{Miscellaneous $\rightarrow$ Generate Symbol} .
+        \item Marque \textbf{Replace Existing}.
+        \item \textbf{Choose Shape} $\rightarrow$ Selecione o formato gráfico adequado (ex: \texttt{And Gate}, \texttt{Buffer}, ou \texttt{Box}) .
+        \item O editor de símbolos abrirá.
+    \end{itemize}
+    
+    \item \textbf{ Sequência de Verificação do Símbolo:}
+    \begin{itemize}
+        \item No editor de símbolo, execute \textbf{File $\rightarrow$ Check Symbol}.
+        \item Salve o símbolo: \textbf{File $\rightarrow$ Save Symbol}.
+        \item Verifique novamente: \textbf{File $\rightarrow$ Check Symbol} (agora deve dar 0 warnings) .
+        \item Feche o editor de símbolo.
+    \end{itemize}
+
+    \item \textbf{Verificação Final (Check Schematic):}
+    \begin{itemize}
+        \item De volta ao esquemático, execute: \texttt{File $\rightarrow$ Check Schematic} (novamente) .
+        \item \textbf{Resultado Esperado:} 0 Erros, 0 Warnings .
+    \end{itemize}
+\end{enumerate}
+
+\subsection{ Criação do ViewPoint e Netlist}
+O ViewPoint é uma "visão" do esquemático usada para gerar o netlist de simulação (arquivo `.spi` ou `.cir`).
+
+\subsubsection{Criação do ViewPoint}
+\begin{enumerate}
+    \item \textbf{Comando:} \texttt{Hit-Kit Utilities $\rightarrow$ Create ViewPoint} .
+    \item \textbf{Design Path:} Verifique se o caminho aponta para o seu esquemático \\ (ex: \texttt{\$Cell/default.group/logic.view/gate}).
+    \item \textbf{Tipo:} Selecione \texttt{device}.
+\end{enumerate}
+
+\subsubsection{Geração do Netlist (ELDO)}
+\begin{enumerate}
+    \item \textbf{Modo de Simulação:} Entre no modo de simulação (último botão "play" verde na barra esquerda).
+    \item \textbf{Selecionar Viewpoint:} Selecione o \texttt{vpt\_c35b4\_device} que você acabou de criar.
+    \item \textbf{Gerar Netlist:} Clique no botão "Netlist" (ícone com wires pretos).
+    \item \textbf{Visualizar:} Use o comando \texttt{ASCII Results $\rightarrow$ View Netlist} (ícone do "olho") para ver o netlist gerado.
+    \item \textbf{Copiar e Editar:} Copie o conteúdo para um arquivo \texttt{.cir}. Você \textbf{precisa} editar o arquivo:
+    \begin{itemize}
+        \item Mude \texttt{.end} para \texttt{.ends}.
+        \item Adicione os nomes dos ports (entradas/saídas) na linha \texttt{.subckt} (ex: \texttt{.subckt GATE A B C OUT VDD VSS}).
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Estrutura do Netlist Gerado}
+O arquivo gerado (ex: \texttt{nome\_porta\_vpt\_c35b4\_device.spi}) terá esta aparência:
+\begin{lstlisting}[language=pspice]
+* Arquivo gerado automaticamente pelo ViewPoint
+.global VSS VDD
+.subckt NOME_PORTA A B C OUT
+* ...
+* Definicoes dos transistores M1, M2...
+* ...
+.ends
+\end{lstlisting}
+
+\subsection{Observações e Dicas Críticas}
+
+\subsubsection{Erros Comuns no Esquemático}
+\begin{itemize}
+    \item \textbf{Bulk não conectado:} Erro mais comum. Causa falha no LVS. Sempre conecte PMOS no VDD e NMOS no VSS.
+    \item \textbf{Warning persistente (mesmo após criar símbolo):} Delete o símbolo e gere-o novamente.
+    \item \textbf{Dois ports com mesmo nome:} Se as entradas A e B estão em curto, use o mesmo \texttt{Portin} e conecte-o a ambos os gates. Não crie dois \texttt{Portin} com o nome \texttt{A}.
+\end{itemize}
+
+\subsubsection{Dicas Importantes}
+\begin{itemize}
+    \item \textbf{Salvar Frequentemente:} Use \texttt{File $\rightarrow$ Save} ou o ícone do disquete.
+    \item \textbf{Nomenclatura:} Use \textbf{apenas letras minúsculas} para nomes de bibliotecas e células.
+    \item \textbf{Organização:} Mantenha o esquemático limpo e organizado. Isso facilita muito a depuração e a criação do layout.
+\end{itemize}
+
+\subsubsection{Para Circuitos Complexos (AOI/OAI/Sequenciais)}
+\begin{itemize}
+    \item A metodologia é a mesma.
+    \item Siga as regras de dualidade (Série/Paralelo) para as redes PUN/PDN.
+    \item Para circuitos sequenciais (Flip-Flops), adicione portas de entrada para \texttt{CLK} (clock) e \texttt{RST} (reset), se necessário.
+    \item Use hierarquia: crie e verifique blocos menores (ex: um Latch) e depois use o símbolo desse bloco para construir um circuito maior (ex: um Flip-Flop Master-Slave).
+\end{itemize}
+
+\newpage
+
+\newpage
+\section[\textcolor{red}{Exemplos de Prova: Esquemático Avançado}]{\textcolor{red}{Exemplos de Prova: Esquemático Avançado}}
+
+\subsection[\textcolor{red}{Contadores Síncronos (Provas 2016b Q5 e 2022a Q5)}]{\textcolor{red}{Contadores Síncronos (Provas 2016b Q5 e 2022a Q5)}}
+Ambas as provas solicitam a transposição de um diagrama de blocos (contador) para o esquemático no Mentor Graphics, utilizando células da biblioteca padrão (\texttt{CORELIB}).
+
+\textbf{Células Necessárias:}
+\begin{itemize}
+    \item \textbf{Prova 2016b (Fig. 2):} \texttt{df1} (Flip-Flop), \texttt{nor21}, \texttt{aoi211}, \texttt{aoi21}, \texttt{nand21} (verifique a lógica exata na figura da prova).
+    \item \textbf{Prova 2022a (Fig. 1):} \texttt{df1}, \texttt{xnr21} (XNOR), \texttt{nand21}.
+\end{itemize}
+
+\textbf{Passo a Passo de Resolução:}
+\begin{enumerate}
+    \item \textbf{Criar Nova Célula:} \texttt{File $\rightarrow$ New $\rightarrow$ Cell} (ex: \texttt{contador\_p22}). View: \texttt{Schematic}.
+    \item \textbf{Instanciar Células da CORELIB:}
+    \begin{itemize}
+        \item \texttt{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+        \item Navegue até a biblioteca \texttt{CORELIB} e selecione as células identificadas acima (ex: \texttt{df1}).
+    \end{itemize}
+    \item \textbf{Conectar o Clock (CLK):}
+    \begin{itemize}
+        \item Em circuitos síncronos, o sinal de \texttt{CLK} deve ser conectado à entrada de clock de \textbf{todos} os Flip-Flops.
+        \item Adicione um \texttt{Portin} chamado \texttt{CLK}.
+    \end{itemize}
+    \item \textbf{Realimentação (Feedback):}
+    \begin{itemize}
+        \item Conecte as saídas $Q$ (ou $\bar{Q}$) dos Flip-Flops de volta às entradas das portas lógicas combinacionais conforme o desenho da prova.
+        \item \textit{Dica:} Use \texttt{Name Nets} para nomear fios distantes com o mesmo nome (ex: \texttt{Q1}) em vez de passar fios longos por todo o esquemático.
+    \end{itemize}
+    \item \textbf{Verificação e Símbolo:}
+    \begin{itemize}
+        \item \texttt{Check Schematic} (Deve dar 0 Erros).
+        \item \texttt{Miscellaneous $\rightarrow$ Generate Symbol} (Substitua o existente).
+    \end{itemize}
+\end{enumerate}
+
+\subsection[\textcolor{red}{Hierarquia e Blocos Reutilizáveis (Prova 2024 Q5 e Q6)}]{\textcolor{red}{Hierarquia e Blocos Reutilizáveis (Prova 2024 Q5 e Q6)}}
+A prova de 2024 exige uma abordagem hierárquica: primeiro cria-se um bloco menor ("BLOCO") e depois ele é usado múltiplas vezes no circuito principal.
+
+\subsubsection[\textcolor{red}{Passo 1: Criar o Sub-bloco (Questão 5)}]{\textcolor{red}{Passo 1: Criar o Sub-bloco (Questão 5)}}
+\begin{itemize}
+    \item \textbf{Objetivo:} Criar o esquemático interno do bloco mostrado na prova.
+    \item \textbf{Componentes:} \texttt{df1} (Flip-Flop), \texttt{nand21} e \texttt{inv1} (para formar AND e OR, já que AND = NAND + INV).
+    \item \textbf{Ação:}
+    \begin{enumerate}
+        \item Crie a célula \texttt{bloco\_q5}.
+        \item Monte o circuito interno conforme a figura.
+        \item Adicione portas de entrada/saída (ex: \texttt{In}, \texttt{Out}, \texttt{M}, \texttt{CLK}).
+        \item \texttt{Check Schematic} e \textbf{Generate Symbol}.
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection[\textcolor{red}{Passo 2: Circuito Principal (Questão 6)}]{\textcolor{red}{Passo 2: Circuito Principal (Questão 6)}}
+\begin{itemize}
+    \item \textbf{Objetivo:} Construir o circuito final usando o símbolo criado no Passo 1.
+    \item \textbf{Ação:}
+    \begin{enumerate}
+        \item Crie uma nova célula (ex: \texttt{circuito\_final\_q6}).
+        \item \textbf{Instanciar o Bloco:} Use \texttt{Add Instance} e selecione o símbolo \texttt{bloco\_q5} que você acabou de criar. Repita 4 vezes.
+        \item \textbf{Configurar Modos ($M_x$):}
+        \begin{itemize}
+            \item A prova pede conexões específicas como $M_1 = V_{DD}$ e $M_4 = 0V$.
+            \item Adicione fontes \texttt{VDD} e \texttt{VSS} da biblioteca \texttt{Generic Lib}.
+            \item Conecte o pino $M$ da primeira instância ao \texttt{VDD}.
+            \item Conecte o pino $M$ da última instância ao \texttt{VSS} (GND).
+        \end{itemize}
+        \item \textbf{Interconexões:} Ligue a saída $X_n$ de um bloco à entrada do próximo e adicione a lógica de controle superior (\texttt{nand21}, \texttt{inv1}) conforme a figura.
+    \end{enumerate}
+\end{itemize}
+
+\newpage
+\section{Layout}
+Esta seção descreve o fluxo de trabalho para criar o layout físico de uma célula no ICStation, a partir de um esquemático verificado.
+
+\subsection{Criação do Layout a partir do Esquemático}
+
+\subsubsection{Inicialização do Layout}
+\begin{enumerate}
+    \item No \textbf{ICStudio}: Selecione a célula desejada (ex: \texttt{inv}) na sua biblioteca.
+    \item Clique com o \textbf{Botão direito $\rightarrow$ New View}.
+    \item \textbf{View Type}: Selecione \textbf{Layout}.
+    \item \textbf{Connectivity Source}: Assegure-se de que está selecionado \textbf{Schematic} (ou o \texttt{vpt\_c35b4\_device} se estiver usando ViewPoint).
+    \item \textbf{Finish}. A ferramenta \textbf{ICStation} (para layout) será aberta.
+\end{enumerate}
+
+\subsubsection{Configuração do Ambiente ICStation}
+Configure o ambiente para facilitar o trabalho:
+\begin{itemize}
+    \item \textbf{ Reserva de Célula:} Garanta que você pode editar o layout.
+    \begin{itemize}
+        \item \textbf{File $\rightarrow$ Cell $\rightarrow$ Reserve $\rightarrow$ Current Context}.
+        \item O status deve mudar de (GE-R-0) (Read-only) para (GE-E-0) (Editável) .
+    \end{itemize}
+    \item \textbf{Janelas Lado a Lado:} \textbf{MGC $\rightarrow$ Setup $\rightarrow$ LeftRight} (para ver o esquemático e o layout simultaneamente).
+    \item \textbf{Habilitar Atalhos:} \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Enable}, depois \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Load} .
+    \item \textbf{Configurar o Grid:} \textbf{Other $\rightarrow$ Window $\rightarrow$ Set Grid} .
+    \begin{itemize}
+        \item \textbf{X = 0.025}, \textbf{Y = 0.025}
+        \item \textbf{Minor = 0.1}, \textbf{Major = 1}
+    \end{itemize}
+    \item \textbf{Mostrar Softkeys:} \textbf{Setup $\rightarrow$ Session $\rightarrow$ Show Softkeys} (mostra botões de atalho).
+    \item \textbf{Mostrar Paleta de Camadas:} \textbf{Other $\rightarrow$ Layers $\rightarrow$ Show layer palette $\rightarrow$ Append $\rightarrow$ all} .
+    \item \textbf{ Dica de Estabilidade:} Ao usar a barra de scroll no ICStation, não clique repetidamente, pois isso pode travar a ferramenta.
+\end{itemize}
+
+\subsection{Geração Automática e Placement}
+
+\subsubsection{AutoInst (Instanciação Automática)}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{DLA Layout $\rightarrow$ AutoInst}.
+    \item \textbf{Ação:} Isso gera o layout automático (caixas de transistores e resistores) a partir do esquemático.
+    \item \textbf{Visualizar Hierarquia (Peek):} Para ver o conteúdo das células (como os transistores), use \textbf{Context $\rightarrow$ Hierarchy $\rightarrow$ Peek $\rightarrow$ 2-4 levels}.
+\end{itemize}
+
+\subsubsection{Placement Automático (para Standard Cells)}
+Para projetos que usam células-padrão (ex: da CORELIB), o processo é diferente:
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{Place \& Route $\rightarrow$ Autofp $\rightarrow$ Ok}.
+    \item \textbf{ Aspect Ratio:} Configure \textbf{Upper = 2} em \textbf{Aspect Ratio}.
+    \item \textbf{StdCell} $\rightarrow$ Clique e arraste para desenhar a área onde as células serão posicionadas.
+    \item Apague as linhas verdes externas (são guias para PADs que não usaremos agora).
+    \item \textbf{ Dica de Conexão:} Antes de rotear, selecione todo o esquemático na janela ao lado para garantir que todas as conexões (overflows) apareçam no layout.
+\end{itemize}
+
+\subsection{Otimização do Layout (Layout Manual)}
+
+\subsubsection{Merge (Fusão) de Transistores}
+O objetivo é otimizar a área fundindo (sobrepondo) terminais de dreno/source.
+\begin{itemize}
+    \item \textbf{Transistores em Série:} Podem ser juntados diretamente (sobrepondo os terminais).
+    \item \textbf{Transistores em Paralelo:} Use o comando \textbf{Flip} (atalho 'f') em um dos transistores antes de juntá-los para alinhar dreno com dreno e source com source.
+    \item \textbf{Distância Crítica (DIFF-NTUB):} Mantenha uma distância de \textbf{1.2$\mu$m} entre a difusão (DIFF) dos NMOS e o poço (NTUB) dos PMOS.
+    \item \textbf{ Dica de Merge:} O bulk (contato de poço) NUNCA pode estar entre MOS de tamanhos diferentes. Comece o merge por essa parte.
+\end{itemize}
+
+\subsubsection{Dobramento (Folding) de Transistores/Resistores}
+Usado quando um componente é muito largo e atrapalha a otimização da área.
+\begin{enumerate}
+    \item \textbf{Dobrar Transistor (Fold):} 
+    \begin{itemize}
+        \item Desabilite os hotkeys (\textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Disable}).
+        \item Selecione o transistor $\rightarrow$ digite \texttt{fold} no console $\rightarrow$ Enter.
+        \item \textbf{Folds: 2} (ou mais, para dividir em múltiplos "dedos").
+    \end{itemize}
+    \item \textbf{Dobrar Resistor (Bend):} 
+    \begin{itemize}
+        \item \textbf{Object $\rightarrow$ Change $\rightarrow$ Device $\rightarrow$ Bend}.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Adição de Poços e Contatos}
+
+\subsubsection{Contatos de Poço (Bulk/Tap Contacts)}
+Esses contatos são \textbf{essenciais} para conectar o substrato (bulk) ao VDD/VSS e evitar latch-up.
+\begin{itemize}
+    \item \textbf{Método 1 (Change Device):} \textbf{Objects $\rightarrow$ Change $\rightarrow$ Device} $\rightarrow$ Adicionar "t" (tap) onde necessário (ex: \texttt{tcgc} $\rightarrow$ \texttt{tcgct}).
+    \item \textbf{Método 2 (Via Manual):} \textbf{DLA Device $\rightarrow$ Via $\rightarrow$ Point Via}.
+    \begin{itemize}
+        \item \textbf{pdm1}: Contato de bulk para \textbf{PMOS} (conecta NTUB ao VDD).
+        \item \textbf{ndm1}: Contato de bulk para \textbf{NMOS} (conecta PTUB ao VSS).
+        \item Selecione \textbf{MIN\_SIZE}.
+        \item \textbf{} Após colocar o via, desenhe manualmente um \textbf{Shape} da camada (ex: \texttt{NTUB}) ao redor do contato para conectá-lo ao poço.
+    \end{itemize}
+    \item \textbf{Regra Crítica:} O contato de bulk ("t") não pode estar colado diretamente no gate ("g"). Se necessário, use um contato de difusão ("c") entre eles.
+\end{itemize}
+
+\subsubsection{Contatos Poly-Metal1 (p1m1)}
+Usados para conectar o gate (Polisilício) ao roteamento de metal (Metal1).
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{DLA Device $\rightarrow$ Via $\rightarrow$ Point Via $\rightarrow$ p1m1}.
+    \item Selecione \textbf{MIN\_SIZE}.
+\end{itemize}
+
+\subsection{Roteamento (Routing)}
+Processo de desenhar os "fios" (metais) que conectam os componentes.
+
+\subsubsection{Configuração do Roteamento}
+\begin{itemize}
+    \item \textbf{Direção das Camadas:} \textbf{Route $\rightarrow$ Direction}.
+    \begin{itemize}
+        \item \textbf{POLY1}: Both (Permite rotear poly em X e Y)
+        \item \textbf{MET1}: Both
+        \item \textbf{MET2}: Both
+        \item \textbf{MET3}: None (Desabilitar camadas superiores)
+        \item \textbf{MET4}: None
+    \end{itemize}
+    \item \textbf{Opções Avançadas:} \textbf{Route $\rightarrow$ Options $\rightarrow$ Advanced}.
+    \begin{itemize}
+        \item Marcar \textbf{Check same net spacing}.
+        \item Marcar \textbf{Center wires on pins}.
+    \end{itemize}
+    \item \textbf{Setup (Bloqueios):} \textbf{Route $\rightarrow$ Setup}.
+    \begin{itemize}
+        \item \textbf{Instance blockages}: Marcar \textbf{All data} (impede o roteador de passar por dentro dos transistores).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Roteamento Automático (ARoute)}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{ARoute Commands $\rightarrow$ RUN}.
+    \item \textbf{Verificar Conexões Faltantes:} Olhe o console ou use o atalho \textbf{S0vrf}.
+    \item \textbf{ Repetir/Apagar:} Use \textbf{Rip} (ripup) para refazer conexões falhas, ou \textbf{Routing Results $\rightarrow$ Delete Nets $\rightarrow$ all} para apagar tudo e recomeçar.
+\end{itemize}
+
+\subsubsection{Roteamento Manual (IRoute)}
+Útil para conexões curtas ou complexas que o ARoute falha.
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{IRoute Commands $\rightarrow$ RUN}.
+    \item \textbf{Barra de espaço} alterna entre as camadas de roteamento (Poly, Metal1, etc.).
+    \item \textbf{Conexão de Gate:} O padrão é \texttt{Gate(poly) -- poly -- (p1m1) -- metal(IN)}.
+\end{itemize}
+
+\subsubsection{Configuração de Net Classes (VDD/VSS)}
+As linhas de alimentação devem ser mais largas para suportar mais corrente.
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{ARoute Net Classes $\rightarrow$ Edit $\rightarrow$ New}.
+    \item \textbf{Configurar Larguras:} \textbf{MET1: 1.8}, \textbf{MET2: 1.8} $\rightarrow$ \textbf{OK} (Larguras de 1.0 $\mu$m a 1.8 $\mu$m são comuns).
+    \item Dê um nome para a classe (ex: "power").
+    \item \textbf{Assign} $\rightarrow$ Selecione o net \textbf{VSS} $\rightarrow$ \textbf{Apply} .
+    \item Repita o processo para \textbf{VDD}.
+\end{enumerate}
+
+\subsection{Ports e Textos}
+Ports são necessários para que as ferramentas de verificação (LVS) e extração (PEX) saibam onde estão as entradas e saídas do seu layout.
+
+\subsubsection{Adição de Ports}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{DLA Layout $\rightarrow$ Port}.
+    \item \textbf{ Se não funcionar:} Se não conseguir colocar ports, tente \textbf{DLA Layout $\rightarrow$ Open}.
+    \item \textbf{Camada:} Use a \textbf{Barra de espaço} para mudar a camada para \textbf{MET1} (Metal1) para todos os ports.
+    \item Posicione os ports nos locais apropriados (entradas, saídas, VDD, VSS).
+\end{itemize}
+
+\subsubsection{Texto nos Ports}
+Esta é uma etapa \textbf{crítica} para o LVS.
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{Botão direito $\rightarrow$ Add $\rightarrow$ Text on Ports}.
+    \item \textbf{Text layer}: Mude de \texttt{PIN} para \textbf{M1NET}. (Alguns tutoriais divergem , mas \texttt{M1NET} é a prática recomendada para evitar erros de LVS e DRC ).
+    \item \textbf{Text height}: \textbf{1.0}.
+\end{itemize}
+
+\subsubsection{Aumentar Área dos Ports (Opcional, mas recomendado)}
+Para garantir uma boa conexão com blocos externos.
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Easy Edit $\rightarrow$ Add $\rightarrow$ Shape $\rightarrow$ MET1}.
+    \item Desenhe um retângulo de Metal1 sobre a área de dreno/source que serve como port.
+    \item \textbf{Comando:} \textbf{Connectivity $\rightarrow$ Port $\rightarrow$ Add to Port}.
+\end{enumerate}
+
+\subsection{Camadas Geradas}
+Algumas camadas não são desenhadas, mas geradas com base em outras.
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{HIT-Kit Utilities $\rightarrow$ Generated Layers}.
+    \item \textbf{Marcar:} \textbf{NLDD} e \textbf{FIMP}.
+    \item \textbf{Ação:} Clique em \textbf{OK}.
+    \item \textbf{Importante:} Rode o DRC novamente após gerar essas camadas.
+\end{itemize}
+
+\subsection{Ligação com Símbolo (Propriedade phy\_comp)}
+Esta etapa "amarra" o seu símbolo de esquemático ao seu layout finalizado.
+
+\begin{enumerate}
+    \item \textbf{Copiar Localização do Layout:}
+    \begin{itemize}
+        \item No \textbf{ICStation}, clique com o \textbf{botão direito} na aba do seu layout (ex: \texttt{inv/layout}).
+        \item \textbf{Properties $\rightarrow$ Location}.
+        \item Copie o caminho exibido (ex: \texttt{\$minha\_lib/default.group/layout.views/inv}).
+    \end{itemize}
+    \item \textbf{Adicionar Propriedade ao Símbolo:}
+    \begin{itemize}
+        \item Volte ao \textbf{Design Architect} (esquemático).
+        \item Abra o \textbf{SÍMBOLO} (\texttt{File $\rightarrow$ Open $\rightarrow$ Symbol}).
+        \item \textbf{Comando:} \textbf{Add $\rightarrow$ Properties}.
+        \item \textbf{Property Name}: \texttt{phy\_comp}.
+        \item \textbf{Property Value}: Cole a \textbf{Location} copiada do layout.
+        \item Coloque o texto gerado abaixo do símbolo.
+    \end{itemize}
+    \item \textbf{Ajustar Texto (Opcional):}
+    \begin{itemize}
+        \item \textbf{ Setup $\rightarrow$ Select Filter $\rightarrow$ Properties} $\rightarrow$ OK .
+        \item Selecione o texto \texttt{phy\_comp}.
+        \item \textbf{Botão direito $\rightarrow$ Change Height $\rightarrow$ Specified $\rightarrow$ 0.2} .
+    \end{itemize}
+    \item \textbf{ Verificar Símbolo (A "Parte Mágica"):}
+    \begin{itemize}
+        \item \textbf{File $\rightarrow$ Check Symbol} (1 warning é esperado: \textit{"Property phy\_comp... not on the interface"}) .
+        \item \textbf{Save}.
+        \item \textbf{File $\rightarrow$ Check Symbol} (Agora 0 warnings são esperados) .
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Técnicas Avançadas}
+
+\subsubsection{Adição de PADs}
+PADs são as conexões externas do chip.
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+    \item \textbf{Biblioteca:} \textbf{IOLIB\_4M}.
+    \item \textbf{Célula:} \textbf{g\_padonly} $\rightarrow$ OK.
+    \item Posicione os PADs (ex: um para VDD, um para VSS) nas bordas do layout.
+    \item Conecte-os ao seu circuito usando \textbf{Shapes} de metal largas.
+    \item \textbf{ Dica:} Comece grosso, e se der erro de DRC, diminua a largura.
+\end{enumerate}
+
+\subsubsection{Determinação do Tamanho da Célula}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{Report $\rightarrow$ Windows}.
+    \item O console mostrará as coordenadas \textbf{CellExtent} (ex: \texttt{(x1, y1) (x2, y2)}).
+    \item \textbf{Área} = (x2 - x1) * (y2 - y1).
+\end{itemize}
+
+\subsection{Dicas Críticas e Problemas Comuns}
+
+\subsubsection{Organização do Layout}
+\begin{itemize}
+    \item \textbf{Minimizar Cruzamentos:} Antes de rotear, posicione os componentes para minimizar o número de "overflows" (linhas amarelas) que se cruzam.
+    \item \textbf{Canal de Roteamento:} Tente deixar um caminho livre no meio (entre PMOS e NMOS) para o roteamento.
+    \item \textbf{Alinhamento:} Use \textbf{Easy Edit $\rightarrow$ Align $\rightarrow$ Center X} (ou Y) para alinhar componentes.
+\end{itemize}
+
+\subsubsection{Problemas Comuns e Soluções}
+\begin{itemize}
+    \item \textbf{Mouse travado com Ctrl:} Se o mouse se comportar como se o Ctrl estivesse pressionado, pressione \textbf{Ctrl+Shift} e use as setas do teclado; isso geralmente resolve.
+    \item \textbf{ICStation Travado:} Evite clicar repetidamente no scroll do mouse.
+    \item \textbf{Células Sumiram da Biblioteca:} Crie um novo projeto com o nome antigo e copie a pasta \texttt{default.group} do projeto antigo/backup para a nova pasta do projeto .
+    \item \textbf{Não consigo colocar Ports:} Verifique se o layout está aberto com \textbf{DLA Layout $\rightarrow$ Open}.
+\end{itemize}
+
+\subsubsection{Distâncias Críticas e Cálculos}
+\begin{itemize}
+    \item \textbf{POLY-POLY}: 0.45$\mu$m.
+    \item \textbf{RES-POLY}: 0.35$\mu$m.
+    \item \textbf{DIFF-NTUB}: 1.2$\mu$m.
+    \item \textbf{NTUB enclosure} (borda do poço N ao redor do PMOS): 1.2$\mu$m.
+    \item \textbf{ Área/Perímetro (AD/PD):} Para simulação, a altura da difusão é estimada como 0.85$\mu$m.
+        \item $AD = 0.85 \times W$.
+        \item $PD = W + (2 \times 0.85)$.
+\end{itemize}
+
+\subsection{Exemplo de Sequência Completa (Resumo)}
+\begin{enumerate}
+    \item \textbf{AutoInst} $\rightarrow$ Gera layout básico.
+    \item \textbf{Merge} transistores $\rightarrow$ Otimiza área (usando Flip se necessário).
+    \item \textbf{Adicionar bulks} (t) $\rightarrow$ Contatos de poço (pdm1, ndm1).
+    \item \textbf{Configurar roteamento} $\rightarrow$ Direction e Options .
+    \item \textbf{Run routing} (ARoute) $\rightarrow$ Automático + manual (IRoute) se necessário.
+    \item \textbf{Adicionar ports} $\rightarrow$ Em camada MET1.
+    \item \textbf{Text on Ports} $\rightarrow$ Configurar para camada M1NET.
+    \item \textbf{Generated Layers} $\rightarrow$ Gerar NLDD + FIMP.
+    \item \textbf{Verificações} $\rightarrow$ (DRC e LVS, detalhados na próxima seção).
+    \item \textbf{Link com símbolo} $\rightarrow$ Adicionar propriedade \texttt{phy\_comp} ao símbolo.
+\end{enumerate}
+\newpage
+
+\newpage
+\section[\textcolor{red}{Exemplos de Prova: Estratégias de Layout}]{\textcolor{red}{Exemplos de Prova: Estratégias de Layout}}
+
+\subsection[\textcolor{red}{Layout de Portas Lógicas (Manual / AutoInst)}]{\textcolor{red}{Layout de Portas Lógicas (Manual / AutoInst)}}
+Aplicável para: \textbf{Prova 2016b (Q2)}, \textbf{Prova 2022a (Q2)} e \textbf{Prova 2024 (Q3)}.
+
+Nestas questões, o objetivo é criar o layout físico de uma única porta (ex: OAI21) otimizando a área.
+
+\textbf{Fluxo de Trabalho Recomendado:}
+\begin{enumerate}
+    \item \textbf{Geração Inicial:} No ICStation, use \texttt{DLA Layout $\rightarrow$ AutoInst}. Isso trará os transistores com as dimensões definidas no esquemático.
+    \item \textbf{Otimização (Merge):}
+    \begin{itemize}
+        \item Identifique transistores que compartilham o mesmo sinal de dreno/source.
+        \item Mova-os para que as áreas de difusão se sobreponham (merge).
+        \item Use o comando \textbf{Flip} (atalho 'f') se necessário para alinhar dreno com dreno ou source com source.
+    \end{itemize}
+    \item \textbf{Contatos de Substrato (Bulks):}
+    \begin{itemize}
+        \item Adicione manualmente os contatos de poço (taps).
+        \item Use \texttt{pdm1} para o poço N (PMOS) conectando ao VDD.
+        \item Use \texttt{ndm1} para o substrato P (NMOS) conectando ao VSS.
+        \item \textit{Regra Crítica:} Mantenha a distância correta entre a difusão e o poço.
+    \end{itemize}
+    \item \textbf{Ports e Textos:} Coloque ports em Metal 1 para A, B, C, OUT, VDD e VSS. Adicione \textbf{Text on Ports} na camada \texttt{M1NET} para o LVS.
+\end{enumerate}
+
+\subsection[\textcolor{red}{Layout Automático (Standard Cells)}]{\textcolor{red}{Layout Automático (Standard Cells)}}
+Aplicável para: \textbf{Prova 2016b (Q7)}, \textbf{Prova 2022a (Q7)} e \textbf{Prova 2024 (Q7)}.
+
+Nestas questões, você está fazendo o layout de um contador ou circuito complexo que usa células prontas da \texttt{CORELIB}. Não desenhamos transistores aqui.
+
+\textbf{Fluxo de Trabalho (ICStation):}
+\begin{enumerate}
+    \item \textbf{Preparação:} Não use AutoInst.
+    \item \textbf{Definição da Área (Floorplanning):}
+    \begin{itemize}
+        \item Vá em \texttt{Place \& Route $\rightarrow$ Autofp}.
+        \item Em \textbf{Aspect Ratio}, defina \textbf{Upper = 2} (ou 1 para quadrado).
+        \item Clique em \textbf{StdCell} e desenhe um retângulo na tela onde as células ficarão.
+    \end{itemize}
+    \item \textbf{Configuração de Alimentação (Crítico):}
+    \begin{itemize}
+        \item Antes de rotear, configure a largura dos trilhas de energia.
+        \item \texttt{ARoute Net Classes $\rightarrow$ Edit $\rightarrow$ New}.
+        \item Nome: \texttt{power}. Largura: \textbf{1.8} (para MET1 e MET2).
+        \item Atribua os nets \texttt{VDD} e \texttt{VSS} a esta classe.
+    \end{itemize}
+    \item \textbf{Roteamento:}
+    \begin{itemize}
+        \item Execute \texttt{ARoute $\rightarrow$ Run}.
+        \item Verifique se não sobraram conexões abertas (overflows).
+    \end{itemize}
+\end{enumerate}
+
+\subsection[\textcolor{red}{Adição de PADs (Prova 2022a Q4)}]{\textcolor{red}{Adição de PADs (Prova 2022a Q4)}}
+Requisito específico da prova de 2022, mas útil saber para todas.
+
+\textbf{Procedimento:}
+\begin{enumerate}
+    \item \textbf{Instanciar PADs:}
+    \begin{itemize}
+        \item Vá em \texttt{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+        \item Selecione a biblioteca \textbf{IOLIB\_4M}.
+        \item Escolha a célula \textbf{g\_padonly} (geralmente a última da lista).
+        \item Adicione duas instâncias: uma para VDD e outra para VSS.
+    \end{itemize}
+    \item \textbf{Posicionamento:} Coloque os PADs nas bordas do seu layout (longe do circuito principal para evitar violações de DRC de poço).
+    \item \textbf{Conexão:}
+    \begin{itemize}
+        \item Desenhe um \textbf{Shape} (retângulo) de Metal 1 ou Metal 2 largo.
+        \item Conecte o pino do PAD ao anel/trilha de alimentação correspondente (VDD ou VSS) do seu circuito.
+    \end{itemize}
+    \item \textbf{Verificação:} Rode o DRC. Erros comuns envolvem espaçamento insuficiente entre o PAD e outros metais ou poços.
+\end{enumerate}
+
+\newpage
+\section{Calibre (DRC / LVS / PEX)}
+
+\subsection{Introdução ao Calibre}
+O Calibre é a ferramenta de verificação e extração utilizada para:
+\begin{itemize}
+    \item \textbf{DRC (Design Rule Checking)}: Verificação de regras de design (espaçamentos, larguras, etc.).
+    \item \textbf{LVS (Layout vs Schematic)}: Comparação entre o layout (físico) e o esquemático (lógico).
+    \item \textbf{PEX (Parasitic Extraction)}: Extração de componentes parasitas (R e C) do layout.
+\end{itemize}
+
+\subsection{Exemplo de Configuração Completa (Resumo)}
+\begin{lstlisting}[language=bash, frame=none, commentstyle=\color{black}]
+### DRC (Design Rule Checking) ###
+1. No ICStation: Calibre -> Run DRC
+2. Na aba "Rules":
+   - Load file: /local/users/cad/Calibre_rules/cac35b4rules_all.run
+3. Na aba "Inputs", painel "Layout":
+   - Top Cell: minha_celula
+   - Marcar: Export from layout viewer
+4. Clique: Run DRC
+5. Resultado: Corrigir erros até restarem apenas os 6-7 warnings
+   (ILL_METx, INFO_PROCESS, INFO_TEXT_VDD/VSS).
+
+### LVS (Layout vs Schematic) ###
+1. No ICStation: Calibre -> Run LVS
+2. Na aba "Rules":
+   - Load file: /local/users/cad/Calibre_rules/cac35b4rules_all.run
+3. Na aba "Inputs", painel "Layout":
+   - Top Cell: minha_celula
+   - Marcar: Export from layout viewer
+4. Na aba "Inputs", painel "Netlist":
+   - Marcar: Export from schematic viewer
+5. Na aba "Setup", painel "LVS Options":
+   - Sub-aba "Supply": Marcar "Ignore layout and source pins during comparison"
+6. Clique: Run LVS
+7. Resultado: "Carinha feliz" (The net-lists match).
+
+### PEX (Parasitic Extraction) ###
+1. No ICStation: Calibre -> Run PEX
+2. Na aba "Rules":
+   - Load file: /local/users/cad/Calibre_rules/cac35b4rules_all.run
+3. Na aba "Outputs", painel "Netlist":
+   - Use Names From: Selecione LAYOUT
+4. Na aba "Outputs", painel "Extraction Type":
+   - Selecione: C+CC ou R+C+CC (conforme a prova)
+5. Clique: Run PEX
+6. Resultado: Arquivo .pex.netlist gerado na pasta .cal/
+
+### Preparo do Netlist PEX (Obrigatório!) ###
+Edite o arquivo .pex.netlist gerado:
+1. Adicionar Ports: Adicione os nomes (VDD, VSS, A, B, OUT) na linha .subckt.
+2. Conectar Alimentação: Adicione linhas .connect (ex: .connect VSS N_VSS_M0_s).
+3. Corrigir Resistores: Mude "rR0" para "XR0".
+4. Corrigir Bipolares: Apague o parâmetro "AREA" se houver (ex: VERT10).
+\end{lstlisting}
+
+\subsection{DRC (Design Rule Checking)}
+
+\subsubsection{Execução do DRC}
+\begin{enumerate}
+    \item No \textbf{ICStation}: \textbf{Calibre $\rightarrow$ Run DRC}.
+    \item \textbf{Rules}: Carregar o arquivo de regras (ex: \texttt{/local/users/cad/work/rules/cac35b4rules\_all.run}).
+    \item \textbf{Load} (Obrigatório clicar em Load após selecionar o arquivo).
+    \item \textbf{Inputs $\rightarrow$ Layout}:
+    \begin{itemize}
+        \item \textbf{Top Cell}: \texttt{nome\_da\_celula}
+        \item \textbf{Export from layout viewer}: Marcado
+    \end{itemize}
+    \item \textbf{Run DRC}
+\end{enumerate}
+
+\subsubsection{Erros DRC Esperados e Aceitáveis}
+Em um layout finalizado, é normal e \textbf{aceitável} que restem os seguintes erros (são informativos):
+\begin{lstlisting}[language=bash, frame=none]
+Check ILL_MET2_DIE_RATIO_M2R1 - 1 Result
+Check ILL_MET3_DIE_RATIO_M3R1 - 1 Result
+Check ILL_MET4_DIE_RATIO_M4R1 - 1 Result
+Check ILL_POLY1_DIE_RATIO_POR1 - 1 Result
+Check INFO_PROCESS_C35B4C3 - 1 Result
+Check INFO_TEXT_VDD - 1 Result
+Check INFO_TEXT_VSS - 1 Result
+\end{lstlisting}
+
+\subsubsection{Erros DRC Críticos e Soluções}
+\begin{itemize}
+    \item \textbf{SPACE DIFF POLY e MET1}: Causa: Dimensões (espaçamentos) incorretas. Solução: Refazer as dimensões na área problemática.
+    \item \textbf{NWELL TOO HOT}: Causa: Poço N (NTUB) flutuante ou mal conectado. Solução: Aumentar a largura do metal VDD (fazer "grossão") ou adicionar mais contatos de poço (pdm1). Verificar se o \textbf{Text on Ports} está correto (M1NET).
+    \item \textbf{FIMP e NLDD MISSING}: Causa: Camadas geradas não foram criadas. Solução: Rodar \textbf{HIT-Kit Utilities $\rightarrow$ Generated Layers} e marcar \textbf{NLDD} e \textbf{FIMP} . Se não funcionar, feche e reabra o layout.
+    \item \textbf{SOFT CONNECTION}: Causa: Conexão inadequada de VDD/VSS (ex: "o VDD grossão só ta encostando a cabecinha"). Solução: Verificar se os metais estão realmente conectados (sobrepostos) e não apenas encostando.
+    \item \textbf{DIODE error (gctcg)}: Causa: Tap (contato de bulk) colado diretamente no Gate. Solução: Colocar um contato de difusão ("c") entre o tap ("t") e o gate ("g").
+    \item \textbf{ILL\_MISS\_MET4BLOCK\_AMTS1}: Causa: Uso da camada MET4. Solução: Idealmente, não usar MET4, mas pode ser ignorado se necessário .
+    \item \textbf{ ILL\_FLOATING\_GATE\_ERC}: Causa: Gate flutuante. Solução: Verifique se escolheu a camada correta para cada port (ex: MET1).
+\end{itemize}
+
+\subsection{LVS (Layout vs Schematic)}
+
+\subsubsection{Método Antigo (ICTrace)}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{ICTrace (M) $\rightarrow$ LVS}.
+    \item \textbf{Source name}: Apontar para o ViewPoint:
+    \begin{itemize}
+        \item \texttt{\$celula/default.group/logic.views/nome/vpt\_c35b4\_device} .
+    \end{itemize}
+    \item \textbf{Abort on Supply Error}: No.
+    \item \textbf{OK}
+    \item Verificar resultados: \textbf{Report $\rightarrow$ LVS}.
+\end{enumerate}
+
+\subsubsection{Método Calibre (Recomendado)}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Calibre $\rightarrow$ Run LVS}.
+    \item \textbf{Rules}: Carregar o arquivo de regras (ex: \texttt{/local/users/cad/Calibre\_rules/cac35b4rules\_all.run}).
+    \item \textbf{Load} (Obrigatório).
+    \item \textbf{Inputs $\rightarrow$ Layout}:
+    \begin{itemize}
+        \item \textbf{Files}: \texttt{nome\_da\_celula}.
+        \item \textbf{Top Cell}: \texttt{nome\_da\_celula}.
+        \item \textbf{Export from layout viewer}: Marcado.
+    \end{itemize}
+    \item \textbf{Inputs $\rightarrow$ Netlist}:
+    \begin{itemize}
+        \item \textbf{Export from schematic viewer}: Marcado (puxa o netlist do esquemático aberto).
+        \item \textbf{Verificar Path:} Ocasionalmente, confira o caminho do netlist em \textbf{Files}.
+    \end{itemize}
+    \item \textbf{Setup $\rightarrow$ LVS Options}:
+    \begin{itemize}
+        \item Marcar: \textbf{Ignore layout and source pins during comparison}.
+        \item \textbf{ Desmarcar:} (Prova 2016) \textbf{Ignore layout and source pins during comparison} (alguns tutoriais pedem para desmarcar). Teste as duas opções.
+    \end{itemize}
+    \item \textbf{Run LVS}
+\end{enumerate}
+
+\subsubsection{Erros LVS Comuns e Soluções}
+\begin{itemize}
+    \item \textbf{Discrepancy: Incorrect Port}: Erro mais comum.
+    \begin{itemize}
+        \item \textbf{Causa:} Ports não reconhecidos.
+        \item \textbf{ Solução (Conflitante):} Os documentos de referência são conflitantes, indicando um "bug" ou trade-off no fluxo:
+        \begin{itemize}
+            \item \textbf{Solução 1:} Usar \textbf{Text on Ports $\rightarrow$ M1NET}. Isso corrige os erros de DRC (como \texttt{NWELL TOO HOT}).
+            \item \textbf{Solução 2:} Se o LVS falhar com M1NET, use \textbf{M1PIN}. Isso pode corrigir o LVS, mas pode reintroduzir os erros \texttt{INFO\_TEXT\_VDD} e \texttt{INFO\_TEXT\_VSS} no DRC.
+        \end{itemize}
+        \item \textbf{Recomendação:} Tente \texttt{M1NET} primeiro. Se o LVS falhar, tente \texttt{M1PIN}.
+    \end{itemize}
+    \item \textbf{Supply Errors}:
+    \begin{itemize}
+        \item \textbf{Causa:} Problemas com VDD/VSS (ex: "soft connection").
+        \item \textbf{Solução:} Verificar conexões de alimentação no layout.
+    \end{itemize}
+    \item \textbf{Model not found (RPOLYH, etc.)}:
+    \begin{itemize}
+        \item \textbf{Causa:} Modelos de dispositivos (como resistores) faltando no netlist.
+        \item \textbf{Solução:} Editar o arquivo netlist de simulação e adicionar os \texttt{.include} necessários (ex: \texttt{restm.mod}).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Debug do LVS}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{ICTrace (M) $\rightarrow$ Discreps} (para o método antigo).
+    \item Usar \textbf{first} e \textbf{next} para navegar pelos erros .
+    \item \textbf{Unshow $\rightarrow$ All} para deselecionar regiões destacadas.
+\end{enumerate}
+
+\subsection{PEX (Parasitic Extraction)}
+
+\subsubsection{Execução do PEX}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Calibre $\rightarrow$ Run PEX}.
+    \item \textbf{Outputs $\rightarrow$ Netlist}:
+    \begin{itemize}
+        \item \textbf{Use Names From}: Mudar para \textbf{LAYOUT} (importante para que os nomes dos ports (A, B, OUT) sejam mantidos no netlist extraído).
+    \end{itemize}
+    \item \textbf{Outputs $\rightarrow$ Extraction Type}: 
+    \begin{itemize}
+        \item \textbf{C+CC}: Capacitâncias parasitas (intrínsecas e acoplamento).
+        \item \textbf{R}: Apenas Resistências parasitas.
+        \item \textbf{R+C}: Resistências + capacitâncias intrínsecas.
+        \item \textbf{R+C+CC}: Todos componentes parasitas (mais completo e pesado).
+    \end{itemize}
+    \item \textbf{Run PEX}
+\end{enumerate}
+
+\subsubsection{Arquivos Gerados pelo PEX}
+O PEX cria uma pasta \texttt{.cal/} e gera vários arquivos:
+\begin{itemize}
+    \item \texttt{nome\_celula.pex.netlist} (O netlist principal que usaremos na simulação).
+    \item \texttt{nome\_celula.pex.netlist.pex} 
+    \item \texttt{nome\_celula.pex.netlist.nome\_celula.pxi} 
+\end{itemize}
+
+\subsubsection{Localização dos Arquivos}
+Os arquivos extraídos ficam no diretório da célula, dentro da pasta \texttt{.cal/}:
+\begin{lstlisting}[language=bash, frame=none]
+/local/users/cad/work/nome_projeto.proj/cell.lib/
+  default.group/layout.views/nome_celula/
+    nome_celula.cal/
+      nome_celula.pex.netlist
+\end{lstlisting}
+
+\subsubsection{Preparação do Netlist PEX para Simulação}
+O arquivo \texttt{.pex.netlist} gerado \textbf{não} funciona diretamente no ELDO. Ele precisa de edições manuais:
+
+\begin{enumerate}
+    \item \textbf{Acrescentar ports na linha .subckt}: A linha \texttt{.subckt} gerada pode não incluir os ports VDD/VSS ou as entradas/saídas. Adicione-os manualmente.
+    \begin{lstlisting}[language=pspice]
+    * Original: .subckt GATE
+    * Corrigido: .subckt GATE VSS VDD A B C OUT
+    \end{lstlisting}
+
+    \item \textbf{Conectar nós flutuantes (se houver)}: Às vezes, VDD/VSS são extraídos como nós internos (ex: \texttt{N\_VSS\_M0\_s}). Conecte-os globalmente .
+    \begin{lstlisting}[language=pspice]
+    .connect VSS N_VSS_MO_s
+    .connect VDD N_VDD_MO_d
+    \end{lstlisting}
+
+    \item \textbf{Substituir modelos de transistor}: O PEX usa os nomes do layout (\texttt{NMOS4}, \texttt{PMOS4}). O ELDO espera os nomes do \texttt{.defmod} (ex: \texttt{MODN}, \texttt{MODP}).
+    
+    \item \textbf{Corrigir resistores}: Se houver resistores (rpolyh), o PEX pode instanciá-los como \texttt{rR0} (instância 'r'). O SPICE espera \texttt{XR0} (instância 'X' para subcircuitos).
+    
+    \item \textbf{Remover parâmetro AREA}: Se houver transistores bipolares (ex: \texttt{VERT10}), o PEX adiciona um parâmetro \texttt{AREA=...} que causa erro no ELDO. Delete-o.
+\end{enumerate}
+
+\subsubsection{Includes Necessários}
+Para simular o netlist extraído, seu arquivo \texttt{.cir} principal precisará dos modelos corretos:
+\begin{lstlisting}[language=pspice]
+* Incluir no inicio do arquivo .cir
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWS"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+\end{lstlisting}
+
+\subsection{Verificação de Resultados}
+
+\subsubsection{Relatórios do Calibre}
+\begin{itemize}
+    \item \textbf{DRC Report}: Lista todas as violações de regras.
+    \item \textbf{LVS Report}: Mostra o status do "matching" (se bate ou não) entre layout e esquemático.
+    \item \textbf{PEX Report}: Mostra estatísticas da extração (quantos R e C foram extraídos).
+\end{itemize}
+
+\subsubsection{Interpretação dos Relatórios}
+\textbf{DRC Bem-sucedido:}
+\begin{itemize}
+    \item 0 erros críticos.
+    \item Apenas os 7 erros "informativos" esperados.
+\end{itemize}
+
+\textbf{LVS Bem-sucedido:}
+\begin{itemize}
+    \item O relatório dirá: \textbf{"The net-lists match."}.
+    \item 0 discrepancies.
+    \item Todos os dispositivos (devices) e nets estão "matching".
+\end{itemize}
+
+\textbf{PEX Bem-sucedido:}
+\begin{itemize}
+    \item Netlist gerada sem erros de sintaxe (após as correções manuais).
+    \item Arquivos .pxi gerados corretamente.
+\end{itemize}
+
+\subsection{Configurações Avançadas e Fluxos de Trabalho}
+
+\subsubsection{Configurações do Calibre}
+\begin{itemize}
+    \item \textbf{Setup $\rightarrow$ DRC Options}: Configurações específicas de DRC.
+    \item \textbf{Setup $\rightarrow$ LVS Options}: \textbf{Supply} (configurações de VDD/VSS), \textbf{Ignore} (ignorar certos elementos).
+    \item \textbf{Setup $\rightarrow$ PEX Options}: Opções detalhadas de extração.
+\end{itemize}
+
+\subsubsection{Problemas de Performance}
+\begin{itemize}
+    \item \textbf{LVS lento}: Reduzir a complexidade do layout ou verificar hierarquia.
+    \item \textbf{PEX com muita memória}: Usar extração mais simples (ex: C+CC ao invés de R+C+CC).
+\end{itemize}
+
+\subsubsection{Dicas e Soluções de Problemas}
+\begin{itemize}
+    \item \textbf{Calibre não carrega rules}: Verifique o caminho do arquivo \texttt{.run} e clique em \textbf{Load}.
+    \item \textbf{LVS não encontra schematic}: Verifique se o ViewPoint foi criado corretamente.
+    \item \textbf{PEX gera netlist vazia}: Verifique o "Extraction Type" selecionado.
+\end{itemize}
+
+\subsubsection{Fluxo Recomendado}
+\begin{enumerate}
+    \item \textbf{Rodar DRC} $\rightarrow$ Corrigir todos os erros críticos (vermelhos).
+    \item \textbf{Rodar LVS} $\rightarrow$ Corrigir "discrepancies" (especialmente "Incorrect Port").
+    \item \textbf{Rodar PEX} $\rightarrow$ Preparar o netlist extraído (corrigindo-o manualmente).
+    \item \textbf{Simular} o netlist PEX e comparar com a simulação do esquemático.
+\end{enumerate}
+
+\subsubsection{Scripts Úteis}
+Para converter as imagens de tela (screenshots) do Calibre/ICStation:
+\begin{lstlisting}[language=bash]
+# Capturar a janela
+xwd > layout.xwd
+
+# Converter para TIF/PNG (invertendo cores)
+convert -white-threshold 1 -negate layout.xwd layout.tif
+convert -white-threshold 1 -negate layout.xwd layout.png
+\end{lstlisting}
+
+\newpage
+
+\section{Análise de Circuitos Lógicos e Sequenciais}
+
+A análise precisa de circuitos digitais requer a configuração correta de estímulos transientes, o uso de medições automáticas (\texttt{.meas}) para quantificar desempenho e a interpretação correta das formas de onda no visualizador (EZWave). Esta seção detalha o fluxo de trabalho para caracterizar atrasos, potência e limites de frequência, cobrindo os requisitos das Provas de 2016, 2022 e 2024.
+
+\subsection{Configuração de Estímulos Transientes}
+
+\subsubsection{Onda Quadrada Precisa (Pulse)}
+A definição correta da fonte de tensão é o primeiro passo para evitar erros de simulação. Um erro comum é definir a largura do pulso (\texttt{pulse\_width}) simplesmente como $T/2$. Como os tempos de subida ($t_r$) e descida ($t_f$) ocupam tempo, isso resulta em um \textit{duty cycle} incorreto (menor que 50\%), o que altera a medição de potência dinâmica.
+
+\textbf{O Código Robusto:}
+O script abaixo calcula a largura do pulso descontando as transições, garantindo simetria perfeita.
+
+\begin{lstlisting}[language=pspice, caption={Configuração Robusta de Onda Quadrada (Copiar e Colar)}]
+* --- PARAMETROS DE TEMPO ---
+* Ajuste 'period' conforme a frequencia desejada (Ex: 10n = 100MHz)
+.Param period = 10n
+.Param frequency = '1/period'
+
+* --- NIVEIS DE TENSAO ---
+* Ajuste 'high_value' conforme VDD da prova (3.0V ou 3.3V)
+.Param low_value = 0 
+.Param high_value = 3.0V  
+.Param delay = 0
+
+* --- TEMPOS DE TRANSICAO ---
+* Provas pedem geralmente 5% a 10% do periodo ou fixo (0.1ns a 0.5ns)
+.Param rise_time = 0.2ns 
+.Param fall_time = 0.2ns
+
+* --- CALCULO AUTOMATICO DA LARGURA (PULSE WIDTH) ---
+* Subtrai a media das bordas para garantir 50% de Duty Cycle exato
+.Param pulse_width = 'period/2 - ((rise_time + fall_time)/2)'
+
+* --- FONTE DE TENSAO ---
+* Sintaxe: PULSE(Vlow Vhigh delay tr tf pw per)
+Va A 0 pulse(low_value high_value delay rise_time fall_time pulse_width period)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Ilustração dos parâmetros da fonte Pulse no ELDO: observe como o PW é ajustado para manter o duty cycle.}
+\end{figure}
+
+\newpage
+
+\subsection{Análise de Desempenho (Sweep de Carga e Potência)}
+
+\subsubsection{Teoria e Análise}
+Em circuitos CMOS, dois parâmetros são críticos e dependentes da carga:
+\begin{enumerate}
+    \item \textbf{Atraso ($t_{pd}$):} Aumenta linearmente com a capacitância de carga ($C_L$).
+    \item \textbf{Potência ($P_{avg}$):} Aumenta com a frequência e a carga ($P \approx f C V^2$).
+\end{enumerate}
+Para analisar isso em uma única execução, utilizamos o comando \texttt{SWEEP} dentro da análise \texttt{.tran}.
+
+\textbf{Código Completo:}
+Este script carrega o netlist extraído (PEX), aplica o modelo "Worst Power" (comum em provas) e gera os dados de potência e atraso.
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Carga e Potência}]
+* 1. INCLUDES E MODELOS (CRITICO)
+* Altere o nome do arquivo para o seu .pex.netlist
+.include "minha_celula.pex.netlist"
+
+* Modelos de transistor (WP = Worst Power, comum na Q4 2024)
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP"
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. SETUP DE FONTES
+.Param VDD_ANALISE = 3.3V
+Vdd VDD 0 DC VDD_ANALISE
+Vss VSS 0 DC 0
+
+* Capacitor Variavel (Valor inicial dummy, sera sobrescrito pelo SWEEP)
+CL OUT 0 50fF  
+
+* 3. ESTIMULO (Onda Quadrada - Inserir parametros do exemplo anterior aqui)
+.Param period=10n ... (copiar parametros de tempo)
+Va A 0 pulse(...) 
+
+* 4. MEDICOES AUTOMATICAS (.MEAS)
+* --- Potencia Media ---
+* P = VDD * I_media. O sinal '-' corrige o sentido da corrente no SPICE.
+.meas tran corrente_media AVG I(Vdd)
+.meas tran potencia_consumida param='VDD_ANALISE * -corrente_media'
+
+* --- Atrasos de Propagacao (50% a 50%) ---
+.meas tran atraso_subida trig V(A) val='VDD_ANALISE/2' fall=5 targ V(OUT) val='VDD_ANALISE/2' rise=5
+.meas tran atraso_descida trig V(A) val='VDD_ANALISE/2' rise=5 targ V(OUT) val='VDD_ANALISE/2' fall=5
+
+* 5. SIMULACAO COM SWEEP
+* Sintaxe: .tran passo final SWEEP var INCR passo inicio fim
+* Aqui: Varre CL de 0fF a 300fF com passos de 50fF
+.Param sweep_start=0.0fF sweep_end=300.0fF sweep_step=50.0fF
+.tran 0.1n '10*period' 0 0.01n SWEEP CL INCR sweep_step sweep_start sweep_end
+\end{lstlisting}
+
+\subsubsection{Análise Passo a Passo no EZWave}
+Após rodar a simulação (\texttt{eldo arquivo.cir}), siga estes passos para gerar os gráficos exigidos na prova:
+
+\begin{enumerate}
+    \item Abra o arquivo de resultados (\texttt{.wdb}).
+    \item No menu superior, vá em \textbf{View $\rightarrow$ Measurement Results} (Atalho: \texttt{CTRL+M} em algumas versões, ou procure o ícone de tabela).
+    \item Uma janela se abrirá listando as medições: \texttt{potencia\_consumida}, \texttt{atraso\_subida}, etc.
+    \item \textbf{Selecionar e Plotar:} Clique na medição desejada e arraste para a área de plotagem.
+    \item \textbf{Eixo X Automático:} O EZWave detecta automaticamente que a variável varrida foi $C_L$ e a coloca no eixo X.
+    \item \textbf{Destaque dos Pontos:} Para provar que você simulou 5 ou mais pontos (conforme pede a prova), clique com o botão direito na curva $\rightarrow$ \textbf{Properties} $\rightarrow$ ative \textbf{Data Point Symbol}.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Exemplo de gráfico Potência vs Carga ($C_L$) gerado. Note a linearidade.}
+\end{figure}
+
+\newpage
+
+\subsection{Análise de Frequência Máxima ($F_{max}$)}
+
+\subsubsection{Teoria e Critério de Falha}
+A $F_{max}$ é a frequência limite onde o circuito deixa de fornecer níveis lógicos válidos na saída devido ao tempo insuficiente para carga/descarga dos capacitores parasitas.
+\begin{itemize}
+    \item \textbf{Critério de Aceitação (Degradação):}
+    \begin{itemize}
+        \item Nível lógico "1" deve chegar a pelo menos 95\% de $V_{DD}$.
+        \item Nível lógico "0" deve descer até no máximo 5\% de $V_{DD}$.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Código Completo:}
+Este script varre a frequência e usa a função \texttt{FIND} do ELDO para monitorar os picos de tensão.
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Frequência para Fmax}]
+* ... (Includes e Modelos iguais ao anterior) ...
+
+* 1. ESTIMULO COM FREQUENCIA VARIAVEL
+* Observe que usamos a variavel 'f' no parametro period
+.Param f = 100Meg
+.Param period = '1/f'
+* Definir Rise/Fall como porcentagem pequena do periodo (ex: 5%)
+.Param tr = '0.05 * period'
+Va IN 0 pulse(0 3.3V 0 tr tr 'period/2 - tr' period)
+
+* 2. MEDICOES DE DEGRADACAO
+* Encontra o valor MAXIMO que o nivel BAIXO atinge (Ideal = 0V)
+* Se subir muito (ex: > 0.15V), falhou.
+.meas tran minZero find v(OUT) when v(IN)='3.3V * 0.95' fall=5
+
+* Encontra o valor MINIMO que o nivel ALTO atinge (Ideal = 3.3V)
+* Se cair muito (ex: < 3.15V), falhou.
+.meas tran maxUm find v(OUT) when v(IN)='3.3V * 0.05' rise=5
+
+* 3. SIMULACAO
+* Varre 'f' de 100MHz a 2GHz
+.tran 0.1n '20*period' SWEEP f INCR 100Meg 100Meg 2G
+\end{lstlisting}
+
+\subsubsection{Análise Detalhada no EZWave (Ferramenta Crossing)}
+Esta análise requer precisão para encontrar o ponto exato da falha.
+
+\begin{enumerate}
+    \item Plote as curvas \texttt{maxUm} e \texttt{minZero} em função da frequência.
+    \item Use a ferramenta **Crossing** (\texttt{CTRL + M} $\rightarrow$ Selecione \textbf{All Types} $\rightarrow$ \textbf{Crossing}).
+    \item \textbf{Configurar Limites:}
+    \begin{itemize}
+        \item Para a curva \texttt{minZero}: Defina \textbf{Y Level} = 0.165V (5\% de 3.3V).
+        \item Para a curva \texttt{maxUm}: Defina \textbf{Y Level} = 3.135V (95\% de 3.3V).
+    \end{itemize}
+    \item \textbf{Resultado:} O EZWave marcará a frequência exata onde o sinal cruza esses limites. A $F_{max}$ do circuito é o **menor** valor de frequência entre os dois eventos.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Degradação dos níveis lógicos com a frequência. O ponto de cruzamento define a $F_{max}$.}
+\end{figure}
+
+\newpage
+
+\subsection{Análise Estatística (Monte Carlo)}
+
+\subsubsection{Teoria e Código}
+A análise de Monte Carlo executa a simulação $N$ vezes, variando aleatoriamente os parâmetros dos transistores (como $V_{th}$ e mobilidade) dentro das tolerâncias da fábrica. Isso gera uma distribuição estatística do desempenho.
+
+\textbf{Código Completo:}
+Atenção: O comando `.MC` é especial e não deve ser misturado na mesma linha do `.tran`.
+
+\begin{lstlisting}[language=pspice, caption={Configuração Monte Carlo (Prova 2022a)}]
+* 1. INCLUDES ESPECIFICOS PARA MC
+* Necessario carregar o arquivo de estatisticas (wc53.lib mc)
+.INCLUDE /local/tools/dkit/ams_3.70_mgc/eldo/c35/profile.opt
+.LIB /local/tools/dkit/ams_3.70_mgc/eldo/c35/wc53.lib mc
+
+.include "minha_porta.pex.netlist"
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. PARAMETROS
+.Param VDD_VAL = 2.8V
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. COMANDO MONTE CARLO
+* 75 rodadas, variacao mismatch (local) e process (global)
+.MC 75 NBBINS=20 mismatch process
+
+* 4. MEDICAO
+.meas tran tphl trig V(IN) val='VDD_VAL/2' rise=1 targ V(OUT) val='VDD_VAL/2' fall=1
+
+* 5. EXECUCAO
+.tran 0 50n 0 0.1n
+\end{lstlisting}
+
+\subsubsection{Análise Detalhada no EZWave (Histograma)}
+Não se analisa as ondas no domínio do tempo diretamente, pois haverá 75 curvas sobrepostas ("nuvem de curvas").
+\begin{enumerate}
+    \item Vá em \textbf{Plot $\rightarrow$ Monte Carlo $\rightarrow$ Histogram}.
+    \item Selecione a medição desejada (ex: \texttt{tphl}).
+    \item O gráfico mostrará barras indicando a frequência de cada valor de atraso.
+    \item Observe a legenda do gráfico: ela mostrará a \textbf{Mean} (Média) e \textbf{Sigma} (Desvio Padrão). Estes são os valores que devem ser anotados na prova.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Histograma de Monte Carlo. Uma distribuição estreita indica um circuito robusto.}
+\end{figure}
+
+\newpage
+
+% --- PARTE DE EXEMPLOS DE PROVAS ---
+
+\subsection[\textcolor{red}{Exemplos Práticos de Provas}]{\textcolor{red}{Exemplos Práticos de Provas}}
+
+\subsubsection[\textcolor{red}{Prova 2024 Q4: Sweep de Carga e Potência (Resolução Completa)}]{\textcolor{red}{Prova 2024 Q4: Sweep de Carga e Potência (Resolução Completa)}}
+
+\textbf{Objetivo:} Determinar como a potência dinâmica e o atraso da porta variam ao aumentar a carga capacitiva na saída. Isso simula o efeito de ligar a porta a vários outros blocos ou a fios longos.
+
+\textbf{Teoria Rápida:}
+Em circuitos CMOS digitais, a Potência Dinâmica é dada por:
+\[ P_{dyn} = f \cdot C_L \cdot V_{DD}^2 \]
+Portanto, esperamos que o gráfico \textbf{Potência vs. $C_L$} seja uma \textbf{reta (linear)} com inclinação positiva.
+
+\textbf{1. Preparação do Netlist (.cir)}
+Este script realiza uma simulação transiente (\texttt{.tran}) enquanto varia o valor do capacitor $C_L$ (\texttt{SWEEP}).
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Carga (Q4 2024)}]
+* 
+* 1. INCLUDES E MODELOS
+* Substitua pelo seu arquivo PEX (extraido com R+C ou C+CC)
+.include "minha_celula.pex.netlist"
+
+* --- MODELO WORST POWER (WP) ---
+* O enunciado exige WP (transistores rapidos, consumo maximo)
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP"
+* Mapeamento dos modelos (Do PEX para o .MOD)
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. PARAMETROS GERAIS
+.Param VDD_VAL = 3.3V
+.Param TEMP_VAL = 27
+.Option TEMP = TEMP_VAL
+
+* 3. FONTES DE ALIMENTACAO
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 4. ESTIMULO (Onda Quadrada precisa)
+* Frequencia de operacao (ex: 100MHz)
+.Param period = 10n
+.Param tr = 0.2n
+.Param tf = 0.2n
+* Largura do pulso calculada para 50% de Duty Cycle exato
+.Param pw = 'period/2 - (tr+tf)/2'
+
+* Fonte de entrada (Injetada no pino A)
+Va A 0 PULSE(0 VDD_VAL 0 tr tf pw period)
+
+* 5. CARGA CAPACITIVA VARIAVEL
+* Define o capacitor CL no no de saida (OUT)
+* O valor '1fF' eh dummy, sera sobrescrito pelo SWEEP
+CL OUT 0 1fF
+
+* 6. MEDICOES AUTOMATICAS (.MEAS)
+
+* --- A) Potencia Media ---
+* Medimos a corrente media fornecida pelo VDD.
+* O sinal negativo (-) corrige o sentido da corrente do SPICE (que sai da fonte).
+.meas tran I_media AVG I(Vdd)
+.meas tran Potencia_Total param='-I_media * VDD_VAL'
+
+* --- B) Atrasos (Opcional, mas enriquece a resposta "Graficos de Saida") ---
+.meas tran tplh trig v(A) val='VDD_VAL/2' fall=1 targ v(OUT) val='VDD_VAL/2' rise=1
+.meas tran tphl trig v(A) val='VDD_VAL/2' rise=1 targ v(OUT) val='VDD_VAL/2' fall=1
+.meas tran t_medio param='(tplh + tphl)/2'
+
+* 7. SIMULACAO COM SWEEP (O CORACAO DA QUESTAO)
+* Sintaxe: .tran passo fim SWEEP var INCR passo inicio fim
+* Faixa: 0fF a 300fF (cobre cargas leves e pesadas)
+* Passo: 50fF (Gera os pontos: 0, 50, 100, 150, 200, 250, 300 = 7 pontos)
+* Garantindo o requisito de "pelo menos 5 valores".
+
+.tran 0.01n '5*period' SWEEP CL INCR 50fF 0fF 300fF
+\end{lstlisting}
+
+\textbf{2. Procedimento de Simulação e Análise}
+
+\begin{enumerate}
+    \item \textbf{Executar:} Rode o comando \texttt{eldo nome\_arquivo.cir} no terminal.
+    \item \textbf{Abrir Resultados:} Abra o EZWave (\texttt{ezwave nome\_arquivo.wdb}).
+    \item \textbf{Visualizar a Tabela de Medições:}
+    \begin{itemize}
+        \item Vá em \textbf{View $\rightarrow$ Measurement Results} (ou use o atalho, ícone de tabela).
+        \item Uma janela listará \texttt{Potencia\_Total}, \texttt{t\_medio}, etc.
+    \end{itemize}
+    \item \textbf{Plotar o Gráfico:}
+    \begin{itemize}
+        \item Selecione \texttt{Potencia\_Total} na tabela.
+        \item Arraste para a área de gráficos.
+        \item O eixo X será automaticamente $C_L$ (Load Capacitance) e o eixo Y será a Potência (Watts).
+    \end{itemize}
+    \item \textbf{Destacar os Pontos (Dica de Ouro):}
+    \begin{itemize}
+        \item Para provar ao professor que você simulou os 5+ pontos exigidos:
+        \item Clique com o botão direito na linha do gráfico $\rightarrow$ \textbf{Properties}.
+        \item Vá na aba \textbf{Attributes} (ou Trace) e ative a opção \textbf{Data Point Symbol} (escolha círculos ou xis).
+        \item Isso fará com que cada ponto simulado (0, 50, 100...) fique marcado visualmente sobre a reta.
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{3. O que escrever na folha da prova?}
+\begin{itemize}
+    \item \textbf{Comportamento:} "O gráfico mostra que a potência consumida aumenta linearmente com a capacitância de carga $C_L$."
+    \item \textbf{Justificativa:} "Isso está de acordo com a teoria de potência dinâmica em circuitos CMOS ($P = f \cdot C_L \cdot V_{DD}^2$), onde a carga e descarga do capacitor de saída domina o consumo no modelo Worst Power."
+    \item \textbf{Valores:} Cite o valor mínimo (em 0fF, que é a capacitância parasita interna) e o máximo (em 300fF) para dar dimensão à resposta.
+\end{itemize}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2024 Q8: Relação $F_{in}/F_{out}$ em Contador (Resolução Completa)}]{\textcolor{red}{Prova 2024 Q8: Relação $F_{in}/F_{out}$ em Contador (Resolução Completa)}}
+
+\textbf{Objetivo:} Determinar experimentalmente a taxa de divisão de um contador ($N = F_{in}/F_{out}$) e encontrar a frequência máxima ($F_{max}$) na qual o circuito para de dividir corretamente.
+
+\textbf{Teoria Rápida:}
+Um contador de $k$ bits funciona como um divisor de frequência por $2^k$.
+\begin{itemize}
+    \item Ex: Contador de 4 bits $\rightarrow$ Divide por $2^4 = 16$.
+    \item \textbf{Comportamento esperado:} O gráfico de $F_{in}/F_{out}$ deve ser uma linha reta horizontal no valor de divisão (ex: 16) até atingir a $F_{max}$.
+    \item \textbf{Falha:} Acima de $F_{max}$, o atraso de propagação supera o período do clock. O contador perde pulsos e a relação cai ou torna-se caótica.
+\end{itemize}
+
+\textbf{1. O Script de Simulação (.cir)}
+O segredo aqui é parametrizar o período em função de uma frequência variável \texttt{f} e usar o comando \texttt{SWEEP} no \texttt{.tran}.
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Frequência para Contador}]
+* 
+* 1. INCLUDES
+.include "meu_contador.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. ALIMENTACAO
+.Param VDD_VAL = 3.3V
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. ESTIMULO DE CLOCK (VARIAVEL COM 'f')
+* Definimos uma frequencia inicial dummy (sera varrida)
+.Param f = 10MEG
+.Param period = '1/f'
+
+* Configura bordas rapidas (proporcionais ao periodo para nao falhar em alta freq)
+.Param tr = '0.05 * period'
+.Param tf = '0.05 * period'
+.Param pw = 'period/2 - (tr+tf)/2'
+
+* Clock aplicado na entrada CLK
+Vclk CLK 0 PULSE(0 VDD_VAL 0 tr tf pw period)
+
+* Reset (Necessario para contadores assincronos/sincronos iniciarem conhecidos)
+* Pulso inicial de Reset e depois fica em 0
+Vrst RST 0 PULSE(0 VDD_VAL 0 1n 1n 5n 1000u)
+
+* 4. MEDICOES AUTOMATICAS (.MEAS)
+* Objetivo: Medir Periodo de Entrada (T_in) e Saida (T_out)
+
+* --- Medir T_IN (Periodo do Clock) ---
+* Mede entre a 10a e 11a borda de subida (estabilidade)
+.meas tran T_IN trig v(CLK) val='VDD_VAL/2' rise=10 targ v(CLK) val='VDD_VAL/2' rise=11
+
+* --- Medir T_OUT (Periodo da Saida Q_final) ---
+* O periodo da saida eh MUITO maior. Precisamos pegar uma oscilacao completa.
+* CUIDADO: Se o contador divide por 16, a saida so sobe na borda 8 e 24 do clock.
+* Usamos rise=2 e rise=3 para garantir que o reset ja passou.
+.meas tran T_OUT trig v(SAIDA_Q3) val='VDD_VAL/2' rise=2 targ v(SAIDA_Q3) val='VDD_VAL/2' rise=3
+
+* --- Calcular a Relacao (M = Tout / Tin = Fin / Fout) ---
+.meas tran RELACAO param='T_OUT/T_IN'
+
+* 5. SIMULACAO COM SWEEP DE FREQUENCIA
+* Varredura: 10 MHz ate 2 GHz (ajuste conforme necessidade)
+* O tempo total de simulacao ('100*period') deve ser suficiente para 
+* haver pelo menos 3 ou 4 oscilacoes completas da SAIDA (que eh lenta).
+* Se o contador for de 4 bits (div 16), precisamos de min 50 clocks.
+
+.tran 0 '100*period' SWEEP f DEC 10 10MEG 2G
+\end{lstlisting}
+
+\textbf{2. Análise no EZWave}
+
+\begin{enumerate}
+    \item \textbf{Rodar:} Execute o ELDO.
+    \item \textbf{Tabela de Resultados:} Abra \textbf{View $\rightarrow$ Measurement Results}.
+    \item \textbf{Plotar:} Arraste a medição \texttt{RELACAO} para o gráfico.
+    \item \textbf{Interpretação Visual:}
+    \begin{itemize}
+        \item O eixo X será a Frequência ($f$).
+        \item O gráfico deve mostrar uma linha reta horizontal perfeita no valor da divisão (ex: 16.0).
+        \item Em uma certa frequência alta, a linha começará a cair, oscilar ou desaparecer.
+    \end{itemize}
+    \item \textbf{Identificar $F_{max}$:} O ponto exato onde a linha deixa de ser constante (sai do patamar de 16.0) é a frequência máxima de operação.
+\end{enumerate}
+
+
+
+\textbf{3. Dicas Críticas para a Prova}
+\begin{itemize}
+    \item \textbf{Tempo de Simulação:} Se o gráfico da relação aparecer "zerado" ou vazio, aumente o tempo final do `.tran`. Um contador divide a frequência. Se você simular pouco tempo, o sinal de saída (que é lento) não terá completado um ciclo inteiro ($T_{out}$) para ser medido pelo `.meas`. Use pelo menos \texttt{'100*period'}.
+    \item \textbf{Nome da Saída:} Verifique no netlist qual é o nome do bit mais significativo (MSB) do contador (ex: Q3, Q4, OUT). É nele que você mede o $T_{out}$.
+    \item \textbf{Resposta Escrita:} "A simulação mostra que a relação $F_{in}/F_{out}$ mantém-se constante em 16 (para 4 bits) até a frequência de $X$ GHz. Após este ponto, as violações de tempo de propagação impedem a comutação correta dos flip-flops."
+\end{itemize}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2022a Q3: Monte Carlo de Timing (Resolução Completa)}]{\textcolor{red}{Prova 2022a Q3: Monte Carlo de Timing (Resolução Completa)}}
+
+\textbf{Objetivo:} Realizar uma análise estatística para determinar a variação esperada nos tempos de propagação do circuito devido a imperfeições do processo de fabricação (mismatch e variações globais).
+
+\textbf{Teoria Rápida:}
+Em vez de simular um transistor "ideal", o Monte Carlo roda a simulação $N$ vezes (aqui, 75), sorteando aleatoriamente parâmetros como $V_{th}$ (tensão de limiar) e $\mu$ (mobilidade) baseados em curvas de distribuição reais da fábrica.
+\begin{itemize}
+    \item \textbf{Resultado:} Um histograma (distribuição Gaussiana).
+    \item \textbf{Métrica:} Devemos anotar a \textbf{Média} ($\mu$) e o \textbf{Desvio Padrão} ($\sigma$). Um $\sigma$ alto indica um circuito pouco robusto.
+\end{itemize}
+
+\textbf{1. O Script de Simulação (.cir)}
+Atenção especial à inclusão das bibliotecas de estatística (`.lib ... mc`) e ao comando `.MC`.
+
+\begin{lstlisting}[language=pspice, caption={Script de Monte Carlo (75 iterações)}]
+* 
+* 1. INCLUDES E BIBLIOTECAS ESTATISTICAS (CRITICO)
+* Para MC, nao usamos os modelos simples (.mod). 
+* Precisamos do arquivo de estatisticas (wc53.lib ou similar com flag 'mc')
+.INCLUDE /local/tools/dkit/ams_3.70_mgc/eldo/c35/profile.opt
+.LIB /local/tools/dkit/ams_3.70_mgc/eldo/c35/wc53.lib mc
+
+* Seu netlist extraido (PEX)
+.include "minha_celula.pex.netlist"
+
+* Mapeamento (as vezes necessario dependendo de como o PEX gerou)
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. PARAMETROS FIXOS (Do Enunciado)
+.Param VDD_VAL = 2.8V
+.Param C_LOAD  = 25fF
+
+* Fontes
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. CARGA FIXA
+* Diferente do Sweep, aqui o CL eh fixo.
+CL OUT 0 C_LOAD
+
+* 4. ESTIMULO
+.Param period = 10n
+.Param tr = 0.2n
+Va IN 0 PULSE(0 VDD_VAL 0 tr tr 'period/2' period)
+
+* 5. CONFIGURACAO DO MONTE CARLO (.MC)
+* Sintaxe: .MC <num_runs> [opcoes] <tipo_variacao>
+* NBBINS=20 define a resolucao do histograma (barras).
+* 'mismatch': Variacao entre transistores do mesmo chip.
+* 'process': Variacao global de wafer para wafer.
+.MC 75 NBBINS=20 mismatch process
+
+* 6. MEDICOES DE TIMING
+* O enunciado pede "tempos de subida e descida". 
+* Interpretacao 1: Atraso de Propagacao (tpLH, tpHL) - O mais comum para "timing".
+.meas tran tpLH trig V(IN) val='VDD_VAL/2' fall=1 targ V(OUT) val='VDD_VAL/2' rise=1
+.meas tran tpHL trig V(IN) val='VDD_VAL/2' rise=1 targ V(OUT) val='VDD_VAL/2' fall=1
+
+* Interpretacao 2: Tempo de Transicao (Rise/Fall Time 10-90%) - Caso o prof. peca a inclinacao.
+.meas tran t_rise trig V(OUT) val='VDD_VAL*0.1' rise=1 targ V(OUT) val='VDD_VAL*0.9' rise=1
+.meas tran t_fall trig V(OUT) val='VDD_VAL*0.9' fall=1 targ V(OUT) val='VDD_VAL*0.1' fall=1
+
+* 7. ANALISE TRANSIENTE
+* O tempo deve ser suficiente para capturar a primeira transicao completa.
+.tran 0 20n 0 0.01n
+\end{lstlisting}
+
+\textbf{2. Procedimento de Análise no EZWave}
+
+Diferente das outras simulações, você \textbf{não deve} analisar as formas de onda sobrepostas ("nuvem de linhas"), pois é confuso. Você deve gerar o histograma.
+
+\begin{enumerate}
+    \item \textbf{Rodar:} Execute o ELDO. Note que demorará 75x mais que uma simulação comum.
+    \item \textbf{Abrir EZWave:} Carregue o `.wdb`.
+    \item \textbf{Gerar Histograma:}
+    \begin{itemize}
+        \item No menu superior, vá em \textbf{Plot $\rightarrow$ Monte Carlo $\rightarrow$ Histogram} (ou procure o ícone de gráfico de barras).
+        \item Uma janela se abrirá listando suas medições (`tpLH`, `tpHL`, etc.).
+        \item Selecione, por exemplo, `tpHL` e clique em OK.
+    \end{itemize}
+    \item \textbf{Leitura dos Dados:}
+    \begin{itemize}
+        \item O gráfico mostrará uma distribuição (formato de sino).
+        \item Olhe a legenda ou as propriedades do gráfico para encontrar:
+        \begin{itemize}
+            \item \textbf{Mean (Média):} O atraso típico esperado.
+            \item \textbf{Sigma (Desvio Padrão):} A variabilidade.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{3. O que escrever na folha da prova?}
+\begin{itemize}
+    \item \textbf{Resultados:} "A simulação de Monte Carlo com 75 pontos indicou um tempo de propagação médio ($t_{pHL}$) de $X$ ps com um desvio padrão ($\sigma$) de $Y$ ps."
+    \item \textbf{Análise (Opcional):} "Considerando uma variação de $3\sigma$ (que cobre 99.7\% dos casos), o atraso máximo esperado seria $\mu + 3\sigma$."
+    \item \textbf{Gráfico:} Desenhe um esboço simplificado do histograma mostrando onde está a média.
+\end{itemize}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2016b Q4: Cálculo Teórico de $F_{max}$}]{\textcolor{red}{Prova 2016b Q4: Cálculo Teórico de $F_{max}$}}
+
+\textbf{Enunciado:} Suponha que o atraso de cada porta lógica seja $0.2\,\text{ns}$. O atraso ($T_D$), o setup ($T_{set}$) e o holding time ($T_{holding}$) dos D-FFs estão indicados na Figura 1 ($T_D=0.4\,\text{ns}, T_{set}=0.1\,\text{ns}$). Qual será o máximo clock permitido?
+
+
+
+\textbf{Solução Detalhada:}
+
+Para encontrar a frequência máxima ($F_{max}$), devemos identificar o **Caminho Crítico**, que é o trajeto lógico mais longo entre a saída ($Q$) de um Flip-Flop e a entrada ($D$) do próximo.
+
+\textbf{1. Análise dos Caminhos Combinacionais ($T_{logic}$):}
+Observando a imagem, o sinal pode percorrer dois caminhos distintos:
+\begin{itemize}
+    \item \textbf{Caminho Superior:} Passa por 2 portas XOR.
+    \[ T_{sup} = 2 \times 0.2\,\text{ns} = 0.4\,\text{ns} \]
+    \item \textbf{Caminho Inferior:} Passa por 2 portas AND e depois pela porta XOR final (totalizando 3 portas em série).
+    \[ T_{inf} = 3 \times 0.2\,\text{ns} = \mathbf{0.6\,\text{ns}} \]
+\end{itemize}
+O atraso lógico a ser considerado é sempre o maior: $\mathbf{T_{logic} = 0.6\,\text{ns}}$.
+
+\textbf{2. Cálculo do Período Mínimo ($T_{min}$):}
+O período do clock deve ser suficiente para cobrir o atraso de propagação do FF inicial, o tempo da lógica e o tempo de preparação (setup) do FF final.
+\[ T_{min} \ge T_{clk-q} + T_{logic} + T_{setup} \]
+
+Substituindo os valores dados na figura:
+\[ T_{min} \ge 0.4\,\text{ns} + 0.6\,\text{ns} + 0.1\,\text{ns} \]
+\[ T_{min} = 1.1\,\text{ns} \]
+
+\textbf{3. Cálculo da Frequência Máxima ($F_{max}$):}
+\[ F_{max} = \frac{1}{T_{min}} = \frac{1}{1.1 \times 10^{-9}\,\text{s}} \]
+\[ F_{max} \approx 909.09 \times 10^6\,\text{Hz} \]
+
+\[ \boxed{F_{max} \approx 909\,\text{MHz}} \]
+
+\textbf{Nota:} O parâmetro $T_{holding} = 0.08\,\text{ns}$ e $0.075\,\text{ns}$ serve para verificar violações de tempo de retenção (corrida de sinais), mas \textbf{não influencia} o cálculo da frequência máxima de operação.
+
+\newpage
+
+\section{Projeto e Análise de Circuitos Analógicos}
+
+Esta seção fundamenta as escolhas de topologia e dimensionamento para as fontes de corrente exigidas nas provas (2016b, 2022a, 2024).
+
+\subsection{Parte A: Fundamentos Teóricos de Dispositivos}
+
+\subsubsection{Transcondutância ($g_m$) e Regiões de Operação}
+A transcondutância ($g_m$) é a figura de mérito fundamental no projeto analógico, representando a variação da corrente de dreno em resposta à tensão de gate ($g_m = \frac{\partial I_D}{\partial V_{GS}}$). O comportamento muda drasticamente dependendo da região de inversão.
+
+\textbf{1. Forte Inversão (Strong Inversion)}
+Ocorre quando $V_{GS} > V_{TH}$. O transistor obedece à lei quadrática:
+\begin{equation}
+I_D = \frac{1}{2} \mu C_{ox} \frac{W}{L} (V_{GS} - V_{TH})^2 (1 + \lambda V_{DS})
+\end{equation}
+Derivando em relação a $V_{GS}$, obtemos:
+\begin{equation}
+g_m = \mu C_{ox} \frac{W}{L} (V_{GS} - V_{TH}) = \sqrt{2 \mu C_{ox} \frac{W}{L} I_D} = \frac{2I_D}{V_{OV}}
+\end{equation}
+\textbf{Consequência de Projeto:} Em forte inversão, para aumentar $g_m$, deve-se aumentar a largura $W$ ou a corrente $I_D$. É a região ideal para espelhos de saída onde se deseja minimizar a área e maximizar a excursão de tensão (swing), como exigido nos PMOS de saída da \textbf{Prova 2024}.
+
+\textbf{2. Fraca Inversão (Weak Inversion / Sub-threshold)}
+Ocorre quando $V_{GS} < V_{TH}$. A corrente é dominada por difusão (similar a um BJT) e segue uma relação exponencial:
+\begin{equation}
+I_D \approx I_{D0} \cdot e^{\frac{V_{GS}}{n U_T}} \cdot \left( 1 - e^{\frac{-V_{DS}}{U_T}} \right)
+\end{equation}
+Onde $U_T = \frac{kT}{q} \approx 26mV$ (a 300K) e $n$ é o fator de inclinação de sub-limiar ($n \approx 1.2$ a $1.5$).
+Derivando $I_D$ em relação a $V_{GS}$:
+\begin{equation}
+g_m = \frac{\partial}{\partial V_{GS}} \left( I_{D0} e^{\frac{V_{GS}}{n U_T}} \right) = \frac{I_D}{n U_T}
+\end{equation}
+\textbf{Consequência Crítica para Fontes PTAT:}
+\begin{itemize}
+    \item A transcondutância \textbf{independe da geometria ($W/L$)}.
+    \item A relação $g_m/I_D$ é máxima (máxima eficiência de corrente).
+    \item A diferença de tensão $V_{GS}$ entre dois transistores com densidades de corrente diferentes ($J = I_D/W$) é linear com a temperatura ($T$), base para o princípio PTAT.
+\end{itemize}
+
+
+
+\subsubsection{Espelhos de Corrente e Impedância de Saída}
+Uma fonte de corrente ideal possui impedância de saída infinita ($I_{out}$ constante independente de $V_{out}$).
+
+\textbf{Espelho Simples:}
+A impedância de saída é dominada pela modulação de comprimento de canal ($\lambda$):
+\begin{equation}
+r_o = \frac{1}{\lambda I_D} \approx \frac{V_A L}{I_D}
+\end{equation}
+Para aumentar $r_o$, devemos usar transistores com $L$ longo (ex: $L > 1\mu m$), como feito no dimensionamento do espelho de saída.
+
+\textbf{Espelho Cascode / Wilson:}
+Utiliza realimentação para aumentar a impedância efetiva.
+\begin{equation}
+R_{out} \approx g_m r_o^2
+\end{equation}
+O ganho intrínseco ($g_m r_o$) multiplica a impedância, tornando a fonte muito mais estável frente a variações de $V_{DD}$ (melhor \textit{Line Regulation}).
+
+\newpage
+
+\subsection{Parte B: Teoria e Projeto da Fonte PTAT}
+A fonte de corrente projetada nas provas (2016b, 2024) utiliza a topologia de auto-polarização (\textit{Beta-multiplier} ou similar) operando em fraca inversão.
+
+\subsubsection{Dedução da Fórmula de Projeto}
+O circuito força uma diferença de tensão $\Delta V_{GS}$ sobre um resistor $R$.
+
+1. Considere dois transistores NMOS $M_1$ e $M_2$ operando em fraca inversão, onde $M_2$ é $K$ vezes mais largo que $M_1$ (ou o espelho superior força correntes desiguais).
+
+2. As equações de tensão Gate-Source são:
+$$ V_{GS1} = n U_T \ln\left(\frac{I_{D1}}{I_{D0} (W/L)_1}\right) $$
+$$ V_{GS2} = n U_T \ln\left(\frac{I_{D2}}{I_{D0} (W/L)_2}\right) $$
+
+3. Pela malha do circuito (KVL), a tensão sobre o resistor $R$ é a diferença entre os $V_{GS}$:
+$$ V_R = V_{GS1} - V_{GS2} = \Delta V_{GS} $$
+
+4. Substituindo as equações logarítmicas e assumindo $I_{D1} = I_{D2} = I_{REF}$ (copiados pelo espelho PMOS):
+$$ V_R = n U_T \ln\left( \frac{I_{REF}}{I_{D0} (W/L)_1} \right) - n U_T \ln\left( \frac{I_{REF}}{I_{D0} (W/L)_2} \right) $$
+$$ V_R = n U_T \ln\left( \frac{(W/L)_2}{(W/L)_1} \right) $$
+
+5. Definindo o fator de multiplicidade $M = \frac{(W/L)_2}{(W/L)_1}$:
+$$ I_{REF} \cdot R = n U_T \ln(M) $$
+
+\textbf{Equação Final de Projeto (PTAT):}
+\begin{equation}
+I_{REF} = \frac{n \cdot U_T \cdot \ln(M)}{R}
+\end{equation}
+
+\textbf{Por que é PTAT?}
+Como $U_T = \frac{kT}{q}$, a corrente $I_{REF}$ é diretamente proporcional à Temperatura absoluta $T$.
+$$ I_{REF} \propto T $$
+Isso é essencial para compensar o coeficiente negativo ($V_{BE}$) em referências de Bandgap.
+
+\subsubsection{Análise de Simetria do Esquemático ($M4_a$ e $M4_b$)}
+
+Observando o diagrama esquemático (Figura \ref{fig:fonte_esquematico}) e a Tabela \ref{tab:dimensoes_q11_final}, nota-se a divisão do transistor de carga PMOS em duas unidades ($M4_a$ e $M4_b$ ou M41/M42 na imagem). Esta escolha de projeto é fundamentada em três pilares críticos para circuitos analógicos de precisão:
+
+\begin{enumerate}
+    \item \textbf{Garantia de Espelhamento (Matching 1:1):}
+    A dedução matemática da fonte PTAT assume que a corrente no ramo esquerdo é \textbf{exatamente igual} à corrente no ramo direito ($I_{D1} = I_{D2}$). Qualquer erro nessa cópia introduz um erro logarítmico na tensão de saída. Ao desenhar o layout, dividir o transistor $M4$ em duas metades idênticas ($M4_a$ e $M4_b$) permite o uso de técnicas como \textit{Common Centroid} (Centro Comum), onde os transistores são interdigitados para cancelar gradientes térmicos e de processo.
+
+    \item \textbf{Comprimento de Canal Longo ($L=15\mu m$):}
+    Nota-se que os PMOS possuem $L=15\mu m$. Um canal longo aumenta drasticamente a resistência de saída ($r_o \propto L$), reduzindo o efeito de modulação de comprimento de canal ($\lambda$). Isso garante que $I_{D}$ permaneça constante mesmo se houver uma pequena diferença de $V_{DS}$ entre os ramos, melhorando o PSRR e a regulação de linha.
+
+    \item \textbf{Simetria Visual e Física:}
+    A estrutura simétrica mostrada no esquemático (Ramo Esquerdo vs. Ramo Direito) facilita a verificação visual de que as cargas são idênticas, o que é um pré-requisito para o funcionamento correto do \textit{Beta-multiplier}.
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \caption{Dimensões finais dos transistores otimizados para o projeto. Observe a simetria entre os blocos funcionais.}
+    \label{tab:dimensoes_q11_final}
+    % DICA: 'l' alinha a esquerda, 'c' centraliza, 'r' alinha a direita.
+    % Usamos booktabs (\toprule, \midrule) para visual profissional.
+    \begin{tabular}{l c c c l} 
+        \toprule
+        \textbf{Bloco Funcional} & \textbf{Transistor} & \textbf{W ($\mu$m)} & \textbf{L ($\mu$m)} & \textbf{Função no Circuito} \\ 
+        \midrule
+        
+        % --- BLOCO NMOS (Nucleo) ---
+        \multirow{4}{*}{\textbf{Núcleo NMOS}} 
+          & M1 & 95,0 & 1,0 & Gerador $\Delta V_{GS}$ (Lado esquerdo) \\
+          & M2 & 95,0 & 1,0 & Gerador $\Delta V_{GS}$ (Lado direito, $M \times W$) \\
+          & M6 & 95,0 & 1,0 & Cascode (Aumenta $R_{out}$) \\
+          & M7 & 95,0 & 1,0 & Cascode (Aumenta $R_{out}$) \\ 
+        
+        \midrule
+        
+        % --- BLOCO PMOS (Carga/Espelho) ---
+        \multirow{4}{*}{\textbf{Espelho PMOS}} 
+          & M3 & 9,0 & 15,0 & Parte do Espelho Wilson/Cascode \\
+          & M4$_a$ & 9,0 & 15,0 & Carga Ativa (Paralelo/Simetria) \\
+          & M4$_b$ & 9,0 & 15,0 & Carga Ativa (Paralelo/Simetria) \\
+          & M5 & 9,0 & 15,0 & Espelho de Saída \\ 
+          
+        \bottomrule
+    \end{tabular}
+    
+    % Nota de rodape da tabela para explicar o W/L efetivo
+    \vspace{0.2cm}
+    \small{\textit{Nota: A razão de aspecto efetiva para os NMOS é $W/L = 95$, garantindo operação em fraca inversão para correntes de $\mu A$.}}
+\end{table}
+
+\subsubsection{Script de Dimensionamento (Cálculo dos Componentes)}
+O script abaixo aplica as equações de inversão fraca (para o núcleo) e forte (para a saída) para determinar $W/L$.
+
+\begin{lstlisting}[language=python, caption={Script de Dimensionamento PTAT (Baseado na Teoria)}]
+import numpy as np
+import pandas as pd # Usaremos pandas apenas para visualização bonita, se não tiver, o print normal resolve
+
+# --- FUNÇÃO AUXILIAR: Ajuste para Grade de Layout ---
+def round_grid(val, grid=0.05):
+    """Arredonda para o múltiplo mais próximo da grade de fabricação (ex: 0.05um)"""
+    return np.round(val / grid) * grid
+
+# --- DADOS DE ENTRADA (QUESTÃO 9) ---
+Is = 3.00e-6       # 3.0 uA
+Vdd = 2.6          # Tensão de alimentação
+Vov_pmos = 0.5     # Headroom exigido (Vdd - Vout_max)
+
+# --- PARÂMETROS FÍSICOS (Do Technology File) ---
+Vt = 0.026
+n = 1.2
+un = 475.8; Coxn = 4.55e-7  # NMOS
+up = 148.2; Coxp = 4.55e-7  # PMOS
+
+# --- CÁLCULOS DE ALVO (TARGETS) ---
+
+# 1. PMOS (Saída): Forte Inversão, Saturado
+# I = 1/2 * up * Coxp * (W/L) * Vov^2  --> Isolando W/L:
+WL_pmos_target = (2 * Is) / (up * Coxp * (Vov_pmos**2))
+
+# 2. NMOS (Núcleo): Fraca Inversão
+# Para garantir fraca inversão, W/L tem que ser GRANDE para a densidade de corrente ser baixa.
+# Fator de segurança = 5x longe da inversão moderada
+WL_nmos_min_target = 5.0 * (Is / (un * Coxn * (n * Vt)**2))
+
+print(f"--- ALVOS DE PROJETO ---")
+print(f"Razão W/L PMOS necessária: {WL_pmos_target:.4f} (Para Vov=0.5V)")
+print(f"Razão W/L NMOS mínima:     {WL_nmos_min_target:.4f} (Para garantir Fraca Inversão)")
+print("-" * 60)
+
+# --- GERADOR DE CENÁRIOS INTELIGENTES ---
+
+# Lista de L (Comprimentos) sugeridos para teste. 
+# Em analógico, evitamos L mínimo. Usamos L maiores para ganhar impedância de saída (ro).
+L_choices = [1.0, 2.0, 4.0, 5.0] # em micrometros (um)
+M_choices = [4, 8] # Fatores de multiplicação do espelho (Inteiros pares facilitam centroide)
+
+scenarios = []
+
+for M in M_choices:
+    # Resistor depende apenas de M
+    R = (n * Vt * np.log(M)) / Is
+    R_kohm = R / 1000.0
+    
+    for L_val in L_choices:
+        L_microns = L_val
+        
+        # --- Dimensionamento PMOS ---
+        # W = Razão_Alvo * L
+        W_pmos_raw = WL_pmos_target * L_microns
+        W_pmos_final = round_grid(W_pmos_raw)
+        
+        # Check de sanidade: Se W ficar muito pequeno (< 0.22u), descartar ou avisar
+        if W_pmos_final < 0.22: 
+            note_p = "W muito pequeno (Viol. DRC)"
+        else:
+            note_p = "OK"
+
+        # --- Dimensionamento NMOS (Espelho 1:M) ---
+        # W_nmos = Razão_Minima * L
+        # O transistor M1 tem tamanho (W/L). O transistor M2 tem tamanho M*(W/L).
+        # Aqui calculamos o tamanho unitário base.
+        W_nmos_raw = WL_nmos_min_target * L_microns
+        W_nmos_final = round_grid(W_nmos_raw)
+        
+        # Adicionando ao relatório
+        scenarios.append({
+            "M (Fator)": int(M),
+            "R (kΩ)": round(R_kohm, 2),
+            "L (µm)": L_microns,
+            "PMOS W (µm)": W_pmos_final,
+            "NMOS W (µm)": W_nmos_final,
+            "Status PMOS": note_p
+        })
+
+# --- EXIBIÇÃO DOS RELATÓRIOS ---
+
+df = pd.DataFrame(scenarios)
+
+print("\n### RELATÓRIO 1: SELEÇÃO DE VALORES ###")
+print("Legenda: L é o comprimento do canal. W é a largura total.")
+print("Nota: O NMOS deve operar em fraca inversão, por isso o W é grande.")
+print("-" * 80)
+# Filtrando apenas colunas relevantes e imprimindo
+print(df.to_string(index=False))
+
+print("\n\n### RECOMENDAÇÃO 'PRONTA PARA A PROVA' ###")
+
+# Lógica de seleção automática do "Melhor" cenário
+# Critério: M=8 (Resistor maior, menos erro de processo) e L=2.0um (Bom matching sem ser gigante)
+best_choice = df[(df["M (Fator)"] == 8) & (df["L (µm)"] == 2.0)].iloc[0]
+
+print(f"Topologia: Beta Multiplier (NMOS em Fraca Inversão, PMOS em Forte Inversão)")
+print(f"Resistor Escolhido: {best_choice['R (kΩ)']} kΩ (Resultante de M={int(best_choice['M (Fator)'])} e Is=3uA)")
+print(f"Transistor PMOS (Saída): W = {best_choice['PMOS W (µm)']} µm / L = {best_choice['L (µm)']} µm")
+print(f"   -> Justificativa: Dimensionado para Vov = 0.5V (atendendo Vdd-0.5V).")
+print(f"Transistor NMOS (Núcleo): W = {best_choice['NMOS W (µm)']} µm / L = {best_choice['L (µm)']} µm")
+print(f"   -> Justificativa: W/L > {WL_nmos_min_target:.1f} para garantir operação em Fraca Inversão.")
+print(f"   -> Obs: O transistor M2 será composto por {int(best_choice['M (Fator)'])} dedos ou unidades deste tamanho.")
+\end{lstlisting}
+
+\begin{lstlisting}[language=c, caption={Script de Dimensionamento PTAT (Baseado na Teoria)}]
+--- ALVOS DE PROJETO ---
+Razão W/L PMOS necessária: 0.3559 (Para Vov=0.5V)
+Razão W/L NMOS mínima:     71.1781 (Para garantir Fraca Inversão)
+------------------------------------------------------------
+
+### RELATÓRIO 1: SELEÇÃO DE VALORES ###
+Legenda: L é o comprimento do canal. W é a largura total.
+Nota: O NMOS deve operar em fraca inversão, por isso o W é grande.
+--------------------------------------------------------------------------------
+ M (Fator)  R (kΩ)  L (µm)  PMOS W (µm)  NMOS W (µm) Status PMOS
+         4   14.42     1.0         0.35        71.20          OK
+         4   14.42     2.0         0.70       142.35          OK
+         4   14.42     4.0         1.40       284.70          OK
+         4   14.42     5.0         1.80       355.90          OK
+         8   21.63     1.0         0.35        71.20          OK
+         8   21.63     2.0         0.70       142.35          OK
+         8   21.63     4.0         1.40       284.70          OK
+         8   21.63     5.0         1.80       355.90          OK
+
+
+### RECOMENDAÇÃO 'PRONTA PARA A PROVA' ###
+Topologia: Beta Multiplier (NMOS em Fraca Inversão, PMOS em Forte Inversão)
+Resistor Escolhido: 21.63 kΩ (Resultante de M=8 e Is=3uA)
+Transistor PMOS (Saída): W = 0.7000000000000001 µm / L = 2.0 µm
+   -> Justificativa: Dimensionado para Vov = 0.5V (atendendo Vdd-0.5V).
+Transistor NMOS (Núcleo): W = 142.35 µm / L = 2.0 µm
+   -> Justificativa: W/L > 71.2 para garantir operação em Fraca Inversão.
+   -> Obs: O transistor M2 será composto por 8 dedos ou unidades deste tamanho.
+
+
+** Process exited - Return Code: 0 **
+
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+        \caption{Esquemático da fonte PTAT. O núcleo M1-M2 opera em fraca inversão para gerar $\Delta V_{GS}$.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{fonte_esquematico.png}
+    \caption{Esquemático do circuito gerador de corrente reprojetado, com espelho de corrente de Wilson.}
+    \label{fig:fonte_esquematico}
+\end{figure}
+
+
+\newpage
+
+\subsection{Verificação e Simulação}
+Após desenhar o esquemático com os valores calculados, é obrigatório validar o circuito com simulações DC, Transiente e AC.
+
+\subsubsection{Verificação DC: Estabilidade (Line Regulation)}
+Verifica se a corrente de saída permanece constante (estável) mesmo com variações na tensão de alimentação ($V_{DD}$).
+
+\textbf{O que esperar:} A corrente deve subir rapidamente a partir de $\approx 1V$ e estabilizar num patamar plano (ex: $3\mu A$) até $V_{DD}$ máximo.
+
+\begin{lstlisting}[language=pspice, caption={Script DC para Regulação de Linha}]
+* 1. INCLUDES
+.include "fonte_corrente.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+
+* 2. FONTES
+vdd_s VDD 0 3.3V   * Valor nominal
+vss_s VSS 0 0V
+vout_s OUT 0 0V    * Fonte de 0V na saida para medir corrente
+
+* 3. SIMULACAO (SWEEP VDD)
+* Varre VDD de 0V ate 5V
+.DC vdd_s 0 5 0.01
+
+.probe DC IS(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote \texttt{IS(vout\_s)}.
+    \item Verifique se existe uma região "plana" (constante) em torno da tensão de operação ($3.3V$ ou $3.0V$).
+    \item Se a corrente continuar subindo linearmente (efeito Early), aumente o comprimento ($L$) dos transistores de saída ou use uma topologia cascode.
+\end{enumerate}
+
+
+
+\subsubsection{Verificação de Temperatura (PTAT)}
+Verifica se a corrente aumenta linearmente com a temperatura, requisito fundamental para compor referências Bandgap.
+
+\begin{lstlisting}[language=pspice, caption={Script DC para Temperatura}]
+* Varre Temperatura de -10C a 100C
+.DC TEMP -10 100 1
+
+.probe DC IS(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote \texttt{IS(vout\_s)}.
+    \item O gráfico deve ser uma reta com inclinação positiva.
+    \item Se for uma curva parabólica ou tiver inclinação negativa, verifique se os transistores NMOS estão realmente em fraca inversão (aumente $W$ se necessário).
+\end{enumerate}
+
+\newpage
+
+\subsubsection{Verificação de Start-Up (Transiente)}
+Fontes de auto-polarização possuem um ponto de equilíbrio estável onde $I = 0A$. O teste de start-up força o circuito para esse estado "morto" e verifica se ele consegue "acordar" sozinho.
+
+\textbf{Código Robusto:}
+Usamos o comando \texttt{.IC} (Initial Condition) para travar os nós internos em tensões que desligam os transistores.
+
+\begin{lstlisting}[language=pspice, caption={Script Transiente de Start-Up}]
+* 1. CONDICAO INICIAL (FORCAR OFF)
+* Se M3/M4 sao PMOS, Gate=VDD mantem eles desligados.
+* Descubra o nome do no do gate no seu netlist (ex: N_Gate_PMOS)
+.ic V(N_Gate_PMOS)=3.3V
+
+* 2. SIMULACAO TRANSIENTE
+* Simula por 100us para dar tempo de estabilizar
+.tran 1u 100u 0 1u
+
+.probe tran IS(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote \texttt{IS(vout\_s)}.
+    \item \textbf{Cenário Correto:} A corrente começa em 0A, dá um salto abrupto e estabiliza no valor nominal ($3\mu A$) em poucos microsegundos.
+    \item \textbf{Cenário de Falha:} A corrente permanece em 0A indefinidamente.
+    \item \textit{Correção:} Se falhar, adicione um circuito de start-up (transistor diodo ou divisor resistivo) para injetar uma pequena corrente inicial.
+\end{enumerate}
+
+
+
+\subsubsection{Análise de Frequência (PSRR)}
+O PSRR (\textit{Power Supply Rejection Ratio}) mede o quanto ruídos na linha $V_{DD}$ "vazam" para a saída de corrente.
+
+\begin{lstlisting}[language=pspice, caption={Script AC para PSRR}]
+* 1. FONTE VDD COM RUIDO AC
+* DC=3.3V (ponto de operacao), AC=1V (estimulo para analise)
+Vdd VDD 0 DC 3.3V AC 1.0
+
+* 2. SIMULACAO AC
+* Varredura logaritmica de 1kHz a 100MHz
+.AC DEC 10 1K 100MEG
+
+* 3. MEDICAO
+* Como Vin_AC = 1V, Iout_AC ja representa o ganho
+.probe AC I(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote a magnitude de \texttt{I(vout\_s)}.
+    \item Converta para dB: Clique direito na escala Y $\rightarrow$ Logarithmic ou use a calculadora de onda \texttt{20*log10(...)}.
+    \item Valores baixos (ex: -60dB ou nA) indicam boa rejeição. O PSRR costuma piorar (subir) em altas frequências.
+\end{enumerate}
+
+\newpage
+
+\subsection[\textcolor{red}{Exemplos Práticos de Provas}]{\textcolor{red}{Exemplos Práticos de Provas}}
+
+\subsubsection[\textcolor{red}{Prova 2024 Q8/Q9: Fonte de $3\mu A$ (Projeto e Validação)}]{\textcolor{red}{Prova 2024 Q8/Q9: Fonte de $3\mu A$ (Projeto e Validação)}}
+
+\textbf{Objetivo:} Projetar uma Fonte de Corrente Autorreferenciada (Topologia Beta Multiplier) que forneça $3\mu A$ estáveis com $V_{DD}=3.3V$.
+\textbf{Requisitos:} Transistores PMOS em Forte Inversão (para economizar área/headroom) e validação de Start-up.
+
+\textbf{1. Dimensionamento (Cálculo dos Componentes)}
+
+Antes de ir para o Mentor Graphics, você deve definir $W/L$ e $R$. Use o script Python (Seção 7.1.2) com os seguintes ajustes:
+
+\begin{itemize}
+    \item \textbf{Corrente Alvo:} \texttt{Is = 3.0e-6}
+    \item \textbf{Tensão:} \texttt{Vdd = 3.3}
+    \item \textbf{Headroom PMOS:} Como pede Forte Inversão, assuma $V_{ov} \approx 0.2V$ a $0.3V$.
+    \item \textbf{Multiplicador:} Escolha $M=4$ ou $M=8$ (facilitam o layout em centroide).
+\end{itemize}
+
+\textit{Exemplo de Resultado Típico (M=8):}
+\begin{itemize}
+    \item $R \approx 21.6 k\Omega$.
+    \item $W/L_{NMOS} \approx 70$ (Grande, para garantir Fraca Inversão).
+    \item $W/L_{PMOS} \approx 2$ a $5$ (Pequeno, para garantir Forte Inversão).
+\end{itemize}
+
+
+
+\textbf{2. O Script de Simulação Unificado (.cir)}
+
+Este script realiza duas análises essenciais: **DC** (para verificar a estabilidade da corrente em relação ao VDD) e **Transiente** (para verificar se o circuito liga).
+
+\begin{lstlisting}[language=pspice, caption={Script de Validação da Fonte de Corrente}]
+* 
+* 1. INCLUDES
+* O netlist deve conter o circuito Beta Multiplier + Resistor
+.include "minha_fonte.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+* Modelo do resistor (se usar rpolyh)
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* 2. FONTES
+* VDD nominal e VSS
+Vdd VDD 0 DC 3.3V
+Vss VSS 0 0
+* Fonte Dummy na saida para medir a corrente copiada (se houver espelho de saida)
+Vout_meas OUT 0 1.65V
+
+* 3. ANALISE 1: SWEEP DC (LINE REGULATION)
+* Verifica se a corrente estabiliza em 3uA ao variar VDD
+* Descomente a linha abaixo para rodar esta analise
+* .DC Vdd 0 4 0.01
+
+* 4. ANALISE 2: TRANSIENTE DE START-UP (CRITICO)
+* O Beta Multiplier tem dois pontos de operacao: 3uA (Desejado) e 0A (Indesejado).
+* Precisamos forcar o circuito para 0A no inicio para ver se ele "acorda".
+
+* Condicao Inicial (.IC):
+* Forcamos o Gate dos PMOS para 3.3V (Vgs=0 -> Desligado)
+* Descubra o nome do no do gate no seu netlist (ex: N_Gate_PMOS_1)
+.ic V(N_Gate_PMOS_1)=3.3V
+
+* Simula por 50us para ver a estabilizacao
+.tran 0 50u 0 10n
+
+* 5. MEDICOES
+.probe DC I(Vout_meas)
+.probe tran I(Vout_meas) V(N_Gate_PMOS_1)
+\end{lstlisting}
+
+\textbf{3. Análise no EZWave e Circuito de Start-up}
+
+\begin{enumerate}
+    \item \textbf{Verificação DC (Line Regulation):}
+    \begin{itemize}
+        \item A curva de corrente deve subir e ficar "plana" em $3\mu A$ quando $V_{DD} > 1.5V$.
+        \item Se a corrente continuar subindo (efeito Early), aumente o $L$ dos transistores de saída.
+    \end{itemize}
+
+    \item \textbf{Verificação de Start-up (Transiente):}
+    \begin{itemize}
+        \item Plote a corrente.
+        \item \textbf{Cenário A (Sucesso):} A corrente começa em 0, dá um "salto" abrupto em poucos $\mu s$ e estabiliza em $3\mu A$. O circuito é robusto.
+        \item \textbf{Cenário B (Falha - Ponto Morto):} A corrente permanece em $0A$ (ou picos de ruído femto-ampere) durante toda a simulação.
+    \end{itemize}
+
+    \item \textbf{Como corrigir a Falha (Cenário B):}
+    \begin{itemize}
+        \item Se o gráfico ficar em 0A, você deve desenhar um **Circuito de Start-up** no Mentor.
+        \item \textbf{Solução Simples:} Adicione um transistor NMOS "vazando" corrente.
+        \begin{itemize}
+            \item Dreno: Ligado ao Gate dos NMOS (ou nó interno da fonte).
+            \item Gate: Ligado ao VDD.
+            \item Source: Ligado ao VSS.
+            \item Dimensionamento: Use um $L$ muito grande (ex: $W=1\mu m, L=20\mu m$) para que ele funcione como um resistor de valor altíssimo, injetando apenas uma corrente minúscula ("leakage") para tirar o circuito do zero, mas sem afetar a precisão de $3\mu A$.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{Dica de Prova:} Se a questão pedir para "mostrar a necessidade do start-up", rode a simulação com `.ic` \textbf{sem} o circuito de start-up primeiro, tire o print do gráfico em 0A (falha), e depois adicione o circuito e mostre o gráfico funcionando.
+
+\newpage
+
+
+\subsubsection[\textcolor{red}{Prova 2016b Q9/Q10: Fonte de $0.7\mu A$ (Baixa Potência e Start-up)}]{\textcolor{red}{Prova 2016b Q9/Q10: Fonte de $0.7\mu A$ (Baixa Potência e Start-up)}}
+
+\textbf{Objetivo:} Projetar uma fonte de corrente de referência de apenas $0.7\mu A$ com tensão de alimentação reduzida ($V_{DD}=2.6V$).
+\textbf{Desafios:} O valor alto do resistor necessário, a dependência com a temperatura (PTAT) e a tendência do circuito travar no estado desligado (Start-up).
+
+\textbf{1. Dimensionamento e Cuidados Especiais}
+
+\begin{itemize}
+    \item \textbf{Resistor Elevado:} Para gerar uma corrente tão baixa ($0.7\mu A$), a lei de Ohm ($V=IR$) exige um resistor grande.
+    \item \textbf{Cálculo Rápido:} Usando o script Python com $I_s = 0.7e-6$ e $M=8$, você encontrará um resistor $R \approx 80k\Omega$ a $100k\Omega$.
+    \item \textbf{Dica de Layout:} No esquemático/layout, é obrigatório usar o resistor de alta resistividade (\texttt{rpolyh}) para economizar área, e dobrá-lo ("snake pattern").
+\end{itemize}
+
+
+
+\textbf{2. O Script de Simulação (Temperatura e Start-up)}
+
+Este script está configurado para atender aos dois pedidos da prova: mostrar o comportamento com a temperatura e falhar propositalmente o start-up.
+
+\begin{lstlisting}[language=pspice, caption={Script de Análise de Temperatura e Start-up (2016b)}]
+* 
+* 1. INCLUDES
+.include "minha_fonte_07uA.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* 2. ALIMENTACAO (BAIXA TENSAO)
+* Enunciado especifica 2.6V
+.Param VDD_VAL = 2.6V
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. ANALISE A: COMPORTAMENTO COM TEMPERATURA (Q9)
+* O Beta Multiplier eh naturalmente PTAT (Proporcional a Temp).
+* A corrente DEVE aumentar com a temperatura.
+* Descomente a linha abaixo para gerar este grafico:
+* .DC TEMP -20 100 1
+
+* 4. ANALISE B: PROVA DE NECESSIDADE DE START-UP (Q10)
+* Para provar que o circuito *precisa* de ajuda, vamos força-lo
+* a ficar desligado no t=0. Se ele for robusto, ele acorda.
+* Se ele for dependente, ele fica morto (0A).
+
+* Condicao Inicial (.IC):
+* Forca o Gate do PMOS para 2.6V (Vgs=0 -> PMOS OFF)
+* E forca o Gate do NMOS para 0V (Vgs=0 -> NMOS OFF)
+* Substitua pelos nomes reais dos nos do seu netlist
+.ic V(N_Gate_PMOS)=2.6V V(N_Gate_NMOS)=0V
+
+* Simula o transiente
+.tran 0 100u 0 10n
+
+* 5. MEDICOES
+* Monitoramos a corrente de uma fonte dummy ou do proprio VDD
+.probe DC I(Vdd)
+.probe tran I(Vdd) V(N_Gate_PMOS)
+\end{lstlisting}
+
+\textbf{3. Passo a Passo da Análise (EZWave)}
+
+\textbf{Parte A: Estabilidade com Temperatura (Questão 9)}
+\begin{enumerate}
+    \item Rode o \texttt{.DC TEMP}.
+    \item Plote a corrente de saída.
+    \item \textbf{Resultado Esperado:} Uma reta com inclinação positiva (a corrente sobe conforme esquenta).
+    \item \textbf{Justificativa na Prova:} "O circuito apresenta comportamento PTAT (Proportional To Absolute Temperature), pois $I_{ref} \propto V_T/R$ e a tensão térmica $V_T = kT/q$ aumenta linearmente com T. Isso é desejável para compensar referências de tensão, mas mostra que a corrente não é constante com a temperatura."
+\end{enumerate}
+
+\textbf{Parte B: O "Show" do Start-up (Questão 10)}
+A prova pede para \textit{"mostrar que há necessidade"}. Isso se faz em dois tempos:
+
+\begin{enumerate}
+    \item \textbf{Passo 1: A Falha (Sem Circuito de Start-up)}
+    \begin{itemize}
+        \item Desenhe a fonte básica (apenas o núcleo Beta Multiplier).
+        \item Rode o script Transiente com o comando \texttt{.ic}.
+        \item \textbf{Gráfico:} A corrente ficará travada em $0A$ (ou ruído de fA) por todos os $100\mu s$.
+        \item \textbf{Ação:} Tire um print e escreva: "Com condições iniciais desfavoráveis, o circuito possui um ponto de operação estável em corrente zero, provando a necessidade de um circuito de partida."
+    \end{itemize}
+
+    \item \textbf{Passo 2: A Solução (Com Circuito de Start-up)}
+    \begin{itemize}
+        \item Adicione o circuito de start-up no esquemático.
+        \item \textbf{Sugestão Simples:} Um divisor resistivo (ou dois transistores diodo invertidos) que injeta uma tensão no gate do NMOS apenas quando a fonte está desligada.
+        \item Rode a mesma simulação (mantendo o \texttt{.ic}).
+        \item \textbf{Gráfico:} A corrente começa em 0, mas o circuito de start-up "vence" a condição inicial e a corrente salta para $0.7\mu A$.
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{Dica de Ouro:} Se você não quiser desenhar um circuito complexo de start-up na hora, use o "Start-up via Leakage": Coloque um transistor NMOS muito comprido ($W=0.5u, L=50u$) com Gate em VDD, Source em VSS e Dreno no nó do Gate dos NMOS da fonte. Ele age como um resistor gigante injetando uma corrente minúscula que é suficiente para "acordar" a fonte na simulação.
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2022a Q9: Otimização de Resistor (Trimming via Sweep)}]{\textcolor{red}{Prova 2022a Q9: Otimização de Resistor (Trimming via Sweep)}}
+
+\textbf{Objetivo:} Projetar uma fonte de corrente precisa de $0.7\mu A$ ($V_{DD}=3.0V$).
+
+\textbf{Problema:} Os cálculos teóricos (Python) usam modelos simplificados. Na simulação com modelos reais (BSIM3/4), um resistor calculado teoricamente como $80k\Omega$ pode resultar em uma corrente de $0.62\mu A$ ou $0.75\mu A$.
+
+\textbf{Solução:} Em vez de "chutar" valores manualmente, faremos uma varredura (Sweep) no valor do resistor para encontrar o ponto exato.
+
+\textbf{1. Preparação do Netlist para Otimização}
+
+O segredo é definir o valor do resistor como um **parâmetro** (`.PARAM`) e não como um número fixo.
+
+\begin{lstlisting}[language=pspice, caption={Script de Otimização de Resistor (Sweep Paramétrico)}]
+* 
+* 1. INCLUDES
+.include "minha_fonte.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+* Incluir modelo de resistor se necessario
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* 2. DEFINICAO DE PARAMETRO (VARIAVEL)
+* Chute inicial calculado pelo Python (ex: 80k)
+.Param R_TRIM = 80k
+
+* 3. COMPONENTE COM VALOR VARIAVEL
+* Aqui reside o truque: Se o resistor R1 estiver dentro do netlist PEX,
+* voce nao consegue mudar o valor dele facilmente aqui fora.
+* SOLUCAO: No esquematico, coloque o resistor com valor '{R_TRIM}' 
+* (entre chaves) ou edite o netlist manualmente para:
+* XR1 no_a no_b rpolyh R=R_TRIM
+
+* 4. FONTES
+Vdd VDD 0 DC 3.0V
+Vss VSS 0 0
+* Fonte Dummy para medir a corrente de saida
+Vout_meas OUT 0 1.5V
+
+* 5. SIMULACAO DE VARREDURA (.DC PARAM)
+* Vamos varrer o valor de R_TRIM em vez de varrer uma fonte de tensao.
+* Faixa: De 50k a 120k (uma margem segura ao redor do valor teorico)
+* Passo: 0.1k (100 ohms de precisao)
+
+.DC param R_TRIM 50k 120k 0.1k
+
+* 6. MEDICAO
+.probe DC I(Vout_meas)
+\end{lstlisting}
+
+\textbf{2. Procedimento de "Trimming" no EZWave}
+
+\begin{enumerate}
+    \item \textbf{Executar:} Rode a simulação.
+    \item \textbf{Análise do Gráfico:}
+    \begin{itemize}
+        \item O eixo X agora é a **Resistência ($k\Omega$)**.
+        \item O eixo Y é a **Corrente ($A$)**.
+        \item A curva será decrescente (quanto maior o resistor, menor a corrente).
+    \end{itemize}
+    \item \textbf{Encontrar o Valor Ideal:}
+    \begin{itemize}
+        \item Use a ferramenta **Cursor** ou **Measurement Tool**.
+        \item Mova o cursor até que o valor de Y seja exatamente \texttt{700.0nA} ($0.7\mu A$).
+        \item Leia o valor correspondente no eixo X (ex: $84.3 k\Omega$).
+    \end{itemize}
+    
+    
+
+    \item \textbf{Atualização do Projeto (Back-Annotation):}
+    \begin{itemize}
+        \item Volte ao **Design Architect** (Esquemático).
+        \item Selecione o resistor.
+        \item Altere a propriedade \texttt{R} para o valor encontrado (ex: $84.3k$).
+        \item Gere o netlist novamente e rode uma simulação simples (`.op` ou `.tran`) para confirmar que agora cravou em $0.7\mu A$.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Dica de Prova:} Escreva na folha: "Devido às não-linearidades dos modelos BSIM que não são capturadas pela equação quadrática simples, o valor teórico de $R$ resultou em um erro de corrente. Foi realizada uma análise paramétrica (.DC SWEEP) para ajustar o resistor para $84.3k\Omega$, garantindo $I_{out}=0.7\mu A$ com precisão." Isso demonstra domínio da ferramenta.
+\newpage
+
+\section{Comandos e Configurações Gerais}
+
+\subsection{Configuração do Ambiente}
+
+\subsubsection{Inicialização dos Ambientes}
+\begin{lstlisting}[language=bash, caption={Terminal 1 - Para ICStation (Mentor)}]
+cd /local/users/cad/
+source .cshrc-mentor
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption={Terminal 2 - Para ELDO (Anacad)}]
+cd /local/users/cad/
+source .cshrc-anacad
+\end{lstlisting}
+
+\textbf{Importante}: Executar em shells separados para evitar conflitos.
+
+\subsubsection{Criação e Acesso a Projetos}
+\begin{lstlisting}[language=bash]
+# Novo projeto
+ams_ics -project nome_projeto -t c35b4c3
+
+# Projeto existente (ex: ams_ics -p nome)
+ams_ics -p nome_projeto
+
+# Exemplo de prova
+ams_ics -p prova24brbtv -t -c35b4c3
+\end{lstlisting}
+
+\subsubsection{Diretórios de Trabalho}
+\begin{lstlisting}[language=bash, frame=none]
+# Diretorio padrao de trabalho
+cd /local/users/cad/workavdl
+
+# Estrutura de projetos
+nome_projeto.proj/
+|-- cell.lib/
+|   `-- default.group/
+|       |-- logic.views/ (Esquematicos, Simbolos)
+|       `-- layout.views/ (Layouts, pasta .cal com PEX)
+`-- ...
+\end{lstlisting}
+
+\subsection{Comandos de Terminal Essenciais}
+
+\subsubsection{Gerenciamento de Arquivos}
+\begin{lstlisting}[language=bash]
+# Criar arquivo de simulacao
+touch circuito.cir
+
+# Ver conteudo
+cat circuito.cir
+
+# Editar
+vim circuito.cir
+# ou
+nano circuito.cir
+
+# Copiar seguranca
+cp projeto.proj projeto_backup.proj
+\end{lstlisting}
+
+\subsubsection{Execução de Simulações}
+\begin{lstlisting}[language=bash]
+# Simulacao ELDO
+eldo circuito.cir
+
+# Abrir resultados
+ezwave circuito.wdb
+
+# Executar em background
+eldo circuito.cir > log.txt 2>&1 &
+\end{lstlisting}
+
+\subsubsection{Processamento de Imagens (Screenshots)}
+\begin{lstlisting}[language=bash]
+# Capturar a janela (mouse vira uma mira)
+xwd > layout.xwd
+
+# Converter para formato util (inverte e limpa)
+convert -white-threshold 1 -negate layout.xwd layout.tif
+convert -white-threshold 1 -negate layout.xwd layout.png
+\end{lstlisting}
+
+\subsection{Paths e Diretórios Importantes}
+
+\subsubsection{Modelos e Regras}
+\begin{lstlisting}[language=bash, frame=none]
+# Pasta de Modelos de transistores
+/local/tools/dkit/ams_3.70_mgc/eldo/c35/
+
+# Modelo Tipico (exemplo de arquivo)
+/local/tools/dkit/ams_3.70_mgc/eldo/c35/cmos53tm.mod
+
+#  Modelo de Resistor
+/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod
+
+# Regras Calibre
+/local/users/cad/work/rules/cac35b4rules_all.run
+/local/users/cad/Calibre_rules/cac35b4rules_all.run
+
+# Manuais
+/local/tools/dkit/ams_3.70_mgc/docs/ENG-182_rev2.pdf
+/local/tools/dkit/ams_3.70_mgc/docs/ENG-183_rev2.pdf
+/local/tools/mentor/shared/pdfdocs/eldo_ur.pdf
+\end{lstlisting}
+
+\subsubsection{Arquivos de Projeto}
+\begin{lstlisting}[language=bash, frame=none]
+# Netlists PEX (localizacao)
+/local/users/cad/work/<projeto>.proj/cell.lib/default.group/
+layout.views/<celula>/<celula>.cal/
+
+# ViewPoints (localizacao)
+/local/users/cad/work/<projeto>.proj/cell.lib/default.group/
+logic.views/<celula>/vpt_c35b4_device
+\end{lstlisting}
+
+\subsection{Configurações do ICStation}
+
+\subsubsection{Hotkeys e Softkeys}
+\begin{itemize}
+\item \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Enable} 
+\item \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Load} 
+\item \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Report} (ver hotkeys ativas) 
+\item \textbf{MGC $\rightarrow$ Setup $\rightarrow$ Show Softkeys} 
+\end{itemize}
+
+\subsubsection{Configurações de Grid}
+\begin{itemize}
+\item \textbf{Other $\rightarrow$ Window $\rightarrow$ Set Grid} 
+\item \textbf{X = 0.025}, \textbf{Y = 0.025} 
+\item \textbf{Minor = 0.1}, \textbf{Major = 1} 
+\end{itemize}
+
+\subsubsection{Camadas e Visualização}
+\begin{itemize}
+\item \textbf{Other $\rightarrow$ Layers $\rightarrow$ Show layer palette $\rightarrow$ Append $\rightarrow$ all} 
+\item \textbf{View $\rightarrow$ Visible Layers} (configurar visibilidade) 
+\item \textbf{Setup $\rightarrow$ Select Filter $\rightarrow$ Properties} (para selecionar textos) 
+\end{itemize}
+
+\subsubsection{Reserva de Células}
+\begin{itemize}
+\item \textbf{Verificar status}: "Context: nome\_celula(GE-R-0)" = Não reservado 
+\item \textbf{Reservar}: \textbf{File $\rightarrow$ Cell $\rightarrow$ Reserve $\rightarrow$ Current Context} 
+\item \textbf{Liberar}: \textbf{File $\rightarrow$ Cell $\rightarrow$ Unreserve}
+\end{itemize}
+
+\newpage
+
+\subsection{Configurações ELDO/SPICE}
+
+\subsubsection{ Sintaxe de Componentes (ELDO)}
+\begin{itemize}
+    \item \textbf{Transistor (MOSFET):} 
+    \begin{lstlisting}[language=pspice, frame=none]
+M<nome> <dreno> <gate> <source> <bulk> <modelo>
++ w=<width> l=<length>
++ Ad=<area_dreno> Pd=<perim_dreno>
++ As=<area_source> Ps=<perim_source>
+    \end{lstlisting}
+    \item \textbf{Resistor:} \texttt{R<nome> <no1> <no2> <valor>} 
+    \item \textbf{Capacitor:} \texttt{C<nome> <no1> <no2> <valor>} 
+    \item \textbf{Subcircuito:} \texttt{x<nome> <nos...> <nome\_modelo>} 
+    \item \textbf{Fonte de Tensão (V):} 
+    \begin{lstlisting}[language=pspice, frame=none]
+V<nome> <no+> <no-> <valor_dc>
+V<nome> <no+> <no-> PULSE(<v_min> <v_max> <delay> <t_rise> <t_fall> <t_pulse> <periodo>)
+V<nome> <no+> <no-> SIN(<offset> <amplitude> <freq> <delay> <amortec> <fase>)
+    \end{lstlisting}
+\end{itemize}
+
+\subsubsection{Parâmetros Comuns}
+\begin{lstlisting}[language=pspice]
+* Tensao de alimentacao
+.param VDD_value='3.3V'
+VDD VDD 0 DC VDD_value
+
+* Parametros de tempo e frequencia
+.param freq='10MEG'
+.param T='1/freq'
+
+* Capacitancia de carga
+.param Cload='50f'
+CL OUT 0 Cload
+\end{lstlisting}
+
+\subsubsection{Includes de Modelos}
+\begin{lstlisting}[language=pspice]
+* Modelos para diferentes condicoes
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP" * Worst Power
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWS" * Worst Speed
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD" * Typical
+
+* Modelos de resistor
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+\end{lstlisting}
+
+\subsubsection{Comandos de Análise e Medição}
+\begin{lstlisting}[language=pspice]
+* Ponto de Operacao DC
+.op
+
+* Analise DC (varredura)
+.DC <fonte> <inicio> <fim> <passo>
+
+* Analise transiente
+.tran <passo_print> <tempo_final> <tempo_inicial> <passo_max>
+
+* Analise com varredura (ex: varrer T)
+.tran 0 80n 0 0.01n sweep T 0.4n 0.6n 0.01n
+
+* Condicoes iniciais
+.ic V(no)=valor
+
+* Salvar formas de onda
+.probe DC V(no1) V(no2)
+.probe tran V(no1) I(Vfonte)
+
+* Medir tempos de propagacao (tphl/tplh)
+.meas tran <nome> trig V(<in>) val='VDD/2' fall=1 
++                  targ V(<out>) val='VDD/2' rise=1
+
+* Medir potencia media
+.meas tran <current> AVG I(Vdd) FROM=<inicio> TO=<fim>
+.meas tran <pot> param='<current> * VDD_value'
+\end{lstlisting}
+
+\subsubsection{ Dicas Críticas de Simulação (ELDO)}
+\begin{itemize}
+    \item \textbf{Primeira Linha:} Comente a primeira linha do arquivo \texttt{.cir} (título), pois ela pode não ser lida corretamente.
+    \item \textbf{Nomes de Modelo:} Use \texttt{MODN} e \texttt{MODP} (definidos por \texttt{.defmod}) ao invés de \texttt{NMOS4} e \texttt{PMOS4} no netlist, a menos que esteja incluindo os arquivos de modelo completos (como \texttt{cmos53tm.mod}).
+    \item \textbf{Netlist PEX:} Lembre-se de editar o netlist PEX para corrigir a linha \texttt{.subckt} e os nomes dos modelos.
+\end{itemize}
+
+\subsection{Scripts e Automação}
+
+\subsubsection{Script de Inicialização Rápida}
+\begin{lstlisting}[language=bash]
+#!/bin/csh
+# init_project.csh
+cd /local/users/cad/
+source .cshrc-mentor
+cd /local/users/cad/workavdl
+ams_ics -p $1
+\end{lstlisting}
+
+\subsubsection{Script de Simulação Automática}
+\begin{lstlisting}[language=bash]
+#!/bin/csh
+# run_simulation.csh
+cd /local/users/cad/
+source .cshrc-anacad
+cd /local/users/cad/workavdl/$1
+eldo circuito.cir
+ezwave circuito.wdb
+\end{lstlisting}
+
+\subsubsection{Comandos TCL para EZWave}
+\begin{lstlisting}[language=bash]
+# config_ezwave.tcl
+wave add V(IN) V(OUT)
+xaxis limit 0 100n
+yaxis limit -0.5 3.5
+cursor add
+cursor add
+\end{lstlisting}
+
+\subsection{Constantes e Parâmetros Técnicos}
+
+\subsubsection{Mobilidades e Constantes}
+\begin{itemize}
+\item $\mu_n = 370\ cm^2/V\cdot s$ 
+\item $\mu_p = 126\ cm^2/V\cdot s$ 
+\item $r = \mu_n/\mu_p \approx 2.94$
+\item $C_{ox} \approx 4.6\ fF/\mu m^2$ 
+\item $\epsilon_{ox} = 3.5 \times 10^{-13}\ F/cm$ 
+\item $t_{ox} = 7.6\ nm$ 
+\end{itemize}
+
+\subsubsection{Modelos de Transistores (Valores U0)}
+\begin{itemize}
+\item \textbf{Típico (tm)}:
+ \begin{itemize}
+ \item NMOS: U0 = 4.758e+02 
+ \item PMOS: U0 = 1.482e+02 
+ \item $r \approx 3.21$
+ \end{itemize}
+\item \textbf{Worst Case Power (wp)}:
+ \begin{itemize}
+ \item NMOS: U0 = 5.002e+02 
+ \item PMOS: U0 = 1.581e+02 
+ \item $r \approx 3.16$
+ \end{itemize}
+\item \textbf{Worst Case Speed (ws)}:
+ \begin{itemize}
+ \item NMOS: U0 = 4.671e+02 
+ \item PMOS: U0 = 1.314e+02 
+ \item $r \approx 3.55$
+ \end{itemize}
+\end{itemize}
+
+\subsubsection{Distâncias Críticas e Cálculos}
+\begin{itemize}
+\item \textbf{POLY-POLY}: 0.45 $\mu m$ 
+\item \textbf{RES-POLY}: 0.35 $\mu m$ 
+\item \textbf{DIFF-NTUB}: 1.2 $\mu m$ 
+\item \textbf{NTUB enclosure}: 1.2 $\mu m$ 
+\item \textbf{MET1 largura VDD/VSS}: 1.8 $\mu m$ (recomendado) 
+\item \textbf{ Área/Perímetro (AD/PD):} 
+    \begin{itemize}
+        \item $AD = 0.85 \times W$
+        \item $PD = W + (2 \times 0.85)$ (ou $PD = W + 1.7$)
+    \end{itemize}
+\end{itemize}
+
+\subsection{Solução de Problemas Comuns}
+
+\subsubsection{Problemas de ICStation}
+\begin{itemize}
+\item \textbf{Mouse comporta-se como Ctrl pressionado}:
+ \begin{itemize}
+ \item Solução: Pressione \textbf{Ctrl+Shift} e use as setas do teclado; isso deve normalizar .
+ \end{itemize}
+\item \textbf{ICStation Travado}:
+ \begin{itemize}
+ \item Causa: Clicar repetidamente no scroll do mouse.
+ \item Solução: Fechar e reabrir.
+ \end{itemize}
+\item \textbf{Células desaparecem da library}:
+ \begin{itemize}
+ \item Solução: Crie um novo projeto com o nome antigo e copie a pasta \texttt{default.group} do projeto antigo/backup para a nova pasta do projeto .
+ \end{itemize}
+\item \textbf{Não consegue colocar ports}:
+ \begin{itemize}
+ \item Solução: Tente \textbf{DLA Layout $\rightarrow$ Open}.
+ \end{itemize}
+\end{itemize}
+
+\subsubsection{Problemas de ELDO}
+\begin{itemize}
+\item \textbf{Erro de modelo não encontrado}:
+ \begin{itemize}
+ \item Verificar includes dos modelos.
+ \item Substituir \texttt{NMOS4/PMOS4} por \texttt{MODN/MODP} ou vice-versa.
+ \end{itemize}
+\item \textbf{Netlist PEX com erros}:
+ \begin{itemize}
+ \item Verificar conexões: \texttt{.connect VSS N\_VSS\_...} .
+ \item Corrigir resistores: \texttt{rR0} $\rightarrow$ \texttt{XR0}.
+ \item Remover parâmetro \texttt{AREA} de bipolares.
+ \end{itemize}
+\item \textbf{Simulação não converge}:
+ \begin{itemize}
+ \item Aumentar HMAX.
+ \item Adicionar \texttt{.ic} com condições iniciais.
+ \item Verificar fontes de alimentação.
+ \end{itemize}
+\end{itemize}
+
+\subsubsection{Problemas de Calibre}
+\begin{itemize}
+\item \textbf{Rules não carregam}:
+ \begin{itemize}
+ \item Verificar path completo do arquivo \texttt{.run}.
+ \item \textbf{Load} obrigatório após selecionar.
+ \end{itemize}
+\item \textbf{LVS não encontra schematic}:
+ \begin{itemize}
+ \item Verificar se ViewPoint foi criado .
+ \item Verificar path do \texttt{vpt\_c35b4\_device} .
+ \end{itemize}
+\item \textbf{Erros de port}:
+ \begin{itemize}
+ \item Executar \textbf{Add Text on Ports} novamente .
+ \item Verificar camada \texttt{M1NET} .
+ \end{itemize}
+\end{itemize}
+
+\subsection{Comandos de Debug e Verificação}
+
+\subsubsection{Verificação de Layout}
+\begin{lstlisting}[language=bash, frame=none]
+# Relatorio de camadas
+Report -> Layer -> Design Layers
+
+# Relatorio de selecao
+Report -> Selected
+
+# Tamanho da celula
+Report -> Windows
+\end{lstlisting}
+
+\subsubsection{Verificação de Hierarquia}
+\begin{itemize}
+\item \textbf{Context $\rightarrow$ Hierarchy $\rightarrow$ Peek $\rightarrow$ 2-4 levels} 
+\item \textbf{Edit $\rightarrow$ Flatten} (para desmontar célula) 
+\item \textbf{Objects $\rightarrow$ Make $\rightarrow$ Cell} (para definir célula) 
+\end{itemize}
+
+\subsubsection{Comandos de History}
+\begin{lstlisting}[language=bash]
+# Ver comandos recentes
+history
+
+# Reexecutar comando
+!numero
+
+# Encontrar arquivos
+find -name "*.cir"
+\end{lstlisting}
+
+\subsection{Fluxos de Trabalho Otimizados}
+
+\subsubsection{Fluxo Completo do Projeto}
+\begin{enumerate}
+\item \textbf{Terminal}: \texttt{source .cshrc-mentor} + \texttt{ams\_ics}
+\item \textbf{Schematic}: Criar e verificar esquemático
+\item \textbf{Symbol}: Gerar e configurar símbolo
+\item \textbf{ViewPoint}: Criar para netlist
+\item \textbf{Layout}: AutoInst + otimizacao + routing
+\item \textbf{DRC}: Verificar e corrigir erros
+\item \textbf{LVS}: Comparar com schematic
+\item \textbf{PEX}: Extrair parasitas
+\item \textbf{ELDO}: Preparar e executar simulacao
+\item \textbf{EZWave}: Analisar resultados
+\end{enumerate}
+
+\subsubsection{Fluxo Rapido para Modificacoes}
+\begin{enumerate}
+\item Modificar schematic
+\item Check schematic
+\item Atualizar layout (se necessario)
+\item Run DRC + LVS
+\item Run PEX
+\item Simular e analisar
+\end{enumerate}
+
+\subsection{Backup e Versionamento}
+
+\subsubsection{Estrategias de Backup}
+\begin{lstlisting}[language=bash]
+# Backup completo do projeto
+cp -r projeto.proj projeto_backup_date.proj
+
+# Backup incremental
+tar -czf projeto_$(date +%Y%m%d).tar.gz projeto.proj
+
+# Backup seletivo (apenas celulas importantes)
+cp -r projeto.proj/cell.lib/default.group/logic.views/celula_chave
+\end{lstlisting}
+
+\subsubsection{Controle de Versões Manual}
+\begin{itemize}
+\item \textbf{Nomear versões}: projeto\_v1, projeto\_v2, etc.
+\item \textbf{Documentar mudanças}: Arquivo CHANGES.txt
+\item \textbf{Backup antes de modificações grandes}
+\item \textbf{Testar cada versão} antes de prosseguir
+\end{itemize}
+
+\subsection{Dicas de Produtividade}
+
+\subsubsection{Atalhos e Boas Práticas}
+\begin{itemize}
+\item \textbf{Salvar frequentemente} em todas as ferramentas
+\item \textbf{Usar nomes descritivos} para células e sinais
+\item \textbf{Documentar} configurações importantes
+\item \textbf{Testar incrementalmente} cada parte do circuito
+\item \textbf{Manter organização} nos diretórios e arquivos
+\end{itemize}
+
+\subsubsection{Otimização de Performance}
+\begin{itemize}
+\item \textbf{Limitar complexidade} do layout quando possível
+\item \textbf{Usar extrações mais simples} (C+CC ao invés de R+C+CC) para debug
+\item \textbf{Fechar ferramentas} não utilizadas para liberar memória
+\item \textbf{Limitar número de sinais} no EZWave para melhor performance
+\end{itemize}
+
+\subsubsection{Workflow em Equipe}
+\begin{itemize}
+\item \textbf{Comunicar mudanças} em células compartilhadas
+\item \textbf{Reservar células} quando estiver trabalhando
+\item \textbf{Documentar interfaces} entre diferentes blocos
+\item \textbf{Manter padrões consistentes} de nomenclatura
+\end{itemize}
+
+\subsection{Comandos de Emergência}
+
+\subsubsection{Recuperação de Projeto}
+\begin{lstlisting}[language=bash]
+# Se cElulas desaparecerem 
+ams_ics -p projeto_copy -t c35b4c3
+# Copiar default.group do projeto antigo para o novo
+
+# Se arquivo corrompido
+cp backup/projeto_backup.proj ./
+\end{lstlisting}
+
+\subsubsection{Limpeza de Arquivos Temporários}
+\begin{lstlisting}[language=bash]
+# Limpar arquivos de simulaCAOo temporArios
+rm -f *.wdb *.log *.out *.err
+
+# Limpar netlists antigos
+rm -rf *.cal/
+\end{lstlisting}
+
+\subsubsection{Reinicialização de Ambiente}
+\begin{lstlisting}[language=bash]
+# Se problemas com variaveis de ambiente
+exit
+# Re-login e re-executar source commands
+\end{lstlisting}
+\newpage
+\newpage
+\section{Tópicos Específicos}
+
+\subsection{Células da CORELIB}
+
+\subsubsection{Células Disponíveis (Exemplos)}
+\begin{itemize}
+\item \textbf{inv0, inv1}: Inversores básicos.
+\item \textbf{df1, df3}: Flip-flops D.
+\item \textbf{dl1}: Latch D.
+\item \textbf{nand2, nand21, nand22, nand23}: Portas NAND .
+\item \textbf{nor2, nor21, nor23}: Portas NOR .
+\item \textbf{xor2}: Porta XOR.
+\item \textbf{and2}, \textbf{or2}.
+\end{itemize}
+
+\subsubsection{Uso no Schematic}
+\begin{enumerate}
+\item \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol} .
+\item \textbf{Biblioteca}: CORELIB.
+\item Selecionar célula desejada (ex: \texttt{df1}).
+\item Conectar conforme necessário.
+\item \textbf{Verificar}: Check Schematic (0 errors, 0 warnings).
+\end{enumerate}
+
+\subsubsection{Uso no Layout}
+\begin{itemize}
+\item \textbf{ICStudio $\rightarrow$ Library $\rightarrow$ CORELIB $\rightarrow$ célula}.
+\item Já inclui layout pré-validado (célula-padrão).
+\item \textbf{DRC/LVS}: Geralmente já verificado.
+\end{itemize}
+
+\subsection{Adição de PADs}
+
+\subsubsection{Procedimento Completo}
+\begin{enumerate}
+\item \textbf{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+\item \textbf{Biblioteca}: \textbf{IOLIB\_4M} .
+\item \textbf{Célula}: \textbf{g\_padonly} (último item).
+\item Colocar um PAD para VDD e um para VSS.
+\item \textbf{Conectar com shapes}: 
+ \begin{itemize}
+ \item Puxar shapes de metal dos PADs até os pontos de conexão.
+ \item \textbf{Grossura}: O mais grosso possível (reduzir se der erro DRC).
+ \item \textbf{Materiais}: Usar MET1 ou MET2.
+ \end{itemize}
+\item \textbf{Verificar DRC}: Corrigir erros de espaçamento.
+\end{enumerate}
+
+\subsubsection{Configuração de PADs}
+\begin{itemize}
+\item \textbf{Orientação}: Posicionar nas bordas do chip.
+\item \textbf{Alimentação}: PAD VDD e VSS devem ser robustos.
+\item \textbf{Sinais}: PADs para entradas/saídas importantes.
+\item \textbf{ESD}: Proteção geralmente incluída nos PADs.
+\end{itemize}
+
+\subsection{Criação de Hierarquia}
+
+\subsubsection{Hierarquia no Schematic}
+\begin{enumerate}
+\item Criar schematic de bloco inferior (ex: \texttt{inversor}).
+\item Gerar símbolo e configurar a propriedade \textbf{phy\_comp} (ver abaixo).
+\item No schematic superior: \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+\item Selecionar símbolo do bloco inferior (ex: \texttt{inversor}).
+\item Conectar ports e alimentação.
+\item \textbf{Check Schematic} (0 errors, 0 warnings).
+\end{enumerate}
+
+\subsubsection{ Ligação Símbolo-Layout (phy\_comp)}
+Esta é a etapa crucial que conecta o símbolo do esquemático ao seu layout físico.
+\begin{enumerate}
+    \item \textbf{Copiar Localização do Layout:}
+    \begin{itemize}
+        \item No \textbf{ICStation}, clique com o \textbf{botão direito} na \textit{view} do seu layout.
+        \item \textbf{Properties $\rightarrow$ Location}.
+        \item Copie o caminho exibido (ex: \texttt{\$minha\_lib/default.group/layout.views/inv}) .
+    \end{itemize}
+    \item \textbf{Adicionar Propriedade ao Símbolo:}
+    \begin{itemize}
+        \item Volte ao \textbf{Design Architect} e abra o \textbf{SÍMBOLO} (\texttt{File $\rightarrow$ Open $\rightarrow$ Symbol}).
+        \item \textbf{Comando:} \textbf{Add $\rightarrow$ Properties}.
+        \item \textbf{Property Name}: \texttt{phy\_comp}.
+        \item \textbf{Property Value}: Cole a \textbf{Location} copiada .
+    \end{itemize}
+    \item \textbf{Ajustar Texto e Verificar (A "Parte Mágica"):}
+    \begin{itemize}
+        \item \textbf{Setup $\rightarrow$ Select Filter $\rightarrow$ Properties} $\rightarrow$ OK .
+        \item Mude a altura do texto (ex: \textbf{Change Height $\rightarrow$ Specified $\rightarrow$ 0.2}) .
+        \item \textbf{File $\rightarrow$ Check Symbol} (1 warning é esperado) .
+        \item \textbf{File $\rightarrow$ Save Symbol}.
+        \item \textbf{File $\rightarrow$ Check Symbol} (Agora 0 warnings são esperados) .
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Hierarquia no Layout}
+\begin{enumerate}
+\item Criar layout do bloco inferior (com DRC/LVS limpos).
+\item No layout superior: \textbf{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+\item Selecionar célula do bloco inferior (que agora está ligada ao símbolo).
+\item Posicionar e conectar (usando \textbf{Place \& Route} para Standard Cells ou manualmente).
+\item \textbf{Verificar}: DRC e LVS hierárquicos.
+\end{enumerate}
+
+\subsubsection{Contexto Hierárquico}
+\begin{itemize}
+\item \textbf{Context $\rightarrow$ Hierarchy $\rightarrow$ Peek $\rightarrow$ N levels}: Ver "dentro" do layout do bloco.
+\item \textbf{Edit $\rightarrow$ Flatten}: Desmontar hierarquia (cuidado).
+\item \textbf{Objects $\rightarrow$ Make $\rightarrow$ Cell}: Criar célula a partir de shapes.
+\end{itemize}
+
+\subsection{Resistores em Poly}
+
+\subsubsection{Adição no Schematic}
+\begin{enumerate}
+\item \textbf{HIT-KIT Utilities $\rightarrow$ Devices $\rightarrow$ Resistors}.
+\item \textbf{rpolyh}: Resistor poly de alta resistividade.
+\item \textbf{Parâmetros}:
+ \begin{itemize}
+ \item \textbf{R}: Valor da resistência.
+ \item \textbf{L}: Comprimento (calculado automaticamente).
+ \item \textbf{W}: Largura.
+ \item \textbf{Bends}: Número de dobras (para layout compacto).
+ \end{itemize}
+\end{enumerate}
+
+\subsubsection{Layout de Resistores}
+\begin{itemize}
+\item \textbf{AutoInst}: Gera layout automaticamente.
+\item \textbf{Dobramento}: \textbf{Object $\rightarrow$ Change $\rightarrow$ Device $\rightarrow$ Bend}.
+\item \textbf{Distâncias}: Respeitar espaçamento POLY-RES (0.35$\mu$m).
+\item \textbf{Contatos}: Usar MET1 para conexões.
+\end{itemize}
+
+\subsubsection{Modelo ELDO}
+\begin{lstlisting}[language=pspice]
+* Incluir modelo de resistor
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* Instancia no PEX (vem como 'rR0', trocar para 'XR0')
+XR0 n1 n2 rpolyh r=1k
+\end{lstlisting}
+
+\subsection{Fontes de Corrente e Espelhos}
+
+\subsubsection{Implementação Básica}
+\begin{itemize}
+\item \textbf{Transistores em diodo}: Para referência.
+\item \textbf{Espelho simples}: Copiar corrente.
+\item \textbf{Espelho cascode} ou \textbf{Wilson}: Maior impedância de saída, melhor topologia para fontes de corrente (conforme Prova 2016b, Q9) .
+\item \textbf{Polarização}: Usar resistores ou divisores.
+\end{itemize}
+
+\subsubsection{Dimensionamento}
+\begin{itemize}
+\item \textbf{Corrente de referência}: Definida por resistor ou fonte.
+\item \textbf{Relação W/L}: Define razão de espelhamento.
+\item \textbf{Tensão Early}: Considerar para precisão.
+\item \textbf{Matching}: Transistores próximos no layout.
+\end{itemize}
+
+\subsubsection{Exemplo ELDO}
+\begin{lstlisting}[language=pspice]
+* Espelho de corrente simples 1:2
+Mref ref ref VSS VSS MODN w=10u l=1u
+Mout out ref VSS VSS MODN w=20u l=1u
+Iref VDD ref DC 100uA
+\end{lstlisting}
+
+\subsection{Circuitos C2MOS}
+
+\subsubsection{Características}
+\begin{itemize}
+\item \textbf{Latch dinâmico}: Mantém estado quando clock desabilitado.
+\item \textbf{Clock = Alto (3V)}: $M_{P1}$ e $M_{N1}$ estão conduzindo e o circuito se comporta como um inversor.
+\item \textbf{Clock = Baixo (0V)}: $M_{P1}$ e $M_{N1}$ estão cortados e a carga é mantida no capacitor de saída (ex: gate de outra porta).
+\item \textbf{Aplicações}: Registradores, pipelines.
+\end{itemize}
+
+\subsubsection{Implementação}
+\begin{itemize}
+\item \textbf{Transistores de passagem} (em série): $M_{P1}$ e $M_{N1}$ controlados pelo clock.
+\item \textbf{Inversor principal}: $M_{P2}$ e $M_{N2}$ controlados pela entrada \texttt{In}.
+\item \textbf{Bulk}: Conectar corretamente (PMOS em VDD, NMOS em VSS).
+\end{itemize}
+
+\subsubsection{Dimensionamento}
+\begin{itemize}
+\item \textbf{Transistores de passagem}: L mínimo para reduzir carga.
+\item \textbf{Inversor}: Dimensionar para tempos equivalentes (subida/descida).
+\item \textbf{Clock}: Considerar sobreposição (non-overlap).
+\end{itemize}
+
+\subsection{Osciladores em Anel}
+
+\subsubsection{Configuração Básica}
+\begin{itemize}
+\item \textbf{N estágios}: Número \textbf{ímpar} de inversores.
+\item \textbf{Frequência}: $f = \frac{1}{2 \cdot N \cdot t_{pd}}$ (onde $t_{pd}$ é o atraso médio do inversor).
+\item \textbf{Condição de oscilação}: Ganho > 1 por estágio.
+\item \textbf{Alimentação}: Estável para frequência constante.
+\end{itemize}
+
+\subsubsection{Implementação}
+\begin{itemize}
+\item \textbf{Célula básica}: Inversor ou porta CMOS (ex: NAND com uma entrada em VDD).
+\item \textbf{Controle de frequência}: Tensão de alimentação ou capacidades de carga.
+\item \textbf{Saída}: Usar um buffer para evitar que a carga de medição afete a oscilação.
+\end{itemize}
+
+\subsubsection{Simulação}
+\begin{itemize}
+\item \textbf{Condições iniciais}: \texttt{.ic} pode ser necessário para "chutar" a oscilação.
+\item \textbf{Tempo de simulação}: Múltiplos períodos.
+\item \textbf{Medição}: Período e frequência.
+\end{itemize}
+
+\subsection{Camadas Especiais}
+
+\subsubsection{HRES (High Resistance)}
+\begin{itemize}
+\item \textbf{Função}: Usada para construir resistores de polisilício.
+\item \textbf{Processo}: Define uma área que isola o \texttt{POLY1} e impede que ele seja dopado (aumentando sua resistividade) .
+\item \textbf{Uso}: Definir o corpo do resistor \texttt{rpolyh}.
+\item \textbf{DRC}: Verificar espaçamentos (ex: \texttt{RES-POLY}).
+\end{itemize}
+
+\subsubsection{NLDD e FIMP}
+\begin{itemize}
+\item \textbf{NLDD (N-Lightly Doped Drain)}: Reduz campos elétricos na junção dreno-bulk.
+\item \textbf{FIMP}: Implantação para ajuste fino de $V_{th}$ (Threshold Voltage).
+\item \textbf{Geração}: \textbf{HIT-Kit Utilities $\rightarrow$ Generated Layers} .
+\item \textbf{Verificação}: Rodar DRC novamente após a geração .
+\end{itemize}
+
+\subsubsection{ Camadas Físicas (Exemplos)}
+Os nomes das camadas no processo :
+\begin{itemize}
+    \item \textbf{ntub}: Poço N (Well) para PMOS.
+    \item \textbf{diff}: Região ativa (onde dreno/source são formados).
+    \item \textbf{nplus / pplus}: Implantações N+ e P+ para Dreno/Source.
+    \item \textbf{poly1}: Primeira camada de Polisilício (Gates).
+    \item \textbf{cont}: Contato entre \texttt{diff} ou \texttt{poly1} e \texttt{met1}.
+    \item \textbf{met1}: Primeira camada de Metal.
+    \item \textbf{via1}: Contato entre \texttt{met1} e \texttt{met2}.
+    \item \textbf{pad}: Abertura na passivação para contato externo (Bonding pad).
+\end{itemize}
+
+\subsection{Técnicas de Layout Avançadas}
+
+\subsubsection{Match de Transistores (Casamento)}
+Essencial para circuitos analógicos (espelhos de corrente, pares diferenciais).
+\begin{itemize}
+\item \textbf{Orientação comum}: Todos os transistores na mesma direção.
+\item \textbf{Proximidade}: Transistores pareados devem ser colocados próximos.
+\item \textbf{Interdigitação}: Alternar "dedos" de transistores (ex: A-B-A-B).
+\item \textbf{Comum centroid (Centro Comum)}: Layout simétrico ao redor de um ponto central.
+\end{itemize}
+
+\subsubsection{Redução de Parasitas}
+\begin{itemize}
+\item \textbf{Metais curtos}: Minimizar comprimento de interconexões.
+\item \textbf{Shielding}: Blindar sinais sensíveis (ex: analógicos) com linhas de VDD/VSS.
+\item \textbf{Vias múltiplas}: Usar várias vias para conexões de alta corrente (reduz R e melhora confiabilidade).
+\item \textbf{Orientação}: Evitar cruzamentos desnecessários; se inevitável, cruzar em camadas diferentes (ex: MET1 e MET2).
+\end{itemize}
+
+\subsubsection{Otimização de Área}
+\begin{itemize}
+\item \textbf{Merge agressivo}: Juntar drenos/sources sempre que possível .
+\item \textbf{Dobramento (Fold)}: Usar \texttt{fold} para transistores largos .
+\item \textbf{Compactação}: Mover blocos para o mais próximo possível (respeitando o DRC).
+\item \textbf{Roteamento inteligente}: Planejar o roteamento para minimizar a área de "fios".
+\end{itemize}
+
+\subsection{Fluxos Especiais}
+
+\subsubsection{Fluxo Standard Cells}
+\begin{enumerate}
+\item \textbf{Place \& Route $\rightarrow$ Autofp}.
+\item \textbf{Aspect Ratio}: 2 em Upper.
+\item \textbf{StdCell}: Selecionar área.
+\item \textbf{Route}: Configurar net classes para VDD/VSS (ex: 1.8$\mu$m) .
+\item \textbf{Verificação}: DRC e LVS hierárquico.
+\end{enumerate}
+
+\subsubsection{Fluxo com Células Personalizadas}
+\begin{enumerate}
+\item Criar células personalizadas (ex: porta lógica) com DRC/LVS limpos.
+\item Adicionar ao schematic superior como instâncias.
+\item Gerar layout hierárquico (os blocos aparecerão como caixas).
+\item Conectar as células com roteamento (manual ou automático).
+\item Verificação completa (DRC, LVS).
+\end{enumerate}
+
+\subsubsection{Fluxo Analógico-Digital}
+\begin{enumerate}
+\item \textbf{Blocos analógicos}: Layout manual com \textit{matching} (interdigitação, etc.).
+\item \textbf{Blocos digitais}: Standard cells ou auto place \& route.
+\item \textbf{Interface}: Cuidado com acoplamento de ruído digital para o analógico.
+\item \textbf{Alimentação}: Idealmente, separar VDD/VSS analógico e digital.
+\item \textbf{Verificação}: DRC, LVS e extração PEX completa.
+\end{enumerate}
+
+\subsection{Problemas Específicos e Soluções}
+
+\subsubsection{Latch-up}
+\begin{itemize}
+\item \textbf{Causa}: Acionamento de um SCR (tiristor) parasitário (PNPN) entre VDD e VSS, causando um curto-circuito.
+\item \textbf{Prevenção}:
+ \begin{itemize}
+ \item \textbf{Guard rings}: Anéis de proteção (N+ em poço N, P+ em substrato P) ao redor de blocos.
+ \item \textbf{Espaçamento}: Distância adequada entre NMOS (PTUB) e PMOS (NTUB).
+ \item \textbf{Substrate contacts}: Usar muitos contatos de poço (bulks) para "amarrar" o potencial do substrato ao VDD/VSS.
+ \end{itemize}
+\item \textbf{Verificação}: DRC para espaçamentos críticos (regra NTUB/PTUB).
+\end{itemize}
+
+\subsubsection{Electromigration}
+\begin{itemize}
+\item \textbf{Causa}: Corrente excessiva "empurra" os átomos de metal em trilhas finas, criando aberturas (falhas).
+\item \textbf{Prevenção}:
+ \begin{itemize}
+ \item \textbf{Largura de metal}: Usar trilhas largas para VDD/VSS (ex: 1.8$\mu$m) .
+ \item \textbf{Vias múltiplas}: Usar várias vias para conexões de alta corrente.
+ \end{itemize}
+\item \textbf{Verificação}: DRC verifica regras de largura mínima de metal (width rules).
+\end{itemize}
+
+\subsubsection{Cross-talk (Acoplamento)}
+\begin{itemize}
+\item \textbf{Causa}: Acoplamento capacitivo entre sinais (trilhas) adjacentes.
+\item \textbf{Prevenção}:
+ \begin{itemize}
+ \item \textbf{Shielding}: Blindar sinais sensíveis (ex: analógicos, clock) com linhas de VDD/VSS ao lado.
+ \item \textbf{Espaçamento}: Aumentar distância entre sinais críticos.
+ \item \textbf{Orientação}: Cruzar sinais em ângulos retos (usando camadas diferentes, ex: MET1 vs MET2).
+ \end{itemize}
+\item \textbf{Verificação}: PEX com extração \textbf{C+CC} (Capacitância de Acoplamento) .
+\end{itemize}
+
+\subsection{Exemplos de Células Complexas}
+
+\subsubsection{Flip-flop D Master-Slave}
+\begin{itemize}
+\item \textbf{Composição}: 2 latches (ex: C2MOS ou com realimentação) em série.
+\item \textbf{Clock}: Clocks $\phi$ e $\bar{\phi}$ (não sobrepostos) para evitar \textit{race conditions}.
+\item \textbf{Reset}: Pode ser assíncrono ou síncrono.
+\item \textbf{Layout}: Cuidado com o roteamento e distribuição do(s) sinal(is) de clock.
+\end{itemize}
+
+\subsubsection{Buffer de Potência (Driver)}
+\begin{itemize}
+\item \textbf{Função}: Dirigir cargas capacitivas grandes (ex: pinos de I/O, linhas de clock longas).
+\item \textbf{Estágios múltiplos}: Uma cadeia de inversores com W/L progressivamente maiores.
+\item \textbf{Dimensionamento}: Razão de "tapering" constante (fator 'f') entre os estágios.
+\item \textbf{Layout}: Transistores de saída muito largos (usando \textit{fold}) e múltiplas vias para VDD/VSS.
+\end{itemize}
+
+\subsubsection{Comparador Analógico}
+\begin{itemize}
+\item \textbf{Amplificador diferencial}: Estágio de entrada (alta impedância, rejeição de modo comum).
+\item \textbf{Estágio de ganho}: Amplificação do pequeno sinal de diferença.
+\item \textbf{Latch de saída}: Converte o sinal analógico amplificado em um sinal digital (0 ou 1).
+\item \textbf{Layout}: \textit{Matching} (casamento) é crítico no par diferencial de entrada.
+\end{itemize}
+
+\subsection{Técnicas de Verificação Avançada}
+
+\subsubsection{LVS com Células Personalizadas (Hierarquia)}
+\begin{itemize}
+\item \textbf{phy\_comp}: A propriedade é essencial. O LVS usará o layout apontado por \texttt{phy\_comp} em vez de procurar transistores dentro do símbolo .
+\item \textbf{Hierarquia}: Verificar todos os níveis (LVS hierárquico).
+\item \textbf{Interfaces}: Conferir se os ports (VDD, VSS, A, B) do bloco correspondem ao esquemático.
+\item \textbf{Problemas comuns}: Bulk não conectado dentro do bloco, ports trocados.
+\end{itemize}
+
+\subsubsection{ERC (Electrical Rule Checking)}
+O DRC moderno (Calibre) já inclui muitas verificações de ERC:
+\begin{itemize}
+\item \textbf{Gates flutuantes} (ex: erro \texttt{ILL\_FLOATING\_GATE\_ERC}).
+\item \textbf{Bulk connections} (ex: erro \texttt{NWELL TOO HOT}).
+\item \textbf{Short circuits} (curtos entre VDD e VSS).
+\item \textbf{Open circuits} (nets não conectados).
+\end{itemize}
+
+\subsubsection{Análise de Performance}
+\begin{itemize}
+\item \textbf{Atraso}: Extrair $t_{pd}$ (média de $t_{phl}$ e $t_{plh}$).
+\item \textbf{Potência}: Consumo estático (vazamento) e dinâmico ($C \cdot V^2 \cdot f$).
+\item \textbf{Margem de ruído}: Imunidade a interferências.
+\item \textbf{Temperatura}: Efeito na performance (simulação \texttt{.DC TEMP}).
+\end{itemize}
+
+\subsection{Scripts e Automação Avançada}
+
+\subsubsection{Batch DRC/LVS}
+\begin{lstlisting}[language=bash]
+# Script para verificacao em lote
+foreach cell (cell1 cell2 cell3)
+  calibre -drc $cell
+  calibre -lvs $cell
+end
+\end{lstlisting}
+
+\subsubsection{Extração Automática de Parâmetros}
+\begin{lstlisting}[language=bash]
+# Extrair W/L de todos os transistores
+grep "M.*MOD" schematic.netlist | awk '{print $8, $9}'
+\end{lstlisting}
+
+\subsubsection{Geração de Relatórios}
+\begin{lstlisting}[language=bash, frame=none]
+# (Exemplo de scripts hipoteticos)
+report_area.tcl
+report_performance.tcl
+\end{lstlisting}
+
+\subsection{Migração de Tecnologia}
+
+\subsubsection{Ajustes Necessários}
+\begin{itemize}
+\item \textbf{Regras de design}: Novas distâncias mínimas.
+\item \textbf{Modelos de transistor}: Novos parâmetros (ex: $V_{th}$, $C_{ox}$).
+\item \textbf{Capacitâncias}: Valores diferentes.
+\item \textbf{Resistências}: Novos valores de \textit{sheet resistance}.
+\end{itemize}
+
+\subsubsection{Procedimento}
+\begin{enumerate}
+\item \textbf{Revisar regras}: Novas regras DRC.
+\item \textbf{Ajustar dimensões}: W/L se necessário.
+\item \textbf{Re-rotear}: Se necessário para novas regras.
+\item \textbf{Re-verificar}: DRC, LVS, simulação.
+\end{enumerate}
+
+\subsection{Documentação e Manutenção}
+
+\subsubsection{Documentação de Células}
+\begin{itemize}
+\item \textbf{Esquemático}: Diagrama limpo e legível.
+\item \textbf{Símbolo}: Pins organizados logicamente.
+\item \textbf{Layout}: Com medidas críticas anotadas.
+\item \textbf{Performance}: Parâmetros extraídos (atrasos, potência).
+\end{itemize}
+
+\subsubsection{Versionamento}
+\begin{itemize}
+\item \textbf{Nomenclatura}: celula\_v1, celula\_v2.
+\item \textbf{Log de mudanças}: O que foi modificado e porquê.
+\item \textbf{Backup}: Versões estáveis arquivadas.
+\item \textbf{Testes}: Resultados de simulação documentados.
+\end{itemize}
+
+\subsubsection{Manutenção}
+\begin{itemize}
+\item \textbf{Atualização}: Ajustes para novas versões das ferramentas.
+\item \textbf{Otimização}: Melhorias contínuas de performance.
+\item \textbf{Bug fixes}: Correção de problemas identificados.
+\item \textbf{Documentação}: Manter documentação atualizada.
+\end{itemize}
+
+\end{document}
