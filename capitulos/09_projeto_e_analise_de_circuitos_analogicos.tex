@@ -1,0 +1,694 @@
+\section{Projeto e Análise de Circuitos Analógicos}
+
+
+Esta seção fundamenta as escolhas de topologia e dimensionamento para as fontes de corrente exigidas nas provas (2016b, 2022a, 2024).
+
+\subsection{Parte A: Fundamentos Teóricos de Dispositivos}
+
+\subsubsection{Transcondutância ($g_m$) e Regiões de Operação}
+A transcondutância ($g_m$) é a figura de mérito fundamental no projeto analógico, representando a variação da corrente de dreno em resposta à tensão de gate ($g_m = \frac{\partial I_D}{\partial V_{GS}}$). O comportamento muda drasticamente dependendo da região de inversão.
+
+\textbf{1. Forte Inversão (Strong Inversion)}
+Ocorre quando $V_{GS} > V_{TH}$. O transistor obedece à lei quadrática:
+\begin{equation}
+I_D = \frac{1}{2} \mu C_{ox} \frac{W}{L} (V_{GS} - V_{TH})^2 (1 + \lambda V_{DS})
+\end{equation}
+Derivando em relação a $V_{GS}$, obtemos:
+\begin{equation}
+g_m = \mu C_{ox} \frac{W}{L} (V_{GS} - V_{TH}) = \sqrt{2 \mu C_{ox} \frac{W}{L} I_D} = \frac{2I_D}{V_{OV}}
+\end{equation}
+\textbf{Consequência de Projeto:} Em forte inversão, para aumentar $g_m$, deve-se aumentar a largura $W$ ou a corrente $I_D$. É a região ideal para espelhos de saída onde se deseja minimizar a área e maximizar a excursão de tensão (swing), como exigido nos PMOS de saída da \textbf{Prova 2024}.
+
+\textbf{2. Fraca Inversão (Weak Inversion / Sub-threshold)}
+Ocorre quando $V_{GS} < V_{TH}$. A corrente é dominada por difusão (similar a um BJT) e segue uma relação exponencial:
+\begin{equation}
+I_D \approx I_{D0} \cdot e^{\frac{V_{GS}}{n U_T}} \cdot \left( 1 - e^{\frac{-V_{DS}}{U_T}} \right)
+\end{equation}
+Onde $U_T = \frac{kT}{q} \approx 26mV$ (a 300K) e $n$ é o fator de inclinação de sub-limiar ($n \approx 1.2$ a $1.5$).
+Derivando $I_D$ em relação a $V_{GS}$:
+\begin{equation}
+g_m = \frac{\partial}{\partial V_{GS}} \left( I_{D0} e^{\frac{V_{GS}}{n U_T}} \right) = \frac{I_D}{n U_T}
+\end{equation}
+\textbf{Consequência Crítica para Fontes PTAT:}
+\begin{itemize}
+    \item A transcondutância \textbf{independe da geometria ($W/L$)}.
+    \item A relação $g_m/I_D$ é máxima (máxima eficiência de corrente).
+    \item A diferença de tensão $V_{GS}$ entre dois transistores com densidades de corrente diferentes ($J = I_D/W$) é linear com a temperatura ($T$), base para o princípio PTAT.
+\end{itemize}
+
+
+
+\subsubsection{Espelhos de Corrente e Impedância de Saída}
+Uma fonte de corrente ideal possui impedância de saída infinita ($I_{out}$ constante independente de $V_{out}$).
+
+\textbf{Espelho Simples:}
+A impedância de saída é dominada pela modulação de comprimento de canal ($\lambda$):
+\begin{equation}
+r_o = \frac{1}{\lambda I_D} \approx \frac{V_A L}{I_D}
+\end{equation}
+Para aumentar $r_o$, devemos usar transistores com $L$ longo (ex: $L > 1\mu m$), como feito no dimensionamento do espelho de saída.
+
+\textbf{Espelho Cascode / Wilson:}
+Utiliza realimentação para aumentar a impedância efetiva.
+\begin{equation}
+R_{out} \approx g_m r_o^2
+\end{equation}
+O ganho intrínseco ($g_m r_o$) multiplica a impedância, tornando a fonte muito mais estável frente a variações de $V_{DD}$ (melhor \textit{Line Regulation}).
+
+\newpage
+
+\subsection{Parte B: Teoria e Projeto da Fonte PTAT}
+A fonte de corrente projetada nas provas (2016b, 2024) utiliza a topologia de auto-polarização (\textit{Beta-multiplier} ou similar) operando em fraca inversão.
+
+\subsubsection{Dedução da Fórmula de Projeto}
+O circuito força uma diferença de tensão $\Delta V_{GS}$ sobre um resistor $R$.
+
+1. Considere dois transistores NMOS $M_1$ e $M_2$ operando em fraca inversão, onde $M_2$ é $K$ vezes mais largo que $M_1$ (ou o espelho superior força correntes desiguais).
+
+2. As equações de tensão Gate-Source são:
+$$ V_{GS1} = n U_T \ln\left(\frac{I_{D1}}{I_{D0} (W/L)_1}\right) $$
+$$ V_{GS2} = n U_T \ln\left(\frac{I_{D2}}{I_{D0} (W/L)_2}\right) $$
+
+3. Pela malha do circuito (KVL), a tensão sobre o resistor $R$ é a diferença entre os $V_{GS}$:
+$$ V_R = V_{GS1} - V_{GS2} = \Delta V_{GS} $$
+
+4. Substituindo as equações logarítmicas e assumindo $I_{D1} = I_{D2} = I_{REF}$ (copiados pelo espelho PMOS):
+$$ V_R = n U_T \ln\left( \frac{I_{REF}}{I_{D0} (W/L)_1} \right) - n U_T \ln\left( \frac{I_{REF}}{I_{D0} (W/L)_2} \right) $$
+$$ V_R = n U_T \ln\left( \frac{(W/L)_2}{(W/L)_1} \right) $$
+
+5. Definindo o fator de multiplicidade $M = \frac{(W/L)_2}{(W/L)_1}$:
+$$ I_{REF} \cdot R = n U_T \ln(M) $$
+
+\textbf{Equação Final de Projeto (PTAT):}
+\begin{equation}
+I_{REF} = \frac{n \cdot U_T \cdot \ln(M)}{R}
+\end{equation}
+
+\textbf{Por que é PTAT?}
+Como $U_T = \frac{kT}{q}$, a corrente $I_{REF}$ é diretamente proporcional à Temperatura absoluta $T$.
+$$ I_{REF} \propto T $$
+Isso é essencial para compensar o coeficiente negativo ($V_{BE}$) em referências de Bandgap.
+
+\subsubsection{Análise de Simetria do Esquemático ($M4_a$ e $M4_b$)}
+
+Observando o diagrama esquemático (Figura \ref{fig:fonte_esquematico}) e a Tabela \ref{tab:dimensoes_q11_final}, nota-se a divisão do transistor de carga PMOS em duas unidades ($M4_a$ e $M4_b$ ou M41/M42 na imagem). Esta escolha de projeto é fundamentada em três pilares críticos para circuitos analógicos de precisão:
+
+\begin{enumerate}
+    \item \textbf{Garantia de Espelhamento (Matching 1:1):}
+    A dedução matemática da fonte PTAT assume que a corrente no ramo esquerdo é \textbf{exatamente igual} à corrente no ramo direito ($I_{D1} = I_{D2}$). Qualquer erro nessa cópia introduz um erro logarítmico na tensão de saída. Ao desenhar o layout, dividir o transistor $M4$ em duas metades idênticas ($M4_a$ e $M4_b$) permite o uso de técnicas como \textit{Common Centroid} (Centro Comum), onde os transistores são interdigitados para cancelar gradientes térmicos e de processo.
+
+    \item \textbf{Comprimento de Canal Longo ($L=15\mu m$):}
+    Nota-se que os PMOS possuem $L=15\mu m$. Um canal longo aumenta drasticamente a resistência de saída ($r_o \propto L$), reduzindo o efeito de modulação de comprimento de canal ($\lambda$). Isso garante que $I_{D}$ permaneça constante mesmo se houver uma pequena diferença de $V_{DS}$ entre os ramos, melhorando o PSRR e a regulação de linha.
+
+    \item \textbf{Simetria Visual e Física:}
+    A estrutura simétrica mostrada no esquemático (Ramo Esquerdo vs. Ramo Direito) facilita a verificação visual de que as cargas são idênticas, o que é um pré-requisito para o funcionamento correto do \textit{Beta-multiplier}.
+\end{enumerate}
+
+\begin{table}[H]
+    \centering
+    \caption{Dimensões finais dos transistores otimizados para o projeto. Observe a simetria entre os blocos funcionais.}
+    \label{tab:dimensoes_q11_final}
+    % DICA: 'l' alinha a esquerda, 'c' centraliza, 'r' alinha a direita.
+    % Usamos booktabs (\toprule, \midrule) para visual profissional.
+    \begin{tabular}{l c c c l} 
+        \toprule
+        \textbf{Bloco Funcional} & \textbf{Transistor} & \textbf{W ($\mu$m)} & \textbf{L ($\mu$m)} & \textbf{Função no Circuito} \\ 
+        \midrule
+        
+        % --- BLOCO NMOS (Nucleo) ---
+        \multirow{4}{*}{\textbf{Núcleo NMOS}} 
+          & M1 & 95,0 & 1,0 & Gerador $\Delta V_{GS}$ (Lado esquerdo) \\
+          & M2 & 95,0 & 1,0 & Gerador $\Delta V_{GS}$ (Lado direito, $M \times W$) \\
+          & M6 & 95,0 & 1,0 & Cascode (Aumenta $R_{out}$) \\
+          & M7 & 95,0 & 1,0 & Cascode (Aumenta $R_{out}$) \\ 
+        
+        \midrule
+        
+        % --- BLOCO PMOS (Carga/Espelho) ---
+        \multirow{4}{*}{\textbf{Espelho PMOS}} 
+          & M3 & 9,0 & 15,0 & Parte do Espelho Wilson/Cascode \\
+          & M4$_a$ & 9,0 & 15,0 & Carga Ativa (Paralelo/Simetria) \\
+          & M4$_b$ & 9,0 & 15,0 & Carga Ativa (Paralelo/Simetria) \\
+          & M5 & 9,0 & 15,0 & Espelho de Saída \\ 
+          
+        \bottomrule
+    \end{tabular}
+    
+    % Nota de rodape da tabela para explicar o W/L efetivo
+    \vspace{0.2cm}
+    \small{\textit{Nota: A razão de aspecto efetiva para os NMOS é $W/L = 95$, garantindo operação em fraca inversão para correntes de $\mu A$.}}
+\end{table}
+
+\subsubsection{Script de Dimensionamento (Cálculo dos Componentes)}
+O script abaixo aplica as equações de inversão fraca (para o núcleo) e forte (para a saída) para determinar $W/L$.
+
+\begin{lstlisting}[language=python, caption={Script de Dimensionamento PTAT (Baseado na Teoria)}]
+import numpy as np
+import pandas as pd # Usaremos pandas apenas para visualização bonita, se não tiver, o print normal resolve
+
+# --- FUNÇÃO AUXILIAR: Ajuste para Grade de Layout ---
+def round_grid(val, grid=0.05):
+    """Arredonda para o múltiplo mais próximo da grade de fabricação (ex: 0.05um)"""
+    return np.round(val / grid) * grid
+
+# --- DADOS DE ENTRADA (QUESTÃO 9) ---
+Is = 3.00e-6       # 3.0 uA
+Vdd = 2.6          # Tensão de alimentação
+Vov_pmos = 0.5     # Headroom exigido (Vdd - Vout_max)
+
+# --- PARÂMETROS FÍSICOS (Do Technology File) ---
+Vt = 0.026
+n = 1.2
+un = 475.8; Coxn = 4.55e-7  # NMOS
+up = 148.2; Coxp = 4.55e-7  # PMOS
+
+# --- CÁLCULOS DE ALVO (TARGETS) ---
+
+# 1. PMOS (Saída): Forte Inversão, Saturado
+# I = 1/2 * up * Coxp * (W/L) * Vov^2  --> Isolando W/L:
+WL_pmos_target = (2 * Is) / (up * Coxp * (Vov_pmos**2))
+
+# 2. NMOS (Núcleo): Fraca Inversão
+# Para garantir fraca inversão, W/L tem que ser GRANDE para a densidade de corrente ser baixa.
+# Fator de segurança = 5x longe da inversão moderada
+WL_nmos_min_target = 5.0 * (Is / (un * Coxn * (n * Vt)**2))
+
+print(f"--- ALVOS DE PROJETO ---")
+print(f"Razão W/L PMOS necessária: {WL_pmos_target:.4f} (Para Vov=0.5V)")
+print(f"Razão W/L NMOS mínima:     {WL_nmos_min_target:.4f} (Para garantir Fraca Inversão)")
+print("-" * 60)
+
+# --- GERADOR DE CENÁRIOS INTELIGENTES ---
+
+# Lista de L (Comprimentos) sugeridos para teste. 
+# Em analógico, evitamos L mínimo. Usamos L maiores para ganhar impedância de saída (ro).
+L_choices = [1.0, 2.0, 4.0, 5.0] # em micrometros (um)
+M_choices = [4, 8] # Fatores de multiplicação do espelho (Inteiros pares facilitam centroide)
+
+scenarios = []
+
+for M in M_choices:
+    # Resistor depende apenas de M
+    R = (n * Vt * np.log(M)) / Is
+    R_kohm = R / 1000.0
+    
+    for L_val in L_choices:
+        L_microns = L_val
+        
+        # --- Dimensionamento PMOS ---
+        # W = Razão_Alvo * L
+        W_pmos_raw = WL_pmos_target * L_microns
+        W_pmos_final = round_grid(W_pmos_raw)
+        
+        # Check de sanidade: Se W ficar muito pequeno (< 0.22u), descartar ou avisar
+        if W_pmos_final < 0.22: 
+            note_p = "W muito pequeno (Viol. DRC)"
+        else:
+            note_p = "OK"
+
+        # --- Dimensionamento NMOS (Espelho 1:M) ---
+        # W_nmos = Razão_Minima * L
+        # O transistor M1 tem tamanho (W/L). O transistor M2 tem tamanho M*(W/L).
+        # Aqui calculamos o tamanho unitário base.
+        W_nmos_raw = WL_nmos_min_target * L_microns
+        W_nmos_final = round_grid(W_nmos_raw)
+        
+        # Adicionando ao relatório
+        scenarios.append({
+            "M (Fator)": int(M),
+            "R (kΩ)": round(R_kohm, 2),
+            "L (µm)": L_microns,
+            "PMOS W (µm)": W_pmos_final,
+            "NMOS W (µm)": W_nmos_final,
+            "Status PMOS": note_p
+        })
+
+# --- EXIBIÇÃO DOS RELATÓRIOS ---
+
+df = pd.DataFrame(scenarios)
+
+print("\n### RELATÓRIO 1: SELEÇÃO DE VALORES ###")
+print("Legenda: L é o comprimento do canal. W é a largura total.")
+print("Nota: O NMOS deve operar em fraca inversão, por isso o W é grande.")
+print("-" * 80)
+# Filtrando apenas colunas relevantes e imprimindo
+print(df.to_string(index=False))
+
+print("\n\n### RECOMENDAÇÃO 'PRONTA PARA A PROVA' ###")
+
+# Lógica de seleção automática do "Melhor" cenário
+# Critério: M=8 (Resistor maior, menos erro de processo) e L=2.0um (Bom matching sem ser gigante)
+best_choice = df[(df["M (Fator)"] == 8) & (df["L (µm)"] == 2.0)].iloc[0]
+
+print(f"Topologia: Beta Multiplier (NMOS em Fraca Inversão, PMOS em Forte Inversão)")
+print(f"Resistor Escolhido: {best_choice['R (kΩ)']} kΩ (Resultante de M={int(best_choice['M (Fator)'])} e Is=3uA)")
+print(f"Transistor PMOS (Saída): W = {best_choice['PMOS W (µm)']} µm / L = {best_choice['L (µm)']} µm")
+print(f"   -> Justificativa: Dimensionado para Vov = 0.5V (atendendo Vdd-0.5V).")
+print(f"Transistor NMOS (Núcleo): W = {best_choice['NMOS W (µm)']} µm / L = {best_choice['L (µm)']} µm")
+print(f"   -> Justificativa: W/L > {WL_nmos_min_target:.1f} para garantir operação em Fraca Inversão.")
+print(f"   -> Obs: O transistor M2 será composto por {int(best_choice['M (Fator)'])} dedos ou unidades deste tamanho.")
+\end{lstlisting}
+
+\begin{lstlisting}[language=c, caption={Script de Dimensionamento PTAT (Baseado na Teoria)}]
+--- ALVOS DE PROJETO ---
+Razão W/L PMOS necessária: 0.3559 (Para Vov=0.5V)
+Razão W/L NMOS mínima:     71.1781 (Para garantir Fraca Inversão)
+------------------------------------------------------------
+
+### RELATÓRIO 1: SELEÇÃO DE VALORES ###
+Legenda: L é o comprimento do canal. W é a largura total.
+Nota: O NMOS deve operar em fraca inversão, por isso o W é grande.
+--------------------------------------------------------------------------------
+ M (Fator)  R (kΩ)  L (µm)  PMOS W (µm)  NMOS W (µm) Status PMOS
+         4   14.42     1.0         0.35        71.20          OK
+         4   14.42     2.0         0.70       142.35          OK
+         4   14.42     4.0         1.40       284.70          OK
+         4   14.42     5.0         1.80       355.90          OK
+         8   21.63     1.0         0.35        71.20          OK
+         8   21.63     2.0         0.70       142.35          OK
+         8   21.63     4.0         1.40       284.70          OK
+         8   21.63     5.0         1.80       355.90          OK
+
+
+### RECOMENDAÇÃO 'PRONTA PARA A PROVA' ###
+Topologia: Beta Multiplier (NMOS em Fraca Inversão, PMOS em Forte Inversão)
+Resistor Escolhido: 21.63 kΩ (Resultante de M=8 e Is=3uA)
+Transistor PMOS (Saída): W = 0.7000000000000001 µm / L = 2.0 µm
+   -> Justificativa: Dimensionado para Vov = 0.5V (atendendo Vdd-0.5V).
+Transistor NMOS (Núcleo): W = 142.35 µm / L = 2.0 µm
+   -> Justificativa: W/L > 71.2 para garantir operação em Fraca Inversão.
+   -> Obs: O transistor M2 será composto por 8 dedos ou unidades deste tamanho.
+
+
+** Process exited - Return Code: 0 **
+
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+        \caption{Esquemático da fonte PTAT. O núcleo M1-M2 opera em fraca inversão para gerar $\Delta V_{GS}$.}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{fonte_esquematico.png}
+    \caption{Esquemático do circuito gerador de corrente reprojetado, com espelho de corrente de Wilson.}
+    \label{fig:fonte_esquematico}
+\end{figure}
+
+
+\newpage
+
+\subsection{Verificação e Simulação}
+Após desenhar o esquemático com os valores calculados, é obrigatório validar o circuito com simulações DC, Transiente e AC.
+
+\subsubsection{Verificação DC: Estabilidade (Line Regulation)}
+Verifica se a corrente de saída permanece constante (estável) mesmo com variações na tensão de alimentação ($V_{DD}$).
+
+\textbf{O que esperar:} A corrente deve subir rapidamente a partir de $\approx 1V$ e estabilizar num patamar plano (ex: $3\mu A$) até $V_{DD}$ máximo.
+
+\begin{lstlisting}[language=pspice, caption={Script DC para Regulação de Linha}]
+* 1. INCLUDES
+.include "fonte_corrente.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+
+* 2. FONTES
+vdd_s VDD 0 3.3V   * Valor nominal
+vss_s VSS 0 0V
+vout_s OUT 0 0V    * Fonte de 0V na saida para medir corrente
+
+* 3. SIMULACAO (SWEEP VDD)
+* Varre VDD de 0V ate 5V
+.DC vdd_s 0 5 0.01
+
+.probe DC IS(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote \texttt{IS(vout\_s)}.
+    \item Verifique se existe uma região "plana" (constante) em torno da tensão de operação ($3.3V$ ou $3.0V$).
+    \item Se a corrente continuar subindo linearmente (efeito Early), aumente o comprimento ($L$) dos transistores de saída ou use uma topologia cascode.
+\end{enumerate}
+
+
+
+\subsubsection{Verificação de Temperatura (PTAT)}
+Verifica se a corrente aumenta linearmente com a temperatura, requisito fundamental para compor referências Bandgap.
+
+\begin{lstlisting}[language=pspice, caption={Script DC para Temperatura}]
+* Varre Temperatura de -10C a 100C
+.DC TEMP -10 100 1
+
+.probe DC IS(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote \texttt{IS(vout\_s)}.
+    \item O gráfico deve ser uma reta com inclinação positiva.
+    \item Se for uma curva parabólica ou tiver inclinação negativa, verifique se os transistores NMOS estão realmente em fraca inversão (aumente $W$ se necessário).
+\end{enumerate}
+
+\newpage
+
+\subsubsection{Verificação de Start-Up (Transiente)}
+Fontes de auto-polarização possuem um ponto de equilíbrio estável onde $I = 0A$. O teste de start-up força o circuito para esse estado "morto" e verifica se ele consegue "acordar" sozinho.
+
+\textbf{Código Robusto:}
+Usamos o comando \texttt{.IC} (Initial Condition) para travar os nós internos em tensões que desligam os transistores.
+
+\begin{lstlisting}[language=pspice, caption={Script Transiente de Start-Up}]
+* 1. CONDICAO INICIAL (FORCAR OFF)
+* Se M3/M4 sao PMOS, Gate=VDD mantem eles desligados.
+* Descubra o nome do no do gate no seu netlist (ex: N_Gate_PMOS)
+.ic V(N_Gate_PMOS)=3.3V
+
+* 2. SIMULACAO TRANSIENTE
+* Simula por 100us para dar tempo de estabilizar
+.tran 1u 100u 0 1u
+
+.probe tran IS(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote \texttt{IS(vout\_s)}.
+    \item \textbf{Cenário Correto:} A corrente começa em 0A, dá um salto abrupto e estabiliza no valor nominal ($3\mu A$) em poucos microsegundos.
+    \item \textbf{Cenário de Falha:} A corrente permanece em 0A indefinidamente.
+    \item \textit{Correção:} Se falhar, adicione um circuito de start-up (transistor diodo ou divisor resistivo) para injetar uma pequena corrente inicial.
+\end{enumerate}
+
+
+
+\subsubsection{Análise de Frequência (PSRR)}
+O PSRR (\textit{Power Supply Rejection Ratio}) mede o quanto ruídos na linha $V_{DD}$ "vazam" para a saída de corrente.
+
+\begin{lstlisting}[language=pspice, caption={Script AC para PSRR}]
+* 1. FONTE VDD COM RUIDO AC
+* DC=3.3V (ponto de operacao), AC=1V (estimulo para analise)
+Vdd VDD 0 DC 3.3V AC 1.0
+
+* 2. SIMULACAO AC
+* Varredura logaritmica de 1kHz a 100MHz
+.AC DEC 10 1K 100MEG
+
+* 3. MEDICAO
+* Como Vin_AC = 1V, Iout_AC ja representa o ganho
+.probe AC I(vout_s)
+\end{lstlisting}
+
+\textbf{Análise no EZWave:}
+\begin{enumerate}
+    \item Plote a magnitude de \texttt{I(vout\_s)}.
+    \item Converta para dB: Clique direito na escala Y $\rightarrow$ Logarithmic ou use a calculadora de onda \texttt{20*log10(...)}.
+    \item Valores baixos (ex: -60dB ou nA) indicam boa rejeição. O PSRR costuma piorar (subir) em altas frequências.
+\end{enumerate}
+
+\newpage
+
+\subsection[\textcolor{red}{Exemplos Práticos de Provas}]{\textcolor{red}{Exemplos Práticos de Provas}}
+
+\subsubsection[\textcolor{red}{Prova 2024 Q8/Q9: Fonte de $3\mu A$ (Projeto e Validação)}]{\textcolor{red}{Prova 2024 Q8/Q9: Fonte de $3\mu A$ (Projeto e Validação)}}
+
+\textbf{Objetivo:} Projetar uma Fonte de Corrente Autorreferenciada (Topologia Beta Multiplier) que forneça $3\mu A$ estáveis com $V_{DD}=3.3V$.
+\textbf{Requisitos:} Transistores PMOS em Forte Inversão (para economizar área/headroom) e validação de Start-up.
+
+\textbf{1. Dimensionamento (Cálculo dos Componentes)}
+
+Antes de ir para o Mentor Graphics, você deve definir $W/L$ e $R$. Use o script Python (Seção 7.1.2) com os seguintes ajustes:
+
+\begin{itemize}
+    \item \textbf{Corrente Alvo:} \texttt{Is = 3.0e-6}
+    \item \textbf{Tensão:} \texttt{Vdd = 3.3}
+    \item \textbf{Headroom PMOS:} Como pede Forte Inversão, assuma $V_{ov} \approx 0.2V$ a $0.3V$.
+    \item \textbf{Multiplicador:} Escolha $M=4$ ou $M=8$ (facilitam o layout em centroide).
+\end{itemize}
+
+\textit{Exemplo de Resultado Típico (M=8):}
+\begin{itemize}
+    \item $R \approx 21.6 k\Omega$.
+    \item $W/L_{NMOS} \approx 70$ (Grande, para garantir Fraca Inversão).
+    \item $W/L_{PMOS} \approx 2$ a $5$ (Pequeno, para garantir Forte Inversão).
+\end{itemize}
+
+
+
+\textbf{2. O Script de Simulação Unificado (.cir)}
+
+Este script realiza duas análises essenciais: **DC** (para verificar a estabilidade da corrente em relação ao VDD) e **Transiente** (para verificar se o circuito liga).
+
+\begin{lstlisting}[language=pspice, caption={Script de Validação da Fonte de Corrente}]
+* 
+* 1. INCLUDES
+* O netlist deve conter o circuito Beta Multiplier + Resistor
+.include "minha_fonte.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+* Modelo do resistor (se usar rpolyh)
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* 2. FONTES
+* VDD nominal e VSS
+Vdd VDD 0 DC 3.3V
+Vss VSS 0 0
+* Fonte Dummy na saida para medir a corrente copiada (se houver espelho de saida)
+Vout_meas OUT 0 1.65V
+
+* 3. ANALISE 1: SWEEP DC (LINE REGULATION)
+* Verifica se a corrente estabiliza em 3uA ao variar VDD
+* Descomente a linha abaixo para rodar esta analise
+* .DC Vdd 0 4 0.01
+
+* 4. ANALISE 2: TRANSIENTE DE START-UP (CRITICO)
+* O Beta Multiplier tem dois pontos de operacao: 3uA (Desejado) e 0A (Indesejado).
+* Precisamos forcar o circuito para 0A no inicio para ver se ele "acorda".
+
+* Condicao Inicial (.IC):
+* Forcamos o Gate dos PMOS para 3.3V (Vgs=0 -> Desligado)
+* Descubra o nome do no do gate no seu netlist (ex: N_Gate_PMOS_1)
+.ic V(N_Gate_PMOS_1)=3.3V
+
+* Simula por 50us para ver a estabilizacao
+.tran 0 50u 0 10n
+
+* 5. MEDICOES
+.probe DC I(Vout_meas)
+.probe tran I(Vout_meas) V(N_Gate_PMOS_1)
+\end{lstlisting}
+
+\textbf{3. Análise no EZWave e Circuito de Start-up}
+
+\begin{enumerate}
+    \item \textbf{Verificação DC (Line Regulation):}
+    \begin{itemize}
+        \item A curva de corrente deve subir e ficar "plana" em $3\mu A$ quando $V_{DD} > 1.5V$.
+        \item Se a corrente continuar subindo (efeito Early), aumente o $L$ dos transistores de saída.
+    \end{itemize}
+
+    \item \textbf{Verificação de Start-up (Transiente):}
+    \begin{itemize}
+        \item Plote a corrente.
+        \item \textbf{Cenário A (Sucesso):} A corrente começa em 0, dá um "salto" abrupto em poucos $\mu s$ e estabiliza em $3\mu A$. O circuito é robusto.
+        \item \textbf{Cenário B (Falha - Ponto Morto):} A corrente permanece em $0A$ (ou picos de ruído femto-ampere) durante toda a simulação.
+    \end{itemize}
+
+    \item \textbf{Como corrigir a Falha (Cenário B):}
+    \begin{itemize}
+        \item Se o gráfico ficar em 0A, você deve desenhar um **Circuito de Start-up** no Mentor.
+        \item \textbf{Solução Simples:} Adicione um transistor NMOS "vazando" corrente.
+        \begin{itemize}
+            \item Dreno: Ligado ao Gate dos NMOS (ou nó interno da fonte).
+            \item Gate: Ligado ao VDD.
+            \item Source: Ligado ao VSS.
+            \item Dimensionamento: Use um $L$ muito grande (ex: $W=1\mu m, L=20\mu m$) para que ele funcione como um resistor de valor altíssimo, injetando apenas uma corrente minúscula ("leakage") para tirar o circuito do zero, mas sem afetar a precisão de $3\mu A$.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{Dica de Prova:} Se a questão pedir para "mostrar a necessidade do start-up", rode a simulação com `.ic` \textbf{sem} o circuito de start-up primeiro, tire o print do gráfico em 0A (falha), e depois adicione o circuito e mostre o gráfico funcionando.
+
+\newpage
+
+
+\subsubsection[\textcolor{red}{Prova 2016b Q9/Q10: Fonte de $0.7\mu A$ (Baixa Potência e Start-up)}]{\textcolor{red}{Prova 2016b Q9/Q10: Fonte de $0.7\mu A$ (Baixa Potência e Start-up)}}
+
+\textbf{Objetivo:} Projetar uma fonte de corrente de referência de apenas $0.7\mu A$ com tensão de alimentação reduzida ($V_{DD}=2.6V$).
+\textbf{Desafios:} O valor alto do resistor necessário, a dependência com a temperatura (PTAT) e a tendência do circuito travar no estado desligado (Start-up).
+
+\textbf{1. Dimensionamento e Cuidados Especiais}
+
+\begin{itemize}
+    \item \textbf{Resistor Elevado:} Para gerar uma corrente tão baixa ($0.7\mu A$), a lei de Ohm ($V=IR$) exige um resistor grande.
+    \item \textbf{Cálculo Rápido:} Usando o script Python com $I_s = 0.7e-6$ e $M=8$, você encontrará um resistor $R \approx 80k\Omega$ a $100k\Omega$.
+    \item \textbf{Dica de Layout:} No esquemático/layout, é obrigatório usar o resistor de alta resistividade (\texttt{rpolyh}) para economizar área, e dobrá-lo ("snake pattern").
+\end{itemize}
+
+
+
+\textbf{2. O Script de Simulação (Temperatura e Start-up)}
+
+Este script está configurado para atender aos dois pedidos da prova: mostrar o comportamento com a temperatura e falhar propositalmente o start-up.
+
+\begin{lstlisting}[language=pspice, caption={Script de Análise de Temperatura e Start-up (2016b)}]
+* 
+* 1. INCLUDES
+.include "minha_fonte_07uA.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* 2. ALIMENTACAO (BAIXA TENSAO)
+* Enunciado especifica 2.6V
+.Param VDD_VAL = 2.6V
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. ANALISE A: COMPORTAMENTO COM TEMPERATURA (Q9)
+* O Beta Multiplier eh naturalmente PTAT (Proporcional a Temp).
+* A corrente DEVE aumentar com a temperatura.
+* Descomente a linha abaixo para gerar este grafico:
+* .DC TEMP -20 100 1
+
+* 4. ANALISE B: PROVA DE NECESSIDADE DE START-UP (Q10)
+* Para provar que o circuito *precisa* de ajuda, vamos força-lo
+* a ficar desligado no t=0. Se ele for robusto, ele acorda.
+* Se ele for dependente, ele fica morto (0A).
+
+* Condicao Inicial (.IC):
+* Forca o Gate do PMOS para 2.6V (Vgs=0 -> PMOS OFF)
+* E forca o Gate do NMOS para 0V (Vgs=0 -> NMOS OFF)
+* Substitua pelos nomes reais dos nos do seu netlist
+.ic V(N_Gate_PMOS)=2.6V V(N_Gate_NMOS)=0V
+
+* Simula o transiente
+.tran 0 100u 0 10n
+
+* 5. MEDICOES
+* Monitoramos a corrente de uma fonte dummy ou do proprio VDD
+.probe DC I(Vdd)
+.probe tran I(Vdd) V(N_Gate_PMOS)
+\end{lstlisting}
+
+\textbf{3. Passo a Passo da Análise (EZWave)}
+
+\textbf{Parte A: Estabilidade com Temperatura (Questão 9)}
+\begin{enumerate}
+    \item Rode o \texttt{.DC TEMP}.
+    \item Plote a corrente de saída.
+    \item \textbf{Resultado Esperado:} Uma reta com inclinação positiva (a corrente sobe conforme esquenta).
+    \item \textbf{Justificativa na Prova:} "O circuito apresenta comportamento PTAT (Proportional To Absolute Temperature), pois $I_{ref} \propto V_T/R$ e a tensão térmica $V_T = kT/q$ aumenta linearmente com T. Isso é desejável para compensar referências de tensão, mas mostra que a corrente não é constante com a temperatura."
+\end{enumerate}
+
+\textbf{Parte B: O "Show" do Start-up (Questão 10)}
+A prova pede para \textit{"mostrar que há necessidade"}. Isso se faz em dois tempos:
+
+\begin{enumerate}
+    \item \textbf{Passo 1: A Falha (Sem Circuito de Start-up)}
+    \begin{itemize}
+        \item Desenhe a fonte básica (apenas o núcleo Beta Multiplier).
+        \item Rode o script Transiente com o comando \texttt{.ic}.
+        \item \textbf{Gráfico:} A corrente ficará travada em $0A$ (ou ruído de fA) por todos os $100\mu s$.
+        \item \textbf{Ação:} Tire um print e escreva: "Com condições iniciais desfavoráveis, o circuito possui um ponto de operação estável em corrente zero, provando a necessidade de um circuito de partida."
+    \end{itemize}
+
+    \item \textbf{Passo 2: A Solução (Com Circuito de Start-up)}
+    \begin{itemize}
+        \item Adicione o circuito de start-up no esquemático.
+        \item \textbf{Sugestão Simples:} Um divisor resistivo (ou dois transistores diodo invertidos) que injeta uma tensão no gate do NMOS apenas quando a fonte está desligada.
+        \item Rode a mesma simulação (mantendo o \texttt{.ic}).
+        \item \textbf{Gráfico:} A corrente começa em 0, mas o circuito de start-up "vence" a condição inicial e a corrente salta para $0.7\mu A$.
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{Dica de Ouro:} Se você não quiser desenhar um circuito complexo de start-up na hora, use o "Start-up via Leakage": Coloque um transistor NMOS muito comprido ($W=0.5u, L=50u$) com Gate em VDD, Source em VSS e Dreno no nó do Gate dos NMOS da fonte. Ele age como um resistor gigante injetando uma corrente minúscula que é suficiente para "acordar" a fonte na simulação.
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2022a Q9: Otimização de Resistor (Trimming via Sweep)}]{\textcolor{red}{Prova 2022a Q9: Otimização de Resistor (Trimming via Sweep)}}
+
+\textbf{Objetivo:} Projetar uma fonte de corrente precisa de $0.7\mu A$ ($V_{DD}=3.0V$).
+
+\textbf{Problema:} Os cálculos teóricos (Python) usam modelos simplificados. Na simulação com modelos reais (BSIM3/4), um resistor calculado teoricamente como $80k\Omega$ pode resultar em uma corrente de $0.62\mu A$ ou $0.75\mu A$.
+
+\textbf{Solução:} Em vez de "chutar" valores manualmente, faremos uma varredura (Sweep) no valor do resistor para encontrar o ponto exato.
+
+\textbf{1. Preparação do Netlist para Otimização}
+
+O segredo é definir o valor do resistor como um **parâmetro** (`.PARAM`) e não como um número fixo.
+
+\begin{lstlisting}[language=pspice, caption={Script de Otimização de Resistor (Sweep Paramétrico)}]
+* 
+* 1. INCLUDES
+.include "minha_fonte.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+* Incluir modelo de resistor se necessario
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* 2. DEFINICAO DE PARAMETRO (VARIAVEL)
+* Chute inicial calculado pelo Python (ex: 80k)
+.Param R_TRIM = 80k
+
+* 3. COMPONENTE COM VALOR VARIAVEL
+* Aqui reside o truque: Se o resistor R1 estiver dentro do netlist PEX,
+* voce nao consegue mudar o valor dele facilmente aqui fora.
+* SOLUCAO: No esquematico, coloque o resistor com valor '{R_TRIM}' 
+* (entre chaves) ou edite o netlist manualmente para:
+* XR1 no_a no_b rpolyh R=R_TRIM
+
+* 4. FONTES
+Vdd VDD 0 DC 3.0V
+Vss VSS 0 0
+* Fonte Dummy para medir a corrente de saida
+Vout_meas OUT 0 1.5V
+
+* 5. SIMULACAO DE VARREDURA (.DC PARAM)
+* Vamos varrer o valor de R_TRIM em vez de varrer uma fonte de tensao.
+* Faixa: De 50k a 120k (uma margem segura ao redor do valor teorico)
+* Passo: 0.1k (100 ohms de precisao)
+
+.DC param R_TRIM 50k 120k 0.1k
+
+* 6. MEDICAO
+.probe DC I(Vout_meas)
+\end{lstlisting}
+
+\textbf{2. Procedimento de "Trimming" no EZWave}
+
+\begin{enumerate}
+    \item \textbf{Executar:} Rode a simulação.
+    \item \textbf{Análise do Gráfico:}
+    \begin{itemize}
+        \item O eixo X agora é a **Resistência ($k\Omega$)**.
+        \item O eixo Y é a **Corrente ($A$)**.
+        \item A curva será decrescente (quanto maior o resistor, menor a corrente).
+    \end{itemize}
+    \item \textbf{Encontrar o Valor Ideal:}
+    \begin{itemize}
+        \item Use a ferramenta **Cursor** ou **Measurement Tool**.
+        \item Mova o cursor até que o valor de Y seja exatamente \texttt{700.0nA} ($0.7\mu A$).
+        \item Leia o valor correspondente no eixo X (ex: $84.3 k\Omega$).
+    \end{itemize}
+    
+    
+
+    \item \textbf{Atualização do Projeto (Back-Annotation):}
+    \begin{itemize}
+        \item Volte ao **Design Architect** (Esquemático).
+        \item Selecione o resistor.
+        \item Altere a propriedade \texttt{R} para o valor encontrado (ex: $84.3k$).
+        \item Gere o netlist novamente e rode uma simulação simples (`.op` ou `.tran`) para confirmar que agora cravou em $0.7\mu A$.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Dica de Prova:} Escreva na folha: "Devido às não-linearidades dos modelos BSIM que não são capturadas pela equação quadrática simples, o valor teórico de $R$ resultou em um erro de corrente. Foi realizada uma análise paramétrica (.DC SWEEP) para ajustar o resistor para $84.3k\Omega$, garantindo $I_{out}=0.7\mu A$ com precisão." Isso demonstra domínio da ferramenta.
+\newpage
+

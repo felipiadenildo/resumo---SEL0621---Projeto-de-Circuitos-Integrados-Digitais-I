@@ -1,0 +1,196 @@
+\section{Schematic (Esquemático)}
+
+Esta seção detalha o processo de criação, verificação e exportação de esquemáticos usando o Design Architect (iniciado a partir do ICStudio).
+
+\subsection{Inicialização do Ambiente}
+
+\subsubsection{Comandos no Terminal}
+Primeiro, configure o ambiente Mentor Graphics e abra o projeto .
+\begin{lstlisting}[language=bash, caption={Inicialização do shell e abertura do projeto}]
+cd /local/users/cad/
+source .cshrc-mentor
+cd /local/users/cad/workavdl
+
+# Para criar um NOVO projeto
+ams_ics -project nome_projeto -t c35b4c3
+
+# Para abrir um projeto EXISTENTE
+ams_ics -p nome_projeto
+\end{lstlisting}
+
+\subsubsection{No ICStudio (Janela Principal)}
+\begin{enumerate}
+    \item \textbf{Criar Biblioteca:} No ICStudio, clique em \textbf{File $\rightarrow$ New $\rightarrow$ Library}. Use um nome em letras minúsculas (ex: \texttt{minha\_lib}).
+    \item \textbf{Criar Célula:} Selecione a biblioteca recém-criada, clique com o \textbf{botão direito $\rightarrow$ New View}.
+    \item \textbf{Configurar Célula:}
+    \begin{itemize}
+        \item \textbf{Cell Name}: \texttt{nome\_da\_celula} (ex: \texttt{inv}, \texttt{nand3}) 
+        \item \textbf{View Type}: Selecione \textbf{Schematic} 
+    \end{itemize}
+    \item Isso abrirá a ferramenta de esquemático \textbf{Design Architect}.
+\end{enumerate}
+
+\subsection{Construção do Esquemático}
+
+\subsubsection{Elementos Básicos (Paleta de Componentes)}
+Os componentes são adicionados usando a paleta lateral (aberta no \textit{"penúltimo ícone à esquerda"}  ou com o \textit{"botão do meio"} do mouse ) ou o menu \textbf{Add $\rightarrow$ Instance}.
+
+\begin{itemize}
+    \item \textbf{Transistores:}
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{HIT-KIT Utilities $\rightarrow$ Devices $\rightarrow$ MOS} 
+        \item \textbf{Células:} \textbf{NMOS4} e \textbf{PMOS4} 
+        \item \textbf{Configuração:} Após adicionar, selecione o transistor e em \texttt{Properties} (ou na janela pop-up ) configure:
+        \item \texttt{Wtot = largura\_em\_microns} (ex: 5u) 
+        \item \texttt{L = 0.35} (valor fixo da tecnologia) 
+    \end{itemize}
+    
+    \item \textbf{Fontes de Alimentação:}
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{MGC Library $\rightarrow$ Generic Lib} 
+        \item \textbf{Células:} \textbf{VDD} e \textbf{VSS} 
+    \end{itemize}
+    
+    \item \textbf{Portas de Entrada/Saída:}
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{MGC Library $\rightarrow$ Generic Lib} 
+        \item \textbf{Células:} \textbf{Portin} (Entrada) e \textbf{Portout} (Saída) 
+    \end{itemize}
+
+    \item \textbf{Resistores (quando necessário):} 
+    \begin{itemize}
+        \item \textbf{Biblioteca:} \texttt{HIT-KIT Utilities $\rightarrow$ Devices $\rightarrow$ Resistors} 
+        \item \textbf{Célula:} \textbf{rpolyh} (Polisilício de alta resistividade) 
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Procedimento de Conexão}
+\begin{enumerate}
+    \item \textbf{Posicionar Componentes:} Adicione todos os transistores, portas e fontes necessários.
+    \item \textbf{Conectar com Wires:} Use a ferramenta de "wire" (linha) para conectar os terminais.
+    \item \textbf{Nomear Nets (Fios):}
+    \begin{itemize}
+        \item Selecione um wire $\rightarrow$ \textbf{Botão direito $\rightarrow$ Name Nets} .
+        \item Dê nomes claros (ex: \texttt{A}, \texttt{B}, \texttt{OUT}, \texttt{n1}).
+    \end{itemize}
+    \item \textbf{Verificar Conexões de Bulk (Substrato):} Esta é uma etapa \textbf{crítica}.
+    \begin{itemize}
+        \item O "bulk" de todos os \textbf{PMOS4} deve ser conectado ao \textbf{VDD}.
+        \item O "bulk" de todos os \textbf{NMOS4} deve ser conectado ao \textbf{VSS}.
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Trabalhando com Hierarquia (Células Existentes)}
+Você pode instanciar outras células, incluindo bibliotecas padrão ou as que você mesmo criou.
+
+\begin{itemize}
+    \item \textbf{Adicionando Células da CORELIB:} 
+    \begin{itemize}
+        \item \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+        \item \textbf{Biblioteca}: \texttt{CORELIB}.
+        \item \textbf{Células comuns}: \texttt{inv0} (inversor), \texttt{df1} (flip-flop D), \texttt{dl1} (latch D) .
+    \end{itemize}
+    
+    \item \textbf{Adicionando Seus Próprios Símbolos:}
+    \begin{itemize}
+        \item \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+        \item Selecione o símbolo da célula que você criou e verificou anteriormente.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Verificações do Esquemático e Geração do Símbolo}
+Siga esta sequência para garantir que o esquemático e seu símbolo estejam corretos.
+
+\begin{enumerate}
+    \item \textbf{Primeira Verificação (Check Schematic):}
+    \begin{itemize}
+        \item \textbf{Comando:} \texttt{File $\rightarrow$ Check Schematic}.
+        \item \textbf{Resultado Esperado:} 0 Erros, 1 Warning .
+        \item \textbf{Warning Esperado:} \textit{"Warning: Interface ... has no pins"}.
+    \end{itemize}
+
+    \item \textbf{Geração do Símbolo:}
+    \begin{itemize}
+        \item \textbf{Comando:} \texttt{Miscellaneous $\rightarrow$ Generate Symbol} .
+        \item Marque \textbf{Replace Existing}.
+        \item \textbf{Choose Shape} $\rightarrow$ Selecione o formato gráfico adequado (ex: \texttt{And Gate}, \texttt{Buffer}, ou \texttt{Box}) .
+        \item O editor de símbolos abrirá.
+    \end{itemize}
+    
+    \item \textbf{ Sequência de Verificação do Símbolo:}
+    \begin{itemize}
+        \item No editor de símbolo, execute \textbf{File $\rightarrow$ Check Symbol}.
+        \item Salve o símbolo: \textbf{File $\rightarrow$ Save Symbol}.
+        \item Verifique novamente: \textbf{File $\rightarrow$ Check Symbol} (agora deve dar 0 warnings) .
+        \item Feche o editor de símbolo.
+    \end{itemize}
+
+    \item \textbf{Verificação Final (Check Schematic):}
+    \begin{itemize}
+        \item De volta ao esquemático, execute: \texttt{File $\rightarrow$ Check Schematic} (novamente) .
+        \item \textbf{Resultado Esperado:} 0 Erros, 0 Warnings .
+    \end{itemize}
+\end{enumerate}
+
+\subsection{ Criação do ViewPoint e Netlist}
+O ViewPoint é uma "visão" do esquemático usada para gerar o netlist de simulação (arquivo `.spi` ou `.cir`).
+
+\subsubsection{Criação do ViewPoint}
+\begin{enumerate}
+    \item \textbf{Comando:} \texttt{Hit-Kit Utilities $\rightarrow$ Create ViewPoint} .
+    \item \textbf{Design Path:} Verifique se o caminho aponta para o seu esquemático \\ (ex: \texttt{\$Cell/default.group/logic.view/gate}).
+    \item \textbf{Tipo:} Selecione \texttt{device}.
+\end{enumerate}
+
+\subsubsection{Geração do Netlist (ELDO)}
+\begin{enumerate}
+    \item \textbf{Modo de Simulação:} Entre no modo de simulação (último botão "play" verde na barra esquerda).
+    \item \textbf{Selecionar Viewpoint:} Selecione o \texttt{vpt\_c35b4\_device} que você acabou de criar.
+    \item \textbf{Gerar Netlist:} Clique no botão "Netlist" (ícone com wires pretos).
+    \item \textbf{Visualizar:} Use o comando \texttt{ASCII Results $\rightarrow$ View Netlist} (ícone do "olho") para ver o netlist gerado.
+    \item \textbf{Copiar e Editar:} Copie o conteúdo para um arquivo \texttt{.cir}. Você \textbf{precisa} editar o arquivo:
+    \begin{itemize}
+        \item Mude \texttt{.end} para \texttt{.ends}.
+        \item Adicione os nomes dos ports (entradas/saídas) na linha \texttt{.subckt} (ex: \texttt{.subckt GATE A B C OUT VDD VSS}).
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Estrutura do Netlist Gerado}
+O arquivo gerado (ex: \texttt{nome\_porta\_vpt\_c35b4\_device.spi}) terá esta aparência:
+\begin{lstlisting}[language=pspice]
+* Arquivo gerado automaticamente pelo ViewPoint
+.global VSS VDD
+.subckt NOME_PORTA A B C OUT
+* ...
+* Definicoes dos transistores M1, M2...
+* ...
+.ends
+\end{lstlisting}
+
+\subsection{Observações e Dicas Críticas}
+
+\subsubsection{Erros Comuns no Esquemático}
+\begin{itemize}
+    \item \textbf{Bulk não conectado:} Erro mais comum. Causa falha no LVS. Sempre conecte PMOS no VDD e NMOS no VSS.
+    \item \textbf{Warning persistente (mesmo após criar símbolo):} Delete o símbolo e gere-o novamente.
+    \item \textbf{Dois ports com mesmo nome:} Se as entradas A e B estão em curto, use o mesmo \texttt{Portin} e conecte-o a ambos os gates. Não crie dois \texttt{Portin} com o nome \texttt{A}.
+\end{itemize}
+
+\subsubsection{Dicas Importantes}
+\begin{itemize}
+    \item \textbf{Salvar Frequentemente:} Use \texttt{File $\rightarrow$ Save} ou o ícone do disquete.
+    \item \textbf{Nomenclatura:} Use \textbf{apenas letras minúsculas} para nomes de bibliotecas e células.
+    \item \textbf{Organização:} Mantenha o esquemático limpo e organizado. Isso facilita muito a depuração e a criação do layout.
+\end{itemize}
+
+\subsubsection{Para Circuitos Complexos (AOI/OAI/Sequenciais)}
+\begin{itemize}
+    \item A metodologia é a mesma.
+    \item Siga as regras de dualidade (Série/Paralelo) para as redes PUN/PDN.
+    \item Para circuitos sequenciais (Flip-Flops), adicione portas de entrada para \texttt{CLK} (clock) e \texttt{RST} (reset), se necessário.
+    \item Use hierarquia: crie e verifique blocos menores (ex: um Latch) e depois use o símbolo desse bloco para construir um circuito maior (ex: um Flip-Flop Master-Slave).
+\end{itemize}
+
+\newpage
+
+\newpage

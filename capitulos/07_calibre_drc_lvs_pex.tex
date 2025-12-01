@@ -1,0 +1,304 @@
+\section{Calibre (DRC / LVS / PEX)}
+
+
+\subsection{Introdução ao Calibre}
+O Calibre é a ferramenta de verificação e extração utilizada para:
+\begin{itemize}
+    \item \textbf{DRC (Design Rule Checking)}: Verificação de regras de design (espaçamentos, larguras, etc.).
+    \item \textbf{LVS (Layout vs Schematic)}: Comparação entre o layout (físico) e o esquemático (lógico).
+    \item \textbf{PEX (Parasitic Extraction)}: Extração de componentes parasitas (R e C) do layout.
+\end{itemize}
+
+\subsection{Exemplo de Configuração Completa (Resumo)}
+\begin{lstlisting}[language=bash, frame=none, commentstyle=\color{black}]
+### DRC (Design Rule Checking) ###
+1. No ICStation: Calibre -> Run DRC
+2. Na aba "Rules":
+   - Load file: /local/users/cad/Calibre_rules/cac35b4rules_all.run
+3. Na aba "Inputs", painel "Layout":
+   - Top Cell: minha_celula
+   - Marcar: Export from layout viewer
+4. Clique: Run DRC
+5. Resultado: Corrigir erros até restarem apenas os 6-7 warnings
+   (ILL_METx, INFO_PROCESS, INFO_TEXT_VDD/VSS).
+
+### LVS (Layout vs Schematic) ###
+1. No ICStation: Calibre -> Run LVS
+2. Na aba "Rules":
+   - Load file: /local/users/cad/Calibre_rules/cac35b4rules_all.run
+3. Na aba "Inputs", painel "Layout":
+   - Top Cell: minha_celula
+   - Marcar: Export from layout viewer
+4. Na aba "Inputs", painel "Netlist":
+   - Marcar: Export from schematic viewer
+5. Na aba "Setup", painel "LVS Options":
+   - Sub-aba "Supply": Marcar "Ignore layout and source pins during comparison"
+6. Clique: Run LVS
+7. Resultado: "Carinha feliz" (The net-lists match).
+
+### PEX (Parasitic Extraction) ###
+1. No ICStation: Calibre -> Run PEX
+2. Na aba "Rules":
+   - Load file: /local/users/cad/Calibre_rules/cac35b4rules_all.run
+3. Na aba "Outputs", painel "Netlist":
+   - Use Names From: Selecione LAYOUT
+4. Na aba "Outputs", painel "Extraction Type":
+   - Selecione: C+CC ou R+C+CC (conforme a prova)
+5. Clique: Run PEX
+6. Resultado: Arquivo .pex.netlist gerado na pasta .cal/
+
+### Preparo do Netlist PEX (Obrigatório!) ###
+Edite o arquivo .pex.netlist gerado:
+1. Adicionar Ports: Adicione os nomes (VDD, VSS, A, B, OUT) na linha .subckt.
+2. Conectar Alimentação: Adicione linhas .connect (ex: .connect VSS N_VSS_M0_s).
+3. Corrigir Resistores: Mude "rR0" para "XR0".
+4. Corrigir Bipolares: Apague o parâmetro "AREA" se houver (ex: VERT10).
+\end{lstlisting}
+
+\subsection{DRC (Design Rule Checking)}
+
+\subsubsection{Execução do DRC}
+\begin{enumerate}
+    \item No \textbf{ICStation}: \textbf{Calibre $\rightarrow$ Run DRC}.
+    \item \textbf{Rules}: Carregar o arquivo de regras (ex: \texttt{/local/users/cad/work/rules/cac35b4rules\_all.run}).
+    \item \textbf{Load} (Obrigatório clicar em Load após selecionar o arquivo).
+    \item \textbf{Inputs $\rightarrow$ Layout}:
+    \begin{itemize}
+        \item \textbf{Top Cell}: \texttt{nome\_da\_celula}
+        \item \textbf{Export from layout viewer}: Marcado
+    \end{itemize}
+    \item \textbf{Run DRC}
+\end{enumerate}
+
+\subsubsection{Erros DRC Esperados e Aceitáveis}
+Em um layout finalizado, é normal e \textbf{aceitável} que restem os seguintes erros (são informativos):
+\begin{lstlisting}[language=bash, frame=none]
+Check ILL_MET2_DIE_RATIO_M2R1 - 1 Result
+Check ILL_MET3_DIE_RATIO_M3R1 - 1 Result
+Check ILL_MET4_DIE_RATIO_M4R1 - 1 Result
+Check ILL_POLY1_DIE_RATIO_POR1 - 1 Result
+Check INFO_PROCESS_C35B4C3 - 1 Result
+Check INFO_TEXT_VDD - 1 Result
+Check INFO_TEXT_VSS - 1 Result
+\end{lstlisting}
+
+\subsubsection{Erros DRC Críticos e Soluções}
+\begin{itemize}
+    \item \textbf{SPACE DIFF POLY e MET1}: Causa: Dimensões (espaçamentos) incorretas. Solução: Refazer as dimensões na área problemática.
+    \item \textbf{NWELL TOO HOT}: Causa: Poço N (NTUB) flutuante ou mal conectado. Solução: Aumentar a largura do metal VDD (fazer "grossão") ou adicionar mais contatos de poço (pdm1). Verificar se o \textbf{Text on Ports} está correto (M1NET).
+    \item \textbf{FIMP e NLDD MISSING}: Causa: Camadas geradas não foram criadas. Solução: Rodar \textbf{HIT-Kit Utilities $\rightarrow$ Generated Layers} e marcar \textbf{NLDD} e \textbf{FIMP} . Se não funcionar, feche e reabra o layout.
+    \item \textbf{SOFT CONNECTION}: Causa: Conexão inadequada de VDD/VSS (ex: "o VDD grossão só ta encostando a cabecinha"). Solução: Verificar se os metais estão realmente conectados (sobrepostos) e não apenas encostando.
+    \item \textbf{DIODE error (gctcg)}: Causa: Tap (contato de bulk) colado diretamente no Gate. Solução: Colocar um contato de difusão ("c") entre o tap ("t") e o gate ("g").
+    \item \textbf{ILL\_MISS\_MET4BLOCK\_AMTS1}: Causa: Uso da camada MET4. Solução: Idealmente, não usar MET4, mas pode ser ignorado se necessário .
+    \item \textbf{ ILL\_FLOATING\_GATE\_ERC}: Causa: Gate flutuante. Solução: Verifique se escolheu a camada correta para cada port (ex: MET1).
+\end{itemize}
+
+\subsection{LVS (Layout vs Schematic)}
+
+\subsubsection{Método Antigo (ICTrace)}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{ICTrace (M) $\rightarrow$ LVS}.
+    \item \textbf{Source name}: Apontar para o ViewPoint:
+    \begin{itemize}
+        \item \texttt{\$celula/default.group/logic.views/nome/vpt\_c35b4\_device} .
+    \end{itemize}
+    \item \textbf{Abort on Supply Error}: No.
+    \item \textbf{OK}
+    \item Verificar resultados: \textbf{Report $\rightarrow$ LVS}.
+\end{enumerate}
+
+\subsubsection{Método Calibre (Recomendado)}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Calibre $\rightarrow$ Run LVS}.
+    \item \textbf{Rules}: Carregar o arquivo de regras (ex: \texttt{/local/users/cad/Calibre\_rules/cac35b4rules\_all.run}).
+    \item \textbf{Load} (Obrigatório).
+    \item \textbf{Inputs $\rightarrow$ Layout}:
+    \begin{itemize}
+        \item \textbf{Files}: \texttt{nome\_da\_celula}.
+        \item \textbf{Top Cell}: \texttt{nome\_da\_celula}.
+        \item \textbf{Export from layout viewer}: Marcado.
+    \end{itemize}
+    \item \textbf{Inputs $\rightarrow$ Netlist}:
+    \begin{itemize}
+        \item \textbf{Export from schematic viewer}: Marcado (puxa o netlist do esquemático aberto).
+        \item \textbf{Verificar Path:} Ocasionalmente, confira o caminho do netlist em \textbf{Files}.
+    \end{itemize}
+    \item \textbf{Setup $\rightarrow$ LVS Options}:
+    \begin{itemize}
+        \item Marcar: \textbf{Ignore layout and source pins during comparison}.
+        \item \textbf{ Desmarcar:} (Prova 2016) \textbf{Ignore layout and source pins during comparison} (alguns tutoriais pedem para desmarcar). Teste as duas opções.
+    \end{itemize}
+    \item \textbf{Run LVS}
+\end{enumerate}
+
+\subsubsection{Erros LVS Comuns e Soluções}
+\begin{itemize}
+    \item \textbf{Discrepancy: Incorrect Port}: Erro mais comum.
+    \begin{itemize}
+        \item \textbf{Causa:} Ports não reconhecidos.
+        \item \textbf{ Solução (Conflitante):} Os documentos de referência são conflitantes, indicando um "bug" ou trade-off no fluxo:
+        \begin{itemize}
+            \item \textbf{Solução 1:} Usar \textbf{Text on Ports $\rightarrow$ M1NET}. Isso corrige os erros de DRC (como \texttt{NWELL TOO HOT}).
+            \item \textbf{Solução 2:} Se o LVS falhar com M1NET, use \textbf{M1PIN}. Isso pode corrigir o LVS, mas pode reintroduzir os erros \texttt{INFO\_TEXT\_VDD} e \texttt{INFO\_TEXT\_VSS} no DRC.
+        \end{itemize}
+        \item \textbf{Recomendação:} Tente \texttt{M1NET} primeiro. Se o LVS falhar, tente \texttt{M1PIN}.
+    \end{itemize}
+    \item \textbf{Supply Errors}:
+    \begin{itemize}
+        \item \textbf{Causa:} Problemas com VDD/VSS (ex: "soft connection").
+        \item \textbf{Solução:} Verificar conexões de alimentação no layout.
+    \end{itemize}
+    \item \textbf{Model not found (RPOLYH, etc.)}:
+    \begin{itemize}
+        \item \textbf{Causa:} Modelos de dispositivos (como resistores) faltando no netlist.
+        \item \textbf{Solução:} Editar o arquivo netlist de simulação e adicionar os \texttt{.include} necessários (ex: \texttt{restm.mod}).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Debug do LVS}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{ICTrace (M) $\rightarrow$ Discreps} (para o método antigo).
+    \item Usar \textbf{first} e \textbf{next} para navegar pelos erros .
+    \item \textbf{Unshow $\rightarrow$ All} para deselecionar regiões destacadas.
+\end{enumerate}
+
+\subsection{PEX (Parasitic Extraction)}
+
+\subsubsection{Execução do PEX}
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Calibre $\rightarrow$ Run PEX}.
+    \item \textbf{Outputs $\rightarrow$ Netlist}:
+    \begin{itemize}
+        \item \textbf{Use Names From}: Mudar para \textbf{LAYOUT} (importante para que os nomes dos ports (A, B, OUT) sejam mantidos no netlist extraído).
+    \end{itemize}
+    \item \textbf{Outputs $\rightarrow$ Extraction Type}: 
+    \begin{itemize}
+        \item \textbf{C+CC}: Capacitâncias parasitas (intrínsecas e acoplamento).
+        \item \textbf{R}: Apenas Resistências parasitas.
+        \item \textbf{R+C}: Resistências + capacitâncias intrínsecas.
+        \item \textbf{R+C+CC}: Todos componentes parasitas (mais completo e pesado).
+    \end{itemize}
+    \item \textbf{Run PEX}
+\end{enumerate}
+
+\subsubsection{Arquivos Gerados pelo PEX}
+O PEX cria uma pasta \texttt{.cal/} e gera vários arquivos:
+\begin{itemize}
+    \item \texttt{nome\_celula.pex.netlist} (O netlist principal que usaremos na simulação).
+    \item \texttt{nome\_celula.pex.netlist.pex} 
+    \item \texttt{nome\_celula.pex.netlist.nome\_celula.pxi} 
+\end{itemize}
+
+\subsubsection{Localização dos Arquivos}
+Os arquivos extraídos ficam no diretório da célula, dentro da pasta \texttt{.cal/}:
+\begin{lstlisting}[language=bash, frame=none]
+/local/users/cad/work/nome_projeto.proj/cell.lib/
+  default.group/layout.views/nome_celula/
+    nome_celula.cal/
+      nome_celula.pex.netlist
+\end{lstlisting}
+
+\subsubsection{Preparação do Netlist PEX para Simulação}
+O arquivo \texttt{.pex.netlist} gerado \textbf{não} funciona diretamente no ELDO. Ele precisa de edições manuais:
+
+\begin{enumerate}
+    \item \textbf{Acrescentar ports na linha .subckt}: A linha \texttt{.subckt} gerada pode não incluir os ports VDD/VSS ou as entradas/saídas. Adicione-os manualmente.
+    \begin{lstlisting}[language=pspice]
+    * Original: .subckt GATE
+    * Corrigido: .subckt GATE VSS VDD A B C OUT
+    \end{lstlisting}
+
+    \item \textbf{Conectar nós flutuantes (se houver)}: Às vezes, VDD/VSS são extraídos como nós internos (ex: \texttt{N\_VSS\_M0\_s}). Conecte-os globalmente .
+    \begin{lstlisting}[language=pspice]
+    .connect VSS N_VSS_MO_s
+    .connect VDD N_VDD_MO_d
+    \end{lstlisting}
+
+    \item \textbf{Substituir modelos de transistor}: O PEX usa os nomes do layout (\texttt{NMOS4}, \texttt{PMOS4}). O ELDO espera os nomes do \texttt{.defmod} (ex: \texttt{MODN}, \texttt{MODP}).
+    
+    \item \textbf{Corrigir resistores}: Se houver resistores (rpolyh), o PEX pode instanciá-los como \texttt{rR0} (instância 'r'). O SPICE espera \texttt{XR0} (instância 'X' para subcircuitos).
+    
+    \item \textbf{Remover parâmetro AREA}: Se houver transistores bipolares (ex: \texttt{VERT10}), o PEX adiciona um parâmetro \texttt{AREA=...} que causa erro no ELDO. Delete-o.
+\end{enumerate}
+
+\subsubsection{Includes Necessários}
+Para simular o netlist extraído, seu arquivo \texttt{.cir} principal precisará dos modelos corretos:
+\begin{lstlisting}[language=pspice]
+* Incluir no inicio do arquivo .cir
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWS"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+\end{lstlisting}
+
+\subsection{Verificação de Resultados}
+
+\subsubsection{Relatórios do Calibre}
+\begin{itemize}
+    \item \textbf{DRC Report}: Lista todas as violações de regras.
+    \item \textbf{LVS Report}: Mostra o status do "matching" (se bate ou não) entre layout e esquemático.
+    \item \textbf{PEX Report}: Mostra estatísticas da extração (quantos R e C foram extraídos).
+\end{itemize}
+
+\subsubsection{Interpretação dos Relatórios}
+\textbf{DRC Bem-sucedido:}
+\begin{itemize}
+    \item 0 erros críticos.
+    \item Apenas os 7 erros "informativos" esperados.
+\end{itemize}
+
+\textbf{LVS Bem-sucedido:}
+\begin{itemize}
+    \item O relatório dirá: \textbf{"The net-lists match."}.
+    \item 0 discrepancies.
+    \item Todos os dispositivos (devices) e nets estão "matching".
+\end{itemize}
+
+\textbf{PEX Bem-sucedido:}
+\begin{itemize}
+    \item Netlist gerada sem erros de sintaxe (após as correções manuais).
+    \item Arquivos .pxi gerados corretamente.
+\end{itemize}
+
+\subsection{Configurações Avançadas e Fluxos de Trabalho}
+
+\subsubsection{Configurações do Calibre}
+\begin{itemize}
+    \item \textbf{Setup $\rightarrow$ DRC Options}: Configurações específicas de DRC.
+    \item \textbf{Setup $\rightarrow$ LVS Options}: \textbf{Supply} (configurações de VDD/VSS), \textbf{Ignore} (ignorar certos elementos).
+    \item \textbf{Setup $\rightarrow$ PEX Options}: Opções detalhadas de extração.
+\end{itemize}
+
+\subsubsection{Problemas de Performance}
+\begin{itemize}
+    \item \textbf{LVS lento}: Reduzir a complexidade do layout ou verificar hierarquia.
+    \item \textbf{PEX com muita memória}: Usar extração mais simples (ex: C+CC ao invés de R+C+CC).
+\end{itemize}
+
+\subsubsection{Dicas e Soluções de Problemas}
+\begin{itemize}
+    \item \textbf{Calibre não carrega rules}: Verifique o caminho do arquivo \texttt{.run} e clique em \textbf{Load}.
+    \item \textbf{LVS não encontra schematic}: Verifique se o ViewPoint foi criado corretamente.
+    \item \textbf{PEX gera netlist vazia}: Verifique o "Extraction Type" selecionado.
+\end{itemize}
+
+\subsubsection{Fluxo Recomendado}
+\begin{enumerate}
+    \item \textbf{Rodar DRC} $\rightarrow$ Corrigir todos os erros críticos (vermelhos).
+    \item \textbf{Rodar LVS} $\rightarrow$ Corrigir "discrepancies" (especialmente "Incorrect Port").
+    \item \textbf{Rodar PEX} $\rightarrow$ Preparar o netlist extraído (corrigindo-o manualmente).
+    \item \textbf{Simular} o netlist PEX e comparar com a simulação do esquemático.
+\end{enumerate}
+
+\subsubsection{Scripts Úteis}
+Para converter as imagens de tela (screenshots) do Calibre/ICStation:
+\begin{lstlisting}[language=bash]
+# Capturar a janela
+xwd > layout.xwd
+
+# Converter para TIF/PNG (invertendo cores)
+convert -white-threshold 1 -negate layout.xwd layout.tif
+convert -white-threshold 1 -negate layout.xwd layout.png
+\end{lstlisting}
+
+\newpage
+

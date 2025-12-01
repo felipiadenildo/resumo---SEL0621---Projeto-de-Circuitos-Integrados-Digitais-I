@@ -1,0 +1,72 @@
+\section{\textcolor{red}
+{Exemplos de Prova: Esquemático Avançado}}
+
+\subsection[\textcolor{red}{Contadores Síncronos (Provas 2016b Q5 e 2022a Q5)}]{\textcolor{red}{Contadores Síncronos (Provas 2016b Q5 e 2022a Q5)}}
+Ambas as provas solicitam a transposição de um diagrama de blocos (contador) para o esquemático no Mentor Graphics, utilizando células da biblioteca padrão (\texttt{CORELIB}).
+
+\textbf{Células Necessárias:}
+\begin{itemize}
+    \item \textbf{Prova 2016b (Fig. 2):} \texttt{df1} (Flip-Flop), \texttt{nor21}, \texttt{aoi211}, \texttt{aoi21}, \texttt{nand21} (verifique a lógica exata na figura da prova).
+    \item \textbf{Prova 2022a (Fig. 1):} \texttt{df1}, \texttt{xnr21} (XNOR), \texttt{nand21}.
+\end{itemize}
+
+\textbf{Passo a Passo de Resolução:}
+\begin{enumerate}
+    \item \textbf{Criar Nova Célula:} \texttt{File $\rightarrow$ New $\rightarrow$ Cell} (ex: \texttt{contador\_p22}). View: \texttt{Schematic}.
+    \item \textbf{Instanciar Células da CORELIB:}
+    \begin{itemize}
+        \item \texttt{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+        \item Navegue até a biblioteca \texttt{CORELIB} e selecione as células identificadas acima (ex: \texttt{df1}).
+    \end{itemize}
+    \item \textbf{Conectar o Clock (CLK):}
+    \begin{itemize}
+        \item Em circuitos síncronos, o sinal de \texttt{CLK} deve ser conectado à entrada de clock de \textbf{todos} os Flip-Flops.
+        \item Adicione um \texttt{Portin} chamado \texttt{CLK}.
+    \end{itemize}
+    \item \textbf{Realimentação (Feedback):}
+    \begin{itemize}
+        \item Conecte as saídas $Q$ (ou $\bar{Q}$) dos Flip-Flops de volta às entradas das portas lógicas combinacionais conforme o desenho da prova.
+        \item \textit{Dica:} Use \texttt{Name Nets} para nomear fios distantes com o mesmo nome (ex: \texttt{Q1}) em vez de passar fios longos por todo o esquemático.
+    \end{itemize}
+    \item \textbf{Verificação e Símbolo:}
+    \begin{itemize}
+        \item \texttt{Check Schematic} (Deve dar 0 Erros).
+        \item \texttt{Miscellaneous $\rightarrow$ Generate Symbol} (Substitua o existente).
+    \end{itemize}
+\end{enumerate}
+
+\subsection[\textcolor{red}{Hierarquia e Blocos Reutilizáveis (Prova 2024 Q5 e Q6)}]{\textcolor{red}{Hierarquia e Blocos Reutilizáveis (Prova 2024 Q5 e Q6)}}
+A prova de 2024 exige uma abordagem hierárquica: primeiro cria-se um bloco menor ("BLOCO") e depois ele é usado múltiplas vezes no circuito principal.
+
+\subsubsection[\textcolor{red}{Passo 1: Criar o Sub-bloco (Questão 5)}]{\textcolor{red}{Passo 1: Criar o Sub-bloco (Questão 5)}}
+\begin{itemize}
+    \item \textbf{Objetivo:} Criar o esquemático interno do bloco mostrado na prova.
+    \item \textbf{Componentes:} \texttt{df1} (Flip-Flop), \texttt{nand21} e \texttt{inv1} (para formar AND e OR, já que AND = NAND + INV).
+    \item \textbf{Ação:}
+    \begin{enumerate}
+        \item Crie a célula \texttt{bloco\_q5}.
+        \item Monte o circuito interno conforme a figura.
+        \item Adicione portas de entrada/saída (ex: \texttt{In}, \texttt{Out}, \texttt{M}, \texttt{CLK}).
+        \item \texttt{Check Schematic} e \textbf{Generate Symbol}.
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection[\textcolor{red}{Passo 2: Circuito Principal (Questão 6)}]{\textcolor{red}{Passo 2: Circuito Principal (Questão 6)}}
+\begin{itemize}
+    \item \textbf{Objetivo:} Construir o circuito final usando o símbolo criado no Passo 1.
+    \item \textbf{Ação:}
+    \begin{enumerate}
+        \item Crie uma nova célula (ex: \texttt{circuito\_final\_q6}).
+        \item \textbf{Instanciar o Bloco:} Use \texttt{Add Instance} e selecione o símbolo \texttt{bloco\_q5} que você acabou de criar. Repita 4 vezes.
+        \item \textbf{Configurar Modos ($M_x$):}
+        \begin{itemize}
+            \item A prova pede conexões específicas como $M_1 = V_{DD}$ e $M_4 = 0V$.
+            \item Adicione fontes \texttt{VDD} e \texttt{VSS} da biblioteca \texttt{Generic Lib}.
+            \item Conecte o pino $M$ da primeira instância ao \texttt{VDD}.
+            \item Conecte o pino $M$ da última instância ao \texttt{VSS} (GND).
+        \end{itemize}
+        \item \textbf{Interconexões:} Ligue a saída $X_n$ de um bloco à entrada do próximo e adicione a lógica de controle superior (\texttt{nand21}, \texttt{inv1}) conforme a figura.
+    \end{enumerate}
+\end{itemize}
+
+\newpage

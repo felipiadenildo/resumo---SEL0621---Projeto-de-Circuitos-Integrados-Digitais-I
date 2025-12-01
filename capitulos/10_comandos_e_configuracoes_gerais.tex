@@ -1,0 +1,518 @@
+\section{Comandos e Configurações Gerais}
+
+
+\subsection{Configuração do Ambiente}
+
+\subsubsection{Inicialização dos Ambientes}
+\begin{lstlisting}[language=bash, caption={Terminal 1 - Para ICStation (Mentor)}]
+cd /local/users/cad/
+source .cshrc-mentor
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash, caption={Terminal 2 - Para ELDO (Anacad)}]
+cd /local/users/cad/
+source .cshrc-anacad
+\end{lstlisting}
+
+\textbf{Importante}: Executar em shells separados para evitar conflitos.
+
+\subsubsection{Criação e Acesso a Projetos}
+\begin{lstlisting}[language=bash]
+# Novo projeto
+ams_ics -project nome_projeto -t c35b4c3
+
+# Projeto existente (ex: ams_ics -p nome)
+ams_ics -p nome_projeto
+
+# Exemplo de prova
+ams_ics -p prova24brbtv -t -c35b4c3
+\end{lstlisting}
+
+\subsubsection{Diretórios de Trabalho}
+\begin{lstlisting}[language=bash, frame=none]
+# Diretorio padrao de trabalho
+cd /local/users/cad/workavdl
+
+# Estrutura de projetos
+nome_projeto.proj/
+|-- cell.lib/
+|   `-- default.group/
+|       |-- logic.views/ (Esquematicos, Simbolos)
+|       `-- layout.views/ (Layouts, pasta .cal com PEX)
+`-- ...
+\end{lstlisting}
+
+\subsection{Comandos de Terminal Essenciais}
+
+\subsubsection{Gerenciamento de Arquivos}
+\begin{lstlisting}[language=bash]
+# Criar arquivo de simulacao
+touch circuito.cir
+
+# Ver conteudo
+cat circuito.cir
+
+# Editar
+vim circuito.cir
+# ou
+nano circuito.cir
+
+# Copiar seguranca
+cp projeto.proj projeto_backup.proj
+\end{lstlisting}
+
+\subsubsection{Execução de Simulações}
+\begin{lstlisting}[language=bash]
+# Simulacao ELDO
+eldo circuito.cir
+
+# Abrir resultados
+ezwave circuito.wdb
+
+# Executar em background
+eldo circuito.cir > log.txt 2>&1 &
+\end{lstlisting}
+
+\subsubsection{Processamento de Imagens (Screenshots)}
+\begin{lstlisting}[language=bash]
+# Capturar a janela (mouse vira uma mira)
+xwd > layout.xwd
+
+# Converter para formato util (inverte e limpa)
+convert -white-threshold 1 -negate layout.xwd layout.tif
+convert -white-threshold 1 -negate layout.xwd layout.png
+\end{lstlisting}
+
+\subsection{Paths e Diretórios Importantes}
+
+\subsubsection{Modelos e Regras}
+\begin{lstlisting}[language=bash, frame=none]
+# Pasta de Modelos de transistores
+/local/tools/dkit/ams_3.70_mgc/eldo/c35/
+
+# Modelo Tipico (exemplo de arquivo)
+/local/tools/dkit/ams_3.70_mgc/eldo/c35/cmos53tm.mod
+
+#  Modelo de Resistor
+/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod
+
+# Regras Calibre
+/local/users/cad/work/rules/cac35b4rules_all.run
+/local/users/cad/Calibre_rules/cac35b4rules_all.run
+
+# Manuais
+/local/tools/dkit/ams_3.70_mgc/docs/ENG-182_rev2.pdf
+/local/tools/dkit/ams_3.70_mgc/docs/ENG-183_rev2.pdf
+/local/tools/mentor/shared/pdfdocs/eldo_ur.pdf
+\end{lstlisting}
+
+\subsubsection{Arquivos de Projeto}
+\begin{lstlisting}[language=bash, frame=none]
+# Netlists PEX (localizacao)
+/local/users/cad/work/<projeto>.proj/cell.lib/default.group/
+layout.views/<celula>/<celula>.cal/
+
+# ViewPoints (localizacao)
+/local/users/cad/work/<projeto>.proj/cell.lib/default.group/
+logic.views/<celula>/vpt_c35b4_device
+\end{lstlisting}
+
+\subsection{Configurações do ICStation}
+
+\subsubsection{Hotkeys e Softkeys}
+\begin{itemize}
+\item \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Enable} 
+\item \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Load} 
+\item \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Report} (ver hotkeys ativas) 
+\item \textbf{MGC $\rightarrow$ Setup $\rightarrow$ Show Softkeys} 
+\end{itemize}
+
+\subsubsection{Configurações de Grid}
+\begin{itemize}
+\item \textbf{Other $\rightarrow$ Window $\rightarrow$ Set Grid} 
+\item \textbf{X = 0.025}, \textbf{Y = 0.025} 
+\item \textbf{Minor = 0.1}, \textbf{Major = 1} 
+\end{itemize}
+
+\subsubsection{Camadas e Visualização}
+\begin{itemize}
+\item \textbf{Other $\rightarrow$ Layers $\rightarrow$ Show layer palette $\rightarrow$ Append $\rightarrow$ all} 
+\item \textbf{View $\rightarrow$ Visible Layers} (configurar visibilidade) 
+\item \textbf{Setup $\rightarrow$ Select Filter $\rightarrow$ Properties} (para selecionar textos) 
+\end{itemize}
+
+\subsubsection{Reserva de Células}
+\begin{itemize}
+\item \textbf{Verificar status}: "Context: nome\_celula(GE-R-0)" = Não reservado 
+\item \textbf{Reservar}: \textbf{File $\rightarrow$ Cell $\rightarrow$ Reserve $\rightarrow$ Current Context} 
+\item \textbf{Liberar}: \textbf{File $\rightarrow$ Cell $\rightarrow$ Unreserve}
+\end{itemize}
+
+\newpage
+
+\subsection{Configurações ELDO/SPICE}
+
+\subsubsection{ Sintaxe de Componentes (ELDO)}
+\begin{itemize}
+    \item \textbf{Transistor (MOSFET):} 
+    \begin{lstlisting}[language=pspice, frame=none]
+M<nome> <dreno> <gate> <source> <bulk> <modelo>
++ w=<width> l=<length>
++ Ad=<area_dreno> Pd=<perim_dreno>
++ As=<area_source> Ps=<perim_source>
+    \end{lstlisting}
+    \item \textbf{Resistor:} \texttt{R<nome> <no1> <no2> <valor>} 
+    \item \textbf{Capacitor:} \texttt{C<nome> <no1> <no2> <valor>} 
+    \item \textbf{Subcircuito:} \texttt{x<nome> <nos...> <nome\_modelo>} 
+    \item \textbf{Fonte de Tensão (V):} 
+    \begin{lstlisting}[language=pspice, frame=none]
+V<nome> <no+> <no-> <valor_dc>
+V<nome> <no+> <no-> PULSE(<v_min> <v_max> <delay> <t_rise> <t_fall> <t_pulse> <periodo>)
+V<nome> <no+> <no-> SIN(<offset> <amplitude> <freq> <delay> <amortec> <fase>)
+    \end{lstlisting}
+\end{itemize}
+
+\subsubsection{Parâmetros Comuns}
+\begin{lstlisting}[language=pspice]
+* Tensao de alimentacao
+.param VDD_value='3.3V'
+VDD VDD 0 DC VDD_value
+
+* Parametros de tempo e frequencia
+.param freq='10MEG'
+.param T='1/freq'
+
+* Capacitancia de carga
+.param Cload='50f'
+CL OUT 0 Cload
+\end{lstlisting}
+
+\subsubsection{Includes de Modelos}
+\begin{lstlisting}[language=pspice]
+* Modelos para diferentes condicoes
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP" * Worst Power
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWS" * Worst Speed
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD" * Typical
+
+* Modelos de resistor
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+\end{lstlisting}
+
+\subsubsection{Comandos de Análise e Medição}
+\begin{lstlisting}[language=pspice]
+* Ponto de Operacao DC
+.op
+
+* Analise DC (varredura)
+.DC <fonte> <inicio> <fim> <passo>
+
+* Analise transiente
+.tran <passo_print> <tempo_final> <tempo_inicial> <passo_max>
+
+* Analise com varredura (ex: varrer T)
+.tran 0 80n 0 0.01n sweep T 0.4n 0.6n 0.01n
+
+* Condicoes iniciais
+.ic V(no)=valor
+
+* Salvar formas de onda
+.probe DC V(no1) V(no2)
+.probe tran V(no1) I(Vfonte)
+
+* Medir tempos de propagacao (tphl/tplh)
+.meas tran <nome> trig V(<in>) val='VDD/2' fall=1 
++                  targ V(<out>) val='VDD/2' rise=1
+
+* Medir potencia media
+.meas tran <current> AVG I(Vdd) FROM=<inicio> TO=<fim>
+.meas tran <pot> param='<current> * VDD_value'
+\end{lstlisting}
+
+\subsubsection{ Dicas Críticas de Simulação (ELDO)}
+\begin{itemize}
+    \item \textbf{Primeira Linha:} Comente a primeira linha do arquivo \texttt{.cir} (título), pois ela pode não ser lida corretamente.
+    \item \textbf{Nomes de Modelo:} Use \texttt{MODN} e \texttt{MODP} (definidos por \texttt{.defmod}) ao invés de \texttt{NMOS4} e \texttt{PMOS4} no netlist, a menos que esteja incluindo os arquivos de modelo completos (como \texttt{cmos53tm.mod}).
+    \item \textbf{Netlist PEX:} Lembre-se de editar o netlist PEX para corrigir a linha \texttt{.subckt} e os nomes dos modelos.
+\end{itemize}
+
+\subsection{Scripts e Automação}
+
+\subsubsection{Script de Inicialização Rápida}
+\begin{lstlisting}[language=bash]
+#!/bin/csh
+# init_project.csh
+cd /local/users/cad/
+source .cshrc-mentor
+cd /local/users/cad/workavdl
+ams_ics -p $1
+\end{lstlisting}
+
+\subsubsection{Script de Simulação Automática}
+\begin{lstlisting}[language=bash]
+#!/bin/csh
+# run_simulation.csh
+cd /local/users/cad/
+source .cshrc-anacad
+cd /local/users/cad/workavdl/$1
+eldo circuito.cir
+ezwave circuito.wdb
+\end{lstlisting}
+
+\subsubsection{Comandos TCL para EZWave}
+\begin{lstlisting}[language=bash]
+# config_ezwave.tcl
+wave add V(IN) V(OUT)
+xaxis limit 0 100n
+yaxis limit -0.5 3.5
+cursor add
+cursor add
+\end{lstlisting}
+
+\subsection{Constantes e Parâmetros Técnicos}
+
+\subsubsection{Mobilidades e Constantes}
+\begin{itemize}
+\item $\mu_n = 370\ cm^2/V\cdot s$ 
+\item $\mu_p = 126\ cm^2/V\cdot s$ 
+\item $r = \mu_n/\mu_p \approx 2.94$
+\item $C_{ox} \approx 4.6\ fF/\mu m^2$ 
+\item $\epsilon_{ox} = 3.5 \times 10^{-13}\ F/cm$ 
+\item $t_{ox} = 7.6\ nm$ 
+\end{itemize}
+
+\subsubsection{Modelos de Transistores (Valores U0)}
+\begin{itemize}
+\item \textbf{Típico (tm)}:
+ \begin{itemize}
+ \item NMOS: U0 = 4.758e+02 
+ \item PMOS: U0 = 1.482e+02 
+ \item $r \approx 3.21$
+ \end{itemize}
+\item \textbf{Worst Case Power (wp)}:
+ \begin{itemize}
+ \item NMOS: U0 = 5.002e+02 
+ \item PMOS: U0 = 1.581e+02 
+ \item $r \approx 3.16$
+ \end{itemize}
+\item \textbf{Worst Case Speed (ws)}:
+ \begin{itemize}
+ \item NMOS: U0 = 4.671e+02 
+ \item PMOS: U0 = 1.314e+02 
+ \item $r \approx 3.55$
+ \end{itemize}
+\end{itemize}
+
+\subsubsection{Distâncias Críticas e Cálculos}
+\begin{itemize}
+\item \textbf{POLY-POLY}: 0.45 $\mu m$ 
+\item \textbf{RES-POLY}: 0.35 $\mu m$ 
+\item \textbf{DIFF-NTUB}: 1.2 $\mu m$ 
+\item \textbf{NTUB enclosure}: 1.2 $\mu m$ 
+\item \textbf{MET1 largura VDD/VSS}: 1.8 $\mu m$ (recomendado) 
+\item \textbf{ Área/Perímetro (AD/PD):} 
+    \begin{itemize}
+        \item $AD = 0.85 \times W$
+        \item $PD = W + (2 \times 0.85)$ (ou $PD = W + 1.7$)
+    \end{itemize}
+\end{itemize}
+
+\subsection{Solução de Problemas Comuns}
+
+\subsubsection{Problemas de ICStation}
+\begin{itemize}
+\item \textbf{Mouse comporta-se como Ctrl pressionado}:
+ \begin{itemize}
+ \item Solução: Pressione \textbf{Ctrl+Shift} e use as setas do teclado; isso deve normalizar .
+ \end{itemize}
+\item \textbf{ICStation Travado}:
+ \begin{itemize}
+ \item Causa: Clicar repetidamente no scroll do mouse.
+ \item Solução: Fechar e reabrir.
+ \end{itemize}
+\item \textbf{Células desaparecem da library}:
+ \begin{itemize}
+ \item Solução: Crie um novo projeto com o nome antigo e copie a pasta \texttt{default.group} do projeto antigo/backup para a nova pasta do projeto .
+ \end{itemize}
+\item \textbf{Não consegue colocar ports}:
+ \begin{itemize}
+ \item Solução: Tente \textbf{DLA Layout $\rightarrow$ Open}.
+ \end{itemize}
+\end{itemize}
+
+\subsubsection{Problemas de ELDO}
+\begin{itemize}
+\item \textbf{Erro de modelo não encontrado}:
+ \begin{itemize}
+ \item Verificar includes dos modelos.
+ \item Substituir \texttt{NMOS4/PMOS4} por \texttt{MODN/MODP} ou vice-versa.
+ \end{itemize}
+\item \textbf{Netlist PEX com erros}:
+ \begin{itemize}
+ \item Verificar conexões: \texttt{.connect VSS N\_VSS\_...} .
+ \item Corrigir resistores: \texttt{rR0} $\rightarrow$ \texttt{XR0}.
+ \item Remover parâmetro \texttt{AREA} de bipolares.
+ \end{itemize}
+\item \textbf{Simulação não converge}:
+ \begin{itemize}
+ \item Aumentar HMAX.
+ \item Adicionar \texttt{.ic} com condições iniciais.
+ \item Verificar fontes de alimentação.
+ \end{itemize}
+\end{itemize}
+
+\subsubsection{Problemas de Calibre}
+\begin{itemize}
+\item \textbf{Rules não carregam}:
+ \begin{itemize}
+ \item Verificar path completo do arquivo \texttt{.run}.
+ \item \textbf{Load} obrigatório após selecionar.
+ \end{itemize}
+\item \textbf{LVS não encontra schematic}:
+ \begin{itemize}
+ \item Verificar se ViewPoint foi criado .
+ \item Verificar path do \texttt{vpt\_c35b4\_device} .
+ \end{itemize}
+\item \textbf{Erros de port}:
+ \begin{itemize}
+ \item Executar \textbf{Add Text on Ports} novamente .
+ \item Verificar camada \texttt{M1NET} .
+ \end{itemize}
+\end{itemize}
+
+\subsection{Comandos de Debug e Verificação}
+
+\subsubsection{Verificação de Layout}
+\begin{lstlisting}[language=bash, frame=none]
+# Relatorio de camadas
+Report -> Layer -> Design Layers
+
+# Relatorio de selecao
+Report -> Selected
+
+# Tamanho da celula
+Report -> Windows
+\end{lstlisting}
+
+\subsubsection{Verificação de Hierarquia}
+\begin{itemize}
+\item \textbf{Context $\rightarrow$ Hierarchy $\rightarrow$ Peek $\rightarrow$ 2-4 levels} 
+\item \textbf{Edit $\rightarrow$ Flatten} (para desmontar célula) 
+\item \textbf{Objects $\rightarrow$ Make $\rightarrow$ Cell} (para definir célula) 
+\end{itemize}
+
+\subsubsection{Comandos de History}
+\begin{lstlisting}[language=bash]
+# Ver comandos recentes
+history
+
+# Reexecutar comando
+!numero
+
+# Encontrar arquivos
+find -name "*.cir"
+\end{lstlisting}
+
+\subsection{Fluxos de Trabalho Otimizados}
+
+\subsubsection{Fluxo Completo do Projeto}
+\begin{enumerate}
+\item \textbf{Terminal}: \texttt{source .cshrc-mentor} + \texttt{ams\_ics}
+\item \textbf{Schematic}: Criar e verificar esquemático
+\item \textbf{Symbol}: Gerar e configurar símbolo
+\item \textbf{ViewPoint}: Criar para netlist
+\item \textbf{Layout}: AutoInst + otimizacao + routing
+\item \textbf{DRC}: Verificar e corrigir erros
+\item \textbf{LVS}: Comparar com schematic
+\item \textbf{PEX}: Extrair parasitas
+\item \textbf{ELDO}: Preparar e executar simulacao
+\item \textbf{EZWave}: Analisar resultados
+\end{enumerate}
+
+\subsubsection{Fluxo Rapido para Modificacoes}
+\begin{enumerate}
+\item Modificar schematic
+\item Check schematic
+\item Atualizar layout (se necessario)
+\item Run DRC + LVS
+\item Run PEX
+\item Simular e analisar
+\end{enumerate}
+
+\subsection{Backup e Versionamento}
+
+\subsubsection{Estrategias de Backup}
+\begin{lstlisting}[language=bash]
+# Backup completo do projeto
+cp -r projeto.proj projeto_backup_date.proj
+
+# Backup incremental
+tar -czf projeto_$(date +%Y%m%d).tar.gz projeto.proj
+
+# Backup seletivo (apenas celulas importantes)
+cp -r projeto.proj/cell.lib/default.group/logic.views/celula_chave
+\end{lstlisting}
+
+\subsubsection{Controle de Versões Manual}
+\begin{itemize}
+\item \textbf{Nomear versões}: projeto\_v1, projeto\_v2, etc.
+\item \textbf{Documentar mudanças}: Arquivo CHANGES.txt
+\item \textbf{Backup antes de modificações grandes}
+\item \textbf{Testar cada versão} antes de prosseguir
+\end{itemize}
+
+\subsection{Dicas de Produtividade}
+
+\subsubsection{Atalhos e Boas Práticas}
+\begin{itemize}
+\item \textbf{Salvar frequentemente} em todas as ferramentas
+\item \textbf{Usar nomes descritivos} para células e sinais
+\item \textbf{Documentar} configurações importantes
+\item \textbf{Testar incrementalmente} cada parte do circuito
+\item \textbf{Manter organização} nos diretórios e arquivos
+\end{itemize}
+
+\subsubsection{Otimização de Performance}
+\begin{itemize}
+\item \textbf{Limitar complexidade} do layout quando possível
+\item \textbf{Usar extrações mais simples} (C+CC ao invés de R+C+CC) para debug
+\item \textbf{Fechar ferramentas} não utilizadas para liberar memória
+\item \textbf{Limitar número de sinais} no EZWave para melhor performance
+\end{itemize}
+
+\subsubsection{Workflow em Equipe}
+\begin{itemize}
+\item \textbf{Comunicar mudanças} em células compartilhadas
+\item \textbf{Reservar células} quando estiver trabalhando
+\item \textbf{Documentar interfaces} entre diferentes blocos
+\item \textbf{Manter padrões consistentes} de nomenclatura
+\end{itemize}
+
+\subsection{Comandos de Emergência}
+
+\subsubsection{Recuperação de Projeto}
+\begin{lstlisting}[language=bash]
+# Se cElulas desaparecerem 
+ams_ics -p projeto_copy -t c35b4c3
+# Copiar default.group do projeto antigo para o novo
+
+# Se arquivo corrompido
+cp backup/projeto_backup.proj ./
+\end{lstlisting}
+
+\subsubsection{Limpeza de Arquivos Temporários}
+\begin{lstlisting}[language=bash]
+# Limpar arquivos de simulaCAOo temporArios
+rm -f *.wdb *.log *.out *.err
+
+# Limpar netlists antigos
+rm -rf *.cal/
+\end{lstlisting}
+
+\subsubsection{Reinicialização de Ambiente}
+\begin{lstlisting}[language=bash]
+# Se problemas com variaveis de ambiente
+exit
+# Re-login e re-executar source commands
+\end{lstlisting}
+\newpage
+\newpage

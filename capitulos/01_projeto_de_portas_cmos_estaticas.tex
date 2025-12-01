@@ -1,0 +1,179 @@
+\section{Projeto de Portas CMOS Estáticas}
+
+
+\subsection{Da Lógica ao Esquemático}
+Uma porta CMOS estática é composta por duas redes de transistores que são o dual uma da outra .
+
+\begin{itemize}
+    \item \textbf{Rede Pull-Up (PUN):}
+    \begin{itemize}
+        \item \textbf{Transistores:} \textbf{PMOS} (ficam "em cima").
+        \item \textbf{Conecta:} A saída (Y) ao \textbf{VDD}.
+    \end{itemize}
+    \item \textbf{Rede Pull-Down (PDN):}
+    \begin{itemize}
+        \item \textbf{Transistores:} \textbf{NMOS} (ficam "em baixo").
+        \item \textbf{Conecta:} A saída (Y) ao \textbf{VSS (GND)}.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{ Regras de Dualidade (Teorema de De Morgan)}
+A rede PDN implementa a lógica \textit{diretamente} (sem a negação final), enquanto a rede PUN implementa o DUAL. Esta dualidade é uma consequência direta do Teorema de De Morgan .
+
+\begin{itemize}
+    \item \textbf{Rede PUN (PMOS):}
+    \begin{itemize}
+        \item Operação \textbf{AND ($\cdot$)} $\rightarrow$ Transistores em \textbf{Paralelo}.
+        \item Operação \textbf{OR (+)} $\rightarrow$ Transistores em \textbf{Série}.
+    \end{itemize}
+    \item \textbf{Rede PDN (NMOS):}
+    \begin{itemize}
+        \item Operação \textbf{AND ($\cdot$)} $\rightarrow$ Transistores em \textbf{Série}.
+        \item Operação \textbf{OR (+)} $\rightarrow$ Transistores em \textbf{Paralelo}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Exemplo Passo-a-Passo: OAI21 - $Y = \overline{(A+B) \cdot C}$}
+Vamos projetar a porta "OR-AND-Invert" (OAI21), cuja lógica é $\neg(b(a+c))$ na Prova 2010.
+
+\begin{enumerate}
+    \item \textbf{Rede Pull-Up (PUN - PMOS):}
+    \begin{itemize}
+        \item A lógica é o DUAL da PDN: $(A \cdot B) + C$.
+        \item (A $\parallel$ B) na PDN $\rightarrow$ Transistores PMOS A e B ficam em \textbf{SÉRIE}.
+        \item em SÉRIE com C na PDN $\rightarrow$ O bloco (A $\cdot$ B) fica em \textbf{PARALELO} com o transistor PMOS C.
+    \end{itemize}
+
+    \item \textbf{Rede Pull-Down (PDN - NMOS):}
+    \begin{itemize}
+        \item A lógica (sem a inversão) é: $(A+B) \cdot C$.
+        \item \textbf{$(A+B)$ (OR):} Transistores NMOS A e B ficam em \textbf{PARALELO}.
+        \item \textbf{$\cdot C$ (AND):} O bloco (A $\parallel$ B) fica em \textbf{SÉRIE} com o transistor NMOS C.
+    \end{itemize}
+
+    
+    \item \textbf{Circuito Completo:}
+    \begin{itemize}
+        \item As entradas (A, B, C) são conectadas aos gates dos pares NMOS/PMOS.
+        \item A PUN é conectada ao VDD; a PDN é conectada ao VSS.
+        \item A Saída (Y ou 'out') é retirada da junção entre a PUN e a PDN.
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+
+\subsection{Princípio Fundamental do Dimensionamento}
+O objetivo do dimensionamento (definir $W_n$ e $W_p$) é igualar as "forças" das redes pull-up e pull-down para que os tempos de subida e descida da porta sejam simétricos.
+
+\subsubsection{ Equações de Tempo de Propagação}
+Os tempos de subida e descida são dados aproximadamente por :
+$$ t_{phl} = \frac{1.6 \cdot C_L}{\mu_n C_{ox} (W/L)_{n,eff} V_{DD}} $$
+$$ t_{plh} = \frac{1.6 \cdot C_L}{\mu_p C_{ox} (W/L)_{p,eff} V_{DD}} $$
+Para igualar os tempos ($t_{phl} = t_{plh}$), os termos $1.6 \cdot C_L / (C_{ox} V_{DD})$ cancelam, resultando em:
+$$ \frac{1}{\mu_n (W/L)_{n,eff}} = \frac{1}{\mu_p (W/L)_{p,eff}} $$
+Assumindo que $L_n = L_p$ (comprimentos iguais), a condição de simetria torna-se:
+\begin{equation}
+\mu_n \cdot W_{n,eff} = \mu_p \cdot W_{p,eff}
+\end{equation}
+
+\subsubsection{ Razão de Mobilidade ($r$) e Modelos}
+Definimos a razão de mobilidade $r = \mu_n / \mu_p$. No entanto, este valor \textbf{não é constante}; ele depende do modelo de simulação (típico, pior velocidade, etc.) .
+
+\begin{itemize}
+    \item $\mu_n$: Mobilidade dos elétrons (NMOS).
+    \item $\mu_p$: Mobilidade das lacunas (PMOS).
+\end{itemize}
+Como $\mu_n > \mu_p$, os transistores PMOS precisam ser fisicamente \textbf{mais largos ($W_p$)} que os NMOS ($W_n$) para ter a mesma "força".
+
+\begin{table}[H]
+\centering
+\caption{Valores de Mobilidade (U0) e Razão (r) para Diferentes Modelos}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Modelo} & \textbf{U0 NMOS ($\mu_n$)} & \textbf{U0 PMOS ($\mu_p$)} & \textbf{Razão $r = \mu_n / \mu_p$} \\
+\midrule
+Constantes Gerais & 370  & 126  & $\approx 2.94$ \\
+Modelo Típico (tm) & 475.8  & 148.2  & $\approx 3.21$  \\
+Worst Power (wp) & 500.2  & 158.1  & $\approx 3.16$  \\
+Worst Speed (ws) & 467.1  & 131.4  & $\approx 3.55$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Relação de Largura para Força Equivalente:}
+\begin{equation}
+W_{p,eff} = r \cdot W_{n,eff}
+\end{equation}
+
+\subsection{Análise de Tempos (Melhor e Pior Caso)}
+A largura efetiva ($W_{eff}$) depende de quais transistores estão conduzindo.
+
+\begin{itemize}
+    \item $t_{PHL}$ (Tempo High-to-Low): Tempo de \textbf{descida}. Controlado pela \textbf{PDN (NMOS)}.
+    \item $t_{PLH}$ (Tempo Low-to-High): Tempo de \textbf{subida}. Controlado pela \textbf{PUN (PMOS)}.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{Pior Caso (Worst Case):} Ocorre no caminho de \textbf{maior resistência} (mais transistores em série e menos em paralelo) . Resulta no tempo \textbf{mais longo}.
+    \item \textbf{Melhor Caso (Best Case):} Ocorre no caminho de \textbf{menor resistência} (todos transistores em paralelo ligados). Resulta no tempo \textbf{mais curto}.
+\end{itemize}
+
+\subsubsection{ Cálculo da Largura Efetiva ($W_{eff}$)}
+Assumindo transistores idênticos ($W, L$) :
+\begin{itemize}
+    \item \textbf{N Transistores em Série:} A resistência total aumenta. A largura efetiva é $N$ vezes menor.
+    $$ W_{eff} = \frac{W}{N} $$
+    \item \textbf{N Transistores em Paralelo:} A resistência total diminui. A largura efetiva é $N$ vezes maior.
+    $$ W_{eff} = N \cdot W $$
+\end{itemize}
+
+\newpage
+
+\subsection{Dimensionamento da Porta OAI21 - $Y = \overline{(A+B) \cdot C}$}
+Usamos as redes que derivamos acima e assumimos $W_{nA} = W_{nB} = W_{nC} = W_n$ e $W_{pA} = W_{pB} = W_{pC} = W_p$.
+
+\begin{table}[H]
+\centering
+\caption{Cálculo da Largura Efetiva ($W_{eff}$) para a porta OAI21 }
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Rede e Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+\textbf{Pior Subida} ($t_{PLH,worst}$) & PUN: Caminho por A e B em série. & $W_{p,eff} = W_p / 2$ \\
+\textbf{Melhor Subida} ($t_{PLH,best}$) & PUN: Caminho por C (em paralelo). & $W_{p,eff} = W_p$ \\
+\midrule
+\textbf{Pior Descida} ($t_{PHL,worst}$) & PDN: Caminho por A e C (ou B e C). & $W_{n,eff} = W_n / 2$ \\
+\textbf{Melhor Descida} ($t_{PHL,best}$) & PDN: Caminho por (A $\parallel$ B) e C. & $W_{n,eff} = (2W_n) / 3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Relações de Comparação para OAI21}
+Usando $W_{p,eff} = r \cdot W_{n,eff}$ (com $r \approx 2.94$ a $3.55$, dependendo do modelo):
+
+\begin{itemize}
+    \item \textbf{$t_{PLH,worst} = t_{PHL,worst}$} (Pior subida = Pior descida) 
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies \dfrac{W_p}{2} = r \cdot \left(\dfrac{W_n}{2}\right)$
+        \item $\mathbf{W_p = r \cdot W_n}$
+    \end{itemize}
+    
+    \item \textbf{$t_{PLH,best} = t_{PHL,best}$} (Melhor subida = Melhor descida)
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies W_p = r \cdot \left(\dfrac{2W_n}{3}\right)$
+        \item $\mathbf{W_p = \dfrac{2r}{3} W_n}$
+    \end{itemize}
+    
+    \item \textbf{$t_{PLH,worst} = t_{PHL,best}$} (Pior subida = Melhor descida) 
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies \dfrac{W_p}{2} = r \cdot \left(\dfrac{2W_n}{3}\right)$
+        \item $\mathbf{W_p = \dfrac{4r}{3} W_n}$
+    \end{itemize}
+    
+    \item \textbf{$t_{PLH,best} = t_{PHL,worst}$} (Melhor subida = Pior descida)
+    \begin{itemize}
+        \item $W_{p,eff} = r \cdot W_{n,eff} \implies W_p = r \cdot \left(\dfrac{W_n}{2}\right)$
+        \item $\mathbf{W_p = \dfrac{r}{2} W_n}$
+    \end{itemize}
+\end{itemize}
+\newpage

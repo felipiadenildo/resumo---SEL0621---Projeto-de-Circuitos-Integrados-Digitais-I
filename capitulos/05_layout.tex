@@ -1,0 +1,285 @@
+\section{Layout}
+
+Esta seção descreve o fluxo de trabalho para criar o layout físico de uma célula no ICStation, a partir de um esquemático verificado.
+
+\subsection{Criação do Layout a partir do Esquemático}
+
+\subsubsection{Inicialização do Layout}
+\begin{enumerate}
+    \item No \textbf{ICStudio}: Selecione a célula desejada (ex: \texttt{inv}) na sua biblioteca.
+    \item Clique com o \textbf{Botão direito $\rightarrow$ New View}.
+    \item \textbf{View Type}: Selecione \textbf{Layout}.
+    \item \textbf{Connectivity Source}: Assegure-se de que está selecionado \textbf{Schematic} (ou o \texttt{vpt\_c35b4\_device} se estiver usando ViewPoint).
+    \item \textbf{Finish}. A ferramenta \textbf{ICStation} (para layout) será aberta.
+\end{enumerate}
+
+\subsubsection{Configuração do Ambiente ICStation}
+Configure o ambiente para facilitar o trabalho:
+\begin{itemize}
+    \item \textbf{ Reserva de Célula:} Garanta que você pode editar o layout.
+    \begin{itemize}
+        \item \textbf{File $\rightarrow$ Cell $\rightarrow$ Reserve $\rightarrow$ Current Context}.
+        \item O status deve mudar de (GE-R-0) (Read-only) para (GE-E-0) (Editável) .
+    \end{itemize}
+    \item \textbf{Janelas Lado a Lado:} \textbf{MGC $\rightarrow$ Setup $\rightarrow$ LeftRight} (para ver o esquemático e o layout simultaneamente).
+    \item \textbf{Habilitar Atalhos:} \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Enable}, depois \textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Load} .
+    \item \textbf{Configurar o Grid:} \textbf{Other $\rightarrow$ Window $\rightarrow$ Set Grid} .
+    \begin{itemize}
+        \item \textbf{X = 0.025}, \textbf{Y = 0.025}
+        \item \textbf{Minor = 0.1}, \textbf{Major = 1}
+    \end{itemize}
+    \item \textbf{Mostrar Softkeys:} \textbf{Setup $\rightarrow$ Session $\rightarrow$ Show Softkeys} (mostra botões de atalho).
+    \item \textbf{Mostrar Paleta de Camadas:} \textbf{Other $\rightarrow$ Layers $\rightarrow$ Show layer palette $\rightarrow$ Append $\rightarrow$ all} .
+    \item \textbf{ Dica de Estabilidade:} Ao usar a barra de scroll no ICStation, não clique repetidamente, pois isso pode travar a ferramenta.
+\end{itemize}
+
+\subsection{Geração Automática e Placement}
+
+\subsubsection{AutoInst (Instanciação Automática)}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{DLA Layout $\rightarrow$ AutoInst}.
+    \item \textbf{Ação:} Isso gera o layout automático (caixas de transistores e resistores) a partir do esquemático.
+    \item \textbf{Visualizar Hierarquia (Peek):} Para ver o conteúdo das células (como os transistores), use \textbf{Context $\rightarrow$ Hierarchy $\rightarrow$ Peek $\rightarrow$ 2-4 levels}.
+\end{itemize}
+
+\subsubsection{Placement Automático (para Standard Cells)}
+Para projetos que usam células-padrão (ex: da CORELIB), o processo é diferente:
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{Place \& Route $\rightarrow$ Autofp $\rightarrow$ Ok}.
+    \item \textbf{ Aspect Ratio:} Configure \textbf{Upper = 2} em \textbf{Aspect Ratio}.
+    \item \textbf{StdCell} $\rightarrow$ Clique e arraste para desenhar a área onde as células serão posicionadas.
+    \item Apague as linhas verdes externas (são guias para PADs que não usaremos agora).
+    \item \textbf{ Dica de Conexão:} Antes de rotear, selecione todo o esquemático na janela ao lado para garantir que todas as conexões (overflows) apareçam no layout.
+\end{itemize}
+
+\subsection{Otimização do Layout (Layout Manual)}
+
+\subsubsection{Merge (Fusão) de Transistores}
+O objetivo é otimizar a área fundindo (sobrepondo) terminais de dreno/source.
+\begin{itemize}
+    \item \textbf{Transistores em Série:} Podem ser juntados diretamente (sobrepondo os terminais).
+    \item \textbf{Transistores em Paralelo:} Use o comando \textbf{Flip} (atalho 'f') em um dos transistores antes de juntá-los para alinhar dreno com dreno e source com source.
+    \item \textbf{Distância Crítica (DIFF-NTUB):} Mantenha uma distância de \textbf{1.2$\mu$m} entre a difusão (DIFF) dos NMOS e o poço (NTUB) dos PMOS.
+    \item \textbf{ Dica de Merge:} O bulk (contato de poço) NUNCA pode estar entre MOS de tamanhos diferentes. Comece o merge por essa parte.
+\end{itemize}
+
+\subsubsection{Dobramento (Folding) de Transistores/Resistores}
+Usado quando um componente é muito largo e atrapalha a otimização da área.
+\begin{enumerate}
+    \item \textbf{Dobrar Transistor (Fold):} 
+    \begin{itemize}
+        \item Desabilite os hotkeys (\textbf{Other $\rightarrow$ Hotkeys $\rightarrow$ Disable}).
+        \item Selecione o transistor $\rightarrow$ digite \texttt{fold} no console $\rightarrow$ Enter.
+        \item \textbf{Folds: 2} (ou mais, para dividir em múltiplos "dedos").
+    \end{itemize}
+    \item \textbf{Dobrar Resistor (Bend):} 
+    \begin{itemize}
+        \item \textbf{Object $\rightarrow$ Change $\rightarrow$ Device $\rightarrow$ Bend}.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Adição de Poços e Contatos}
+
+\subsubsection{Contatos de Poço (Bulk/Tap Contacts)}
+Esses contatos são \textbf{essenciais} para conectar o substrato (bulk) ao VDD/VSS e evitar latch-up.
+\begin{itemize}
+    \item \textbf{Método 1 (Change Device):} \textbf{Objects $\rightarrow$ Change $\rightarrow$ Device} $\rightarrow$ Adicionar "t" (tap) onde necessário (ex: \texttt{tcgc} $\rightarrow$ \texttt{tcgct}).
+    \item \textbf{Método 2 (Via Manual):} \textbf{DLA Device $\rightarrow$ Via $\rightarrow$ Point Via}.
+    \begin{itemize}
+        \item \textbf{pdm1}: Contato de bulk para \textbf{PMOS} (conecta NTUB ao VDD).
+        \item \textbf{ndm1}: Contato de bulk para \textbf{NMOS} (conecta PTUB ao VSS).
+        \item Selecione \textbf{MIN\_SIZE}.
+        \item \textbf{} Após colocar o via, desenhe manualmente um \textbf{Shape} da camada (ex: \texttt{NTUB}) ao redor do contato para conectá-lo ao poço.
+    \end{itemize}
+    \item \textbf{Regra Crítica:} O contato de bulk ("t") não pode estar colado diretamente no gate ("g"). Se necessário, use um contato de difusão ("c") entre eles.
+\end{itemize}
+
+\subsubsection{Contatos Poly-Metal1 (p1m1)}
+Usados para conectar o gate (Polisilício) ao roteamento de metal (Metal1).
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{DLA Device $\rightarrow$ Via $\rightarrow$ Point Via $\rightarrow$ p1m1}.
+    \item Selecione \textbf{MIN\_SIZE}.
+\end{itemize}
+
+\subsection{Roteamento (Routing)}
+Processo de desenhar os "fios" (metais) que conectam os componentes.
+
+\subsubsection{Configuração do Roteamento}
+\begin{itemize}
+    \item \textbf{Direção das Camadas:} \textbf{Route $\rightarrow$ Direction}.
+    \begin{itemize}
+        \item \textbf{POLY1}: Both (Permite rotear poly em X e Y)
+        \item \textbf{MET1}: Both
+        \item \textbf{MET2}: Both
+        \item \textbf{MET3}: None (Desabilitar camadas superiores)
+        \item \textbf{MET4}: None
+    \end{itemize}
+    \item \textbf{Opções Avançadas:} \textbf{Route $\rightarrow$ Options $\rightarrow$ Advanced}.
+    \begin{itemize}
+        \item Marcar \textbf{Check same net spacing}.
+        \item Marcar \textbf{Center wires on pins}.
+    \end{itemize}
+    \item \textbf{Setup (Bloqueios):} \textbf{Route $\rightarrow$ Setup}.
+    \begin{itemize}
+        \item \textbf{Instance blockages}: Marcar \textbf{All data} (impede o roteador de passar por dentro dos transistores).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Roteamento Automático (ARoute)}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{ARoute Commands $\rightarrow$ RUN}.
+    \item \textbf{Verificar Conexões Faltantes:} Olhe o console ou use o atalho \textbf{S0vrf}.
+    \item \textbf{ Repetir/Apagar:} Use \textbf{Rip} (ripup) para refazer conexões falhas, ou \textbf{Routing Results $\rightarrow$ Delete Nets $\rightarrow$ all} para apagar tudo e recomeçar.
+\end{itemize}
+
+\subsubsection{Roteamento Manual (IRoute)}
+Útil para conexões curtas ou complexas que o ARoute falha.
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{IRoute Commands $\rightarrow$ RUN}.
+    \item \textbf{Barra de espaço} alterna entre as camadas de roteamento (Poly, Metal1, etc.).
+    \item \textbf{Conexão de Gate:} O padrão é \texttt{Gate(poly) -- poly -- (p1m1) -- metal(IN)}.
+\end{itemize}
+
+\subsubsection{Configuração de Net Classes (VDD/VSS)}
+As linhas de alimentação devem ser mais largas para suportar mais corrente.
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{ARoute Net Classes $\rightarrow$ Edit $\rightarrow$ New}.
+    \item \textbf{Configurar Larguras:} \textbf{MET1: 1.8}, \textbf{MET2: 1.8} $\rightarrow$ \textbf{OK} (Larguras de 1.0 $\mu$m a 1.8 $\mu$m são comuns).
+    \item Dê um nome para a classe (ex: "power").
+    \item \textbf{Assign} $\rightarrow$ Selecione o net \textbf{VSS} $\rightarrow$ \textbf{Apply} .
+    \item Repita o processo para \textbf{VDD}.
+\end{enumerate}
+
+\subsection{Ports e Textos}
+Ports são necessários para que as ferramentas de verificação (LVS) e extração (PEX) saibam onde estão as entradas e saídas do seu layout.
+
+\subsubsection{Adição de Ports}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{DLA Layout $\rightarrow$ Port}.
+    \item \textbf{ Se não funcionar:} Se não conseguir colocar ports, tente \textbf{DLA Layout $\rightarrow$ Open}.
+    \item \textbf{Camada:} Use a \textbf{Barra de espaço} para mudar a camada para \textbf{MET1} (Metal1) para todos os ports.
+    \item Posicione os ports nos locais apropriados (entradas, saídas, VDD, VSS).
+\end{itemize}
+
+\subsubsection{Texto nos Ports}
+Esta é uma etapa \textbf{crítica} para o LVS.
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{Botão direito $\rightarrow$ Add $\rightarrow$ Text on Ports}.
+    \item \textbf{Text layer}: Mude de \texttt{PIN} para \textbf{M1NET}. (Alguns tutoriais divergem , mas \texttt{M1NET} é a prática recomendada para evitar erros de LVS e DRC ).
+    \item \textbf{Text height}: \textbf{1.0}.
+\end{itemize}
+
+\subsubsection{Aumentar Área dos Ports (Opcional, mas recomendado)}
+Para garantir uma boa conexão com blocos externos.
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Easy Edit $\rightarrow$ Add $\rightarrow$ Shape $\rightarrow$ MET1}.
+    \item Desenhe um retângulo de Metal1 sobre a área de dreno/source que serve como port.
+    \item \textbf{Comando:} \textbf{Connectivity $\rightarrow$ Port $\rightarrow$ Add to Port}.
+\end{enumerate}
+
+\subsection{Camadas Geradas}
+Algumas camadas não são desenhadas, mas geradas com base em outras.
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{HIT-Kit Utilities $\rightarrow$ Generated Layers}.
+    \item \textbf{Marcar:} \textbf{NLDD} e \textbf{FIMP}.
+    \item \textbf{Ação:} Clique em \textbf{OK}.
+    \item \textbf{Importante:} Rode o DRC novamente após gerar essas camadas.
+\end{itemize}
+
+\subsection{Ligação com Símbolo (Propriedade phy\_comp)}
+Esta etapa "amarra" o seu símbolo de esquemático ao seu layout finalizado.
+
+\begin{enumerate}
+    \item \textbf{Copiar Localização do Layout:}
+    \begin{itemize}
+        \item No \textbf{ICStation}, clique com o \textbf{botão direito} na aba do seu layout (ex: \texttt{inv/layout}).
+        \item \textbf{Properties $\rightarrow$ Location}.
+        \item Copie o caminho exibido (ex: \texttt{\$minha\_lib/default.group/layout.views/inv}).
+    \end{itemize}
+    \item \textbf{Adicionar Propriedade ao Símbolo:}
+    \begin{itemize}
+        \item Volte ao \textbf{Design Architect} (esquemático).
+        \item Abra o \textbf{SÍMBOLO} (\texttt{File $\rightarrow$ Open $\rightarrow$ Symbol}).
+        \item \textbf{Comando:} \textbf{Add $\rightarrow$ Properties}.
+        \item \textbf{Property Name}: \texttt{phy\_comp}.
+        \item \textbf{Property Value}: Cole a \textbf{Location} copiada do layout.
+        \item Coloque o texto gerado abaixo do símbolo.
+    \end{itemize}
+    \item \textbf{Ajustar Texto (Opcional):}
+    \begin{itemize}
+        \item \textbf{ Setup $\rightarrow$ Select Filter $\rightarrow$ Properties} $\rightarrow$ OK .
+        \item Selecione o texto \texttt{phy\_comp}.
+        \item \textbf{Botão direito $\rightarrow$ Change Height $\rightarrow$ Specified $\rightarrow$ 0.2} .
+    \end{itemize}
+    \item \textbf{ Verificar Símbolo (A "Parte Mágica"):}
+    \begin{itemize}
+        \item \textbf{File $\rightarrow$ Check Symbol} (1 warning é esperado: \textit{"Property phy\_comp... not on the interface"}) .
+        \item \textbf{Save}.
+        \item \textbf{File $\rightarrow$ Check Symbol} (Agora 0 warnings são esperados) .
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Técnicas Avançadas}
+
+\subsubsection{Adição de PADs}
+PADs são as conexões externas do chip.
+\begin{enumerate}
+    \item \textbf{Comando:} \textbf{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+    \item \textbf{Biblioteca:} \textbf{IOLIB\_4M}.
+    \item \textbf{Célula:} \textbf{g\_padonly} $\rightarrow$ OK.
+    \item Posicione os PADs (ex: um para VDD, um para VSS) nas bordas do layout.
+    \item Conecte-os ao seu circuito usando \textbf{Shapes} de metal largas.
+    \item \textbf{ Dica:} Comece grosso, e se der erro de DRC, diminua a largura.
+\end{enumerate}
+
+\subsubsection{Determinação do Tamanho da Célula}
+\begin{itemize}
+    \item \textbf{Comando:} \textbf{Report $\rightarrow$ Windows}.
+    \item O console mostrará as coordenadas \textbf{CellExtent} (ex: \texttt{(x1, y1) (x2, y2)}).
+    \item \textbf{Área} = (x2 - x1) * (y2 - y1).
+\end{itemize}
+
+\subsection{Dicas Críticas e Problemas Comuns}
+
+\subsubsection{Organização do Layout}
+\begin{itemize}
+    \item \textbf{Minimizar Cruzamentos:} Antes de rotear, posicione os componentes para minimizar o número de "overflows" (linhas amarelas) que se cruzam.
+    \item \textbf{Canal de Roteamento:} Tente deixar um caminho livre no meio (entre PMOS e NMOS) para o roteamento.
+    \item \textbf{Alinhamento:} Use \textbf{Easy Edit $\rightarrow$ Align $\rightarrow$ Center X} (ou Y) para alinhar componentes.
+\end{itemize}
+
+\subsubsection{Problemas Comuns e Soluções}
+\begin{itemize}
+    \item \textbf{Mouse travado com Ctrl:} Se o mouse se comportar como se o Ctrl estivesse pressionado, pressione \textbf{Ctrl+Shift} e use as setas do teclado; isso geralmente resolve.
+    \item \textbf{ICStation Travado:} Evite clicar repetidamente no scroll do mouse.
+    \item \textbf{Células Sumiram da Biblioteca:} Crie um novo projeto com o nome antigo e copie a pasta \texttt{default.group} do projeto antigo/backup para a nova pasta do projeto .
+    \item \textbf{Não consigo colocar Ports:} Verifique se o layout está aberto com \textbf{DLA Layout $\rightarrow$ Open}.
+\end{itemize}
+
+\subsubsection{Distâncias Críticas e Cálculos}
+\begin{itemize}
+    \item \textbf{POLY-POLY}: 0.45$\mu$m.
+    \item \textbf{RES-POLY}: 0.35$\mu$m.
+    \item \textbf{DIFF-NTUB}: 1.2$\mu$m.
+    \item \textbf{NTUB enclosure} (borda do poço N ao redor do PMOS): 1.2$\mu$m.
+    \item \textbf{ Área/Perímetro (AD/PD):} Para simulação, a altura da difusão é estimada como 0.85$\mu$m.
+        \item $AD = 0.85 \times W$.
+        \item $PD = W + (2 \times 0.85)$.
+\end{itemize}
+
+\subsection{Exemplo de Sequência Completa (Resumo)}
+\begin{enumerate}
+    \item \textbf{AutoInst} $\rightarrow$ Gera layout básico.
+    \item \textbf{Merge} transistores $\rightarrow$ Otimiza área (usando Flip se necessário).
+    \item \textbf{Adicionar bulks} (t) $\rightarrow$ Contatos de poço (pdm1, ndm1).
+    \item \textbf{Configurar roteamento} $\rightarrow$ Direction e Options .
+    \item \textbf{Run routing} (ARoute) $\rightarrow$ Automático + manual (IRoute) se necessário.
+    \item \textbf{Adicionar ports} $\rightarrow$ Em camada MET1.
+    \item \textbf{Text on Ports} $\rightarrow$ Configurar para camada M1NET.
+    \item \textbf{Generated Layers} $\rightarrow$ Gerar NLDD + FIMP.
+    \item \textbf{Verificações} $\rightarrow$ (DRC e LVS, detalhados na próxima seção).
+    \item \textbf{Link com símbolo} $\rightarrow$ Adicionar propriedade \texttt{phy\_comp} ao símbolo.
+\end{enumerate}
+\newpage
+
+\newpage

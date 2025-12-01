@@ -1,0 +1,38 @@
+# --- LaTeX (Compilação) ---
+# Ignora a pasta de build que configuramos no VS Code
+build/
+
+# Ignora arquivos temporários gerados caso você compile manualmente fora do VS Code
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.lof
+*.lot
+
+# --- VS Code ---
+# Geralmente é boa prática ignorar a pasta de configurações locais,
+# mas se você quiser salvar o settings.json que criamos, remova a linha abaixo.
+.vscode/
+
+# --- Sistema Operacional ---
+.DS_Store
+Thumbs.db
+
+# --- Ferramentas de CI/Simulação (Baseado no seu relatório) ---
+# Arquivos temporários do ELDO/Mentor Graphics que ocupam espaço e são recriáveis
+*.wdb
+*.chi
+*.cou
+*.xwd
+*.cal/
+*.err
+
+# Backups e arquivos compactados
+*.tar.gz
+*.bak

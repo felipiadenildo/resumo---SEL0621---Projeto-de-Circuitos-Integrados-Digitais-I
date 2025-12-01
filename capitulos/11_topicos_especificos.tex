@@ -1,0 +1,463 @@
+\section{Tópicos Específicos}
+
+
+\subsection{Células da CORELIB}
+
+\subsubsection{Células Disponíveis (Exemplos)}
+\begin{itemize}
+\item \textbf{inv0, inv1}: Inversores básicos.
+\item \textbf{df1, df3}: Flip-flops D.
+\item \textbf{dl1}: Latch D.
+\item \textbf{nand2, nand21, nand22, nand23}: Portas NAND .
+\item \textbf{nor2, nor21, nor23}: Portas NOR .
+\item \textbf{xor2}: Porta XOR.
+\item \textbf{and2}, \textbf{or2}.
+\end{itemize}
+
+\subsubsection{Uso no Schematic}
+\begin{enumerate}
+\item \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol} .
+\item \textbf{Biblioteca}: CORELIB.
+\item Selecionar célula desejada (ex: \texttt{df1}).
+\item Conectar conforme necessário.
+\item \textbf{Verificar}: Check Schematic (0 errors, 0 warnings).
+\end{enumerate}
+
+\subsubsection{Uso no Layout}
+\begin{itemize}
+\item \textbf{ICStudio $\rightarrow$ Library $\rightarrow$ CORELIB $\rightarrow$ célula}.
+\item Já inclui layout pré-validado (célula-padrão).
+\item \textbf{DRC/LVS}: Geralmente já verificado.
+\end{itemize}
+
+\subsection{Adição de PADs}
+
+\subsubsection{Procedimento Completo}
+\begin{enumerate}
+\item \textbf{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+\item \textbf{Biblioteca}: \textbf{IOLIB\_4M} .
+\item \textbf{Célula}: \textbf{g\_padonly} (último item).
+\item Colocar um PAD para VDD e um para VSS.
+\item \textbf{Conectar com shapes}: 
+ \begin{itemize}
+ \item Puxar shapes de metal dos PADs até os pontos de conexão.
+ \item \textbf{Grossura}: O mais grosso possível (reduzir se der erro DRC).
+ \item \textbf{Materiais}: Usar MET1 ou MET2.
+ \end{itemize}
+\item \textbf{Verificar DRC}: Corrigir erros de espaçamento.
+\end{enumerate}
+
+\subsubsection{Configuração de PADs}
+\begin{itemize}
+\item \textbf{Orientação}: Posicionar nas bordas do chip.
+\item \textbf{Alimentação}: PAD VDD e VSS devem ser robustos.
+\item \textbf{Sinais}: PADs para entradas/saídas importantes.
+\item \textbf{ESD}: Proteção geralmente incluída nos PADs.
+\end{itemize}
+
+\subsection{Criação de Hierarquia}
+
+\subsubsection{Hierarquia no Schematic}
+\begin{enumerate}
+\item Criar schematic de bloco inferior (ex: \texttt{inversor}).
+\item Gerar símbolo e configurar a propriedade \textbf{phy\_comp} (ver abaixo).
+\item No schematic superior: \textbf{Add $\rightarrow$ Instance $\rightarrow$ Choose Symbol}.
+\item Selecionar símbolo do bloco inferior (ex: \texttt{inversor}).
+\item Conectar ports e alimentação.
+\item \textbf{Check Schematic} (0 errors, 0 warnings).
+\end{enumerate}
+
+\subsubsection{ Ligação Símbolo-Layout (phy\_comp)}
+Esta é a etapa crucial que conecta o símbolo do esquemático ao seu layout físico.
+\begin{enumerate}
+    \item \textbf{Copiar Localização do Layout:}
+    \begin{itemize}
+        \item No \textbf{ICStation}, clique com o \textbf{botão direito} na \textit{view} do seu layout.
+        \item \textbf{Properties $\rightarrow$ Location}.
+        \item Copie o caminho exibido (ex: \texttt{\$minha\_lib/default.group/layout.views/inv}) .
+    \end{itemize}
+    \item \textbf{Adicionar Propriedade ao Símbolo:}
+    \begin{itemize}
+        \item Volte ao \textbf{Design Architect} e abra o \textbf{SÍMBOLO} (\texttt{File $\rightarrow$ Open $\rightarrow$ Symbol}).
+        \item \textbf{Comando:} \textbf{Add $\rightarrow$ Properties}.
+        \item \textbf{Property Name}: \texttt{phy\_comp}.
+        \item \textbf{Property Value}: Cole a \textbf{Location} copiada .
+    \end{itemize}
+    \item \textbf{Ajustar Texto e Verificar (A "Parte Mágica"):}
+    \begin{itemize}
+        \item \textbf{Setup $\rightarrow$ Select Filter $\rightarrow$ Properties} $\rightarrow$ OK .
+        \item Mude a altura do texto (ex: \textbf{Change Height $\rightarrow$ Specified $\rightarrow$ 0.2}) .
+        \item \textbf{File $\rightarrow$ Check Symbol} (1 warning é esperado) .
+        \item \textbf{File $\rightarrow$ Save Symbol}.
+        \item \textbf{File $\rightarrow$ Check Symbol} (Agora 0 warnings são esperados) .
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Hierarquia no Layout}
+\begin{enumerate}
+\item Criar layout do bloco inferior (com DRC/LVS limpos).
+\item No layout superior: \textbf{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+\item Selecionar célula do bloco inferior (que agora está ligada ao símbolo).
+\item Posicionar e conectar (usando \textbf{Place \& Route} para Standard Cells ou manualmente).
+\item \textbf{Verificar}: DRC e LVS hierárquicos.
+\end{enumerate}
+
+\subsubsection{Contexto Hierárquico}
+\begin{itemize}
+\item \textbf{Context $\rightarrow$ Hierarchy $\rightarrow$ Peek $\rightarrow$ N levels}: Ver "dentro" do layout do bloco.
+\item \textbf{Edit $\rightarrow$ Flatten}: Desmontar hierarquia (cuidado).
+\item \textbf{Objects $\rightarrow$ Make $\rightarrow$ Cell}: Criar célula a partir de shapes.
+\end{itemize}
+
+\subsection{Resistores em Poly}
+
+\subsubsection{Adição no Schematic}
+\begin{enumerate}
+\item \textbf{HIT-KIT Utilities $\rightarrow$ Devices $\rightarrow$ Resistors}.
+\item \textbf{rpolyh}: Resistor poly de alta resistividade.
+\item \textbf{Parâmetros}:
+ \begin{itemize}
+ \item \textbf{R}: Valor da resistência.
+ \item \textbf{L}: Comprimento (calculado automaticamente).
+ \item \textbf{W}: Largura.
+ \item \textbf{Bends}: Número de dobras (para layout compacto).
+ \end{itemize}
+\end{enumerate}
+
+\subsubsection{Layout de Resistores}
+\begin{itemize}
+\item \textbf{AutoInst}: Gera layout automaticamente.
+\item \textbf{Dobramento}: \textbf{Object $\rightarrow$ Change $\rightarrow$ Device $\rightarrow$ Bend}.
+\item \textbf{Distâncias}: Respeitar espaçamento POLY-RES (0.35$\mu$m).
+\item \textbf{Contatos}: Usar MET1 para conexões.
+\end{itemize}
+
+\subsubsection{Modelo ELDO}
+\begin{lstlisting}[language=pspice]
+* Incluir modelo de resistor
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/restm.mod"
+
+* Instancia no PEX (vem como 'rR0', trocar para 'XR0')
+XR0 n1 n2 rpolyh r=1k
+\end{lstlisting}
+
+\subsection{Fontes de Corrente e Espelhos}
+
+\subsubsection{Implementação Básica}
+\begin{itemize}
+\item \textbf{Transistores em diodo}: Para referência.
+\item \textbf{Espelho simples}: Copiar corrente.
+\item \textbf{Espelho cascode} ou \textbf{Wilson}: Maior impedância de saída, melhor topologia para fontes de corrente (conforme Prova 2016b, Q9) .
+\item \textbf{Polarização}: Usar resistores ou divisores.
+\end{itemize}
+
+\subsubsection{Dimensionamento}
+\begin{itemize}
+\item \textbf{Corrente de referência}: Definida por resistor ou fonte.
+\item \textbf{Relação W/L}: Define razão de espelhamento.
+\item \textbf{Tensão Early}: Considerar para precisão.
+\item \textbf{Matching}: Transistores próximos no layout.
+\end{itemize}
+
+\subsubsection{Exemplo ELDO}
+\begin{lstlisting}[language=pspice]
+* Espelho de corrente simples 1:2
+Mref ref ref VSS VSS MODN w=10u l=1u
+Mout out ref VSS VSS MODN w=20u l=1u
+Iref VDD ref DC 100uA
+\end{lstlisting}
+
+\subsection{Circuitos C2MOS}
+
+\subsubsection{Características}
+\begin{itemize}
+\item \textbf{Latch dinâmico}: Mantém estado quando clock desabilitado.
+\item \textbf{Clock = Alto (3V)}: $M_{P1}$ e $M_{N1}$ estão conduzindo e o circuito se comporta como um inversor.
+\item \textbf{Clock = Baixo (0V)}: $M_{P1}$ e $M_{N1}$ estão cortados e a carga é mantida no capacitor de saída (ex: gate de outra porta).
+\item \textbf{Aplicações}: Registradores, pipelines.
+\end{itemize}
+
+\subsubsection{Implementação}
+\begin{itemize}
+\item \textbf{Transistores de passagem} (em série): $M_{P1}$ e $M_{N1}$ controlados pelo clock.
+\item \textbf{Inversor principal}: $M_{P2}$ e $M_{N2}$ controlados pela entrada \texttt{In}.
+\item \textbf{Bulk}: Conectar corretamente (PMOS em VDD, NMOS em VSS).
+\end{itemize}
+
+\subsubsection{Dimensionamento}
+\begin{itemize}
+\item \textbf{Transistores de passagem}: L mínimo para reduzir carga.
+\item \textbf{Inversor}: Dimensionar para tempos equivalentes (subida/descida).
+\item \textbf{Clock}: Considerar sobreposição (non-overlap).
+\end{itemize}
+
+\subsection{Osciladores em Anel}
+
+\subsubsection{Configuração Básica}
+\begin{itemize}
+\item \textbf{N estágios}: Número \textbf{ímpar} de inversores.
+\item \textbf{Frequência}: $f = \frac{1}{2 \cdot N \cdot t_{pd}}$ (onde $t_{pd}$ é o atraso médio do inversor).
+\item \textbf{Condição de oscilação}: Ganho > 1 por estágio.
+\item \textbf{Alimentação}: Estável para frequência constante.
+\end{itemize}
+
+\subsubsection{Implementação}
+\begin{itemize}
+\item \textbf{Célula básica}: Inversor ou porta CMOS (ex: NAND com uma entrada em VDD).
+\item \textbf{Controle de frequência}: Tensão de alimentação ou capacidades de carga.
+\item \textbf{Saída}: Usar um buffer para evitar que a carga de medição afete a oscilação.
+\end{itemize}
+
+\subsubsection{Simulação}
+\begin{itemize}
+\item \textbf{Condições iniciais}: \texttt{.ic} pode ser necessário para "chutar" a oscilação.
+\item \textbf{Tempo de simulação}: Múltiplos períodos.
+\item \textbf{Medição}: Período e frequência.
+\end{itemize}
+
+\subsection{Camadas Especiais}
+
+\subsubsection{HRES (High Resistance)}
+\begin{itemize}
+\item \textbf{Função}: Usada para construir resistores de polisilício.
+\item \textbf{Processo}: Define uma área que isola o \texttt{POLY1} e impede que ele seja dopado (aumentando sua resistividade) .
+\item \textbf{Uso}: Definir o corpo do resistor \texttt{rpolyh}.
+\item \textbf{DRC}: Verificar espaçamentos (ex: \texttt{RES-POLY}).
+\end{itemize}
+
+\subsubsection{NLDD e FIMP}
+\begin{itemize}
+\item \textbf{NLDD (N-Lightly Doped Drain)}: Reduz campos elétricos na junção dreno-bulk.
+\item \textbf{FIMP}: Implantação para ajuste fino de $V_{th}$ (Threshold Voltage).
+\item \textbf{Geração}: \textbf{HIT-Kit Utilities $\rightarrow$ Generated Layers} .
+\item \textbf{Verificação}: Rodar DRC novamente após a geração .
+\end{itemize}
+
+\subsubsection{ Camadas Físicas (Exemplos)}
+Os nomes das camadas no processo :
+\begin{itemize}
+    \item \textbf{ntub}: Poço N (Well) para PMOS.
+    \item \textbf{diff}: Região ativa (onde dreno/source são formados).
+    \item \textbf{nplus / pplus}: Implantações N+ e P+ para Dreno/Source.
+    \item \textbf{poly1}: Primeira camada de Polisilício (Gates).
+    \item \textbf{cont}: Contato entre \texttt{diff} ou \texttt{poly1} e \texttt{met1}.
+    \item \textbf{met1}: Primeira camada de Metal.
+    \item \textbf{via1}: Contato entre \texttt{met1} e \texttt{met2}.
+    \item \textbf{pad}: Abertura na passivação para contato externo (Bonding pad).
+\end{itemize}
+
+\subsection{Técnicas de Layout Avançadas}
+
+\subsubsection{Match de Transistores (Casamento)}
+Essencial para circuitos analógicos (espelhos de corrente, pares diferenciais).
+\begin{itemize}
+\item \textbf{Orientação comum}: Todos os transistores na mesma direção.
+\item \textbf{Proximidade}: Transistores pareados devem ser colocados próximos.
+\item \textbf{Interdigitação}: Alternar "dedos" de transistores (ex: A-B-A-B).
+\item \textbf{Comum centroid (Centro Comum)}: Layout simétrico ao redor de um ponto central.
+\end{itemize}
+
+\subsubsection{Redução de Parasitas}
+\begin{itemize}
+\item \textbf{Metais curtos}: Minimizar comprimento de interconexões.
+\item \textbf{Shielding}: Blindar sinais sensíveis (ex: analógicos) com linhas de VDD/VSS.
+\item \textbf{Vias múltiplas}: Usar várias vias para conexões de alta corrente (reduz R e melhora confiabilidade).
+\item \textbf{Orientação}: Evitar cruzamentos desnecessários; se inevitável, cruzar em camadas diferentes (ex: MET1 e MET2).
+\end{itemize}
+
+\subsubsection{Otimização de Área}
+\begin{itemize}
+\item \textbf{Merge agressivo}: Juntar drenos/sources sempre que possível .
+\item \textbf{Dobramento (Fold)}: Usar \texttt{fold} para transistores largos .
+\item \textbf{Compactação}: Mover blocos para o mais próximo possível (respeitando o DRC).
+\item \textbf{Roteamento inteligente}: Planejar o roteamento para minimizar a área de "fios".
+\end{itemize}
+
+\subsection{Fluxos Especiais}
+
+\subsubsection{Fluxo Standard Cells}
+\begin{enumerate}
+\item \textbf{Place \& Route $\rightarrow$ Autofp}.
+\item \textbf{Aspect Ratio}: 2 em Upper.
+\item \textbf{StdCell}: Selecionar área.
+\item \textbf{Route}: Configurar net classes para VDD/VSS (ex: 1.8$\mu$m) .
+\item \textbf{Verificação}: DRC e LVS hierárquico.
+\end{enumerate}
+
+\subsubsection{Fluxo com Células Personalizadas}
+\begin{enumerate}
+\item Criar células personalizadas (ex: porta lógica) com DRC/LVS limpos.
+\item Adicionar ao schematic superior como instâncias.
+\item Gerar layout hierárquico (os blocos aparecerão como caixas).
+\item Conectar as células com roteamento (manual ou automático).
+\item Verificação completa (DRC, LVS).
+\end{enumerate}
+
+\subsubsection{Fluxo Analógico-Digital}
+\begin{enumerate}
+\item \textbf{Blocos analógicos}: Layout manual com \textit{matching} (interdigitação, etc.).
+\item \textbf{Blocos digitais}: Standard cells ou auto place \& route.
+\item \textbf{Interface}: Cuidado com acoplamento de ruído digital para o analógico.
+\item \textbf{Alimentação}: Idealmente, separar VDD/VSS analógico e digital.
+\item \textbf{Verificação}: DRC, LVS e extração PEX completa.
+\end{enumerate}
+
+\subsection{Problemas Específicos e Soluções}
+
+\subsubsection{Latch-up}
+\begin{itemize}
+\item \textbf{Causa}: Acionamento de um SCR (tiristor) parasitário (PNPN) entre VDD e VSS, causando um curto-circuito.
+\item \textbf{Prevenção}:
+ \begin{itemize}
+ \item \textbf{Guard rings}: Anéis de proteção (N+ em poço N, P+ em substrato P) ao redor de blocos.
+ \item \textbf{Espaçamento}: Distância adequada entre NMOS (PTUB) e PMOS (NTUB).
+ \item \textbf{Substrate contacts}: Usar muitos contatos de poço (bulks) para "amarrar" o potencial do substrato ao VDD/VSS.
+ \end{itemize}
+\item \textbf{Verificação}: DRC para espaçamentos críticos (regra NTUB/PTUB).
+\end{itemize}
+
+\subsubsection{Electromigration}
+\begin{itemize}
+\item \textbf{Causa}: Corrente excessiva "empurra" os átomos de metal em trilhas finas, criando aberturas (falhas).
+\item \textbf{Prevenção}:
+ \begin{itemize}
+ \item \textbf{Largura de metal}: Usar trilhas largas para VDD/VSS (ex: 1.8$\mu$m) .
+ \item \textbf{Vias múltiplas}: Usar várias vias para conexões de alta corrente.
+ \end{itemize}
+\item \textbf{Verificação}: DRC verifica regras de largura mínima de metal (width rules).
+\end{itemize}
+
+\subsubsection{Cross-talk (Acoplamento)}
+\begin{itemize}
+\item \textbf{Causa}: Acoplamento capacitivo entre sinais (trilhas) adjacentes.
+\item \textbf{Prevenção}:
+ \begin{itemize}
+ \item \textbf{Shielding}: Blindar sinais sensíveis (ex: analógicos, clock) com linhas de VDD/VSS ao lado.
+ \item \textbf{Espaçamento}: Aumentar distância entre sinais críticos.
+ \item \textbf{Orientação}: Cruzar sinais em ângulos retos (usando camadas diferentes, ex: MET1 vs MET2).
+ \end{itemize}
+\item \textbf{Verificação}: PEX com extração \textbf{C+CC} (Capacitância de Acoplamento) .
+\end{itemize}
+
+\subsection{Exemplos de Células Complexas}
+
+\subsubsection{Flip-flop D Master-Slave}
+\begin{itemize}
+\item \textbf{Composição}: 2 latches (ex: C2MOS ou com realimentação) em série.
+\item \textbf{Clock}: Clocks $\phi$ e $\bar{\phi}$ (não sobrepostos) para evitar \textit{race conditions}.
+\item \textbf{Reset}: Pode ser assíncrono ou síncrono.
+\item \textbf{Layout}: Cuidado com o roteamento e distribuição do(s) sinal(is) de clock.
+\end{itemize}
+
+\subsubsection{Buffer de Potência (Driver)}
+\begin{itemize}
+\item \textbf{Função}: Dirigir cargas capacitivas grandes (ex: pinos de I/O, linhas de clock longas).
+\item \textbf{Estágios múltiplos}: Uma cadeia de inversores com W/L progressivamente maiores.
+\item \textbf{Dimensionamento}: Razão de "tapering" constante (fator 'f') entre os estágios.
+\item \textbf{Layout}: Transistores de saída muito largos (usando \textit{fold}) e múltiplas vias para VDD/VSS.
+\end{itemize}
+
+\subsubsection{Comparador Analógico}
+\begin{itemize}
+\item \textbf{Amplificador diferencial}: Estágio de entrada (alta impedância, rejeição de modo comum).
+\item \textbf{Estágio de ganho}: Amplificação do pequeno sinal de diferença.
+\item \textbf{Latch de saída}: Converte o sinal analógico amplificado em um sinal digital (0 ou 1).
+\item \textbf{Layout}: \textit{Matching} (casamento) é crítico no par diferencial de entrada.
+\end{itemize}
+
+\subsection{Técnicas de Verificação Avançada}
+
+\subsubsection{LVS com Células Personalizadas (Hierarquia)}
+\begin{itemize}
+\item \textbf{phy\_comp}: A propriedade é essencial. O LVS usará o layout apontado por \texttt{phy\_comp} em vez de procurar transistores dentro do símbolo .
+\item \textbf{Hierarquia}: Verificar todos os níveis (LVS hierárquico).
+\item \textbf{Interfaces}: Conferir se os ports (VDD, VSS, A, B) do bloco correspondem ao esquemático.
+\item \textbf{Problemas comuns}: Bulk não conectado dentro do bloco, ports trocados.
+\end{itemize}
+
+\subsubsection{ERC (Electrical Rule Checking)}
+O DRC moderno (Calibre) já inclui muitas verificações de ERC:
+\begin{itemize}
+\item \textbf{Gates flutuantes} (ex: erro \texttt{ILL\_FLOATING\_GATE\_ERC}).
+\item \textbf{Bulk connections} (ex: erro \texttt{NWELL TOO HOT}).
+\item \textbf{Short circuits} (curtos entre VDD e VSS).
+\item \textbf{Open circuits} (nets não conectados).
+\end{itemize}
+
+\subsubsection{Análise de Performance}
+\begin{itemize}
+\item \textbf{Atraso}: Extrair $t_{pd}$ (média de $t_{phl}$ e $t_{plh}$).
+\item \textbf{Potência}: Consumo estático (vazamento) e dinâmico ($C \cdot V^2 \cdot f$).
+\item \textbf{Margem de ruído}: Imunidade a interferências.
+\item \textbf{Temperatura}: Efeito na performance (simulação \texttt{.DC TEMP}).
+\end{itemize}
+
+\subsection{Scripts e Automação Avançada}
+
+\subsubsection{Batch DRC/LVS}
+\begin{lstlisting}[language=bash]
+# Script para verificacao em lote
+foreach cell (cell1 cell2 cell3)
+  calibre -drc $cell
+  calibre -lvs $cell
+end
+\end{lstlisting}
+
+\subsubsection{Extração Automática de Parâmetros}
+\begin{lstlisting}[language=bash]
+# Extrair W/L de todos os transistores
+grep "M.*MOD" schematic.netlist | awk '{print $8, $9}'
+\end{lstlisting}
+
+\subsubsection{Geração de Relatórios}
+\begin{lstlisting}[language=bash, frame=none]
+# (Exemplo de scripts hipoteticos)
+report_area.tcl
+report_performance.tcl
+\end{lstlisting}
+
+\subsection{Migração de Tecnologia}
+
+\subsubsection{Ajustes Necessários}
+\begin{itemize}
+\item \textbf{Regras de design}: Novas distâncias mínimas.
+\item \textbf{Modelos de transistor}: Novos parâmetros (ex: $V_{th}$, $C_{ox}$).
+\item \textbf{Capacitâncias}: Valores diferentes.
+\item \textbf{Resistências}: Novos valores de \textit{sheet resistance}.
+\end{itemize}
+
+\subsubsection{Procedimento}
+\begin{enumerate}
+\item \textbf{Revisar regras}: Novas regras DRC.
+\item \textbf{Ajustar dimensões}: W/L se necessário.
+\item \textbf{Re-rotear}: Se necessário para novas regras.
+\item \textbf{Re-verificar}: DRC, LVS, simulação.
+\end{enumerate}
+
+\subsection{Documentação e Manutenção}
+
+\subsubsection{Documentação de Células}
+\begin{itemize}
+\item \textbf{Esquemático}: Diagrama limpo e legível.
+\item \textbf{Símbolo}: Pins organizados logicamente.
+\item \textbf{Layout}: Com medidas críticas anotadas.
+\item \textbf{Performance}: Parâmetros extraídos (atrasos, potência).
+\end{itemize}
+
+\subsubsection{Versionamento}
+\begin{itemize}
+\item \textbf{Nomenclatura}: celula\_v1, celula\_v2.
+\item \textbf{Log de mudanças}: O que foi modificado e porquê.
+\item \textbf{Backup}: Versões estáveis arquivadas.
+\item \textbf{Testes}: Resultados de simulação documentados.
+\end{itemize}
+
+\subsubsection{Manutenção}
+\begin{itemize}
+\item \textbf{Atualização}: Ajustes para novas versões das ferramentas.
+\item \textbf{Otimização}: Melhorias contínuas de performance.
+\item \textbf{Bug fixes}: Correção de problemas identificados.
+\item \textbf{Documentação}: Manter documentação atualizada.
+\end{itemize}
+
+

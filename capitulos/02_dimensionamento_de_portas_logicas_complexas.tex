@@ -1,0 +1,259 @@
+\section{Dimensionamento de Portas Lógicas Complexas}
+
+
+O objetivo do dimensionamento é encontrar as larguras ($W_n, W_p$) para que os tempos de subida e descida sejam simétricos. Para isso, igualamos a "força" das redes (PUN e PDN) usando a razão de mobilidade ($r \approx 2.94$ a $3.55$, dependendo do modelo) .
+
+A equação base é: $W_{p,eff} = r \cdot W_{n,eff}$. Assumimos $L_n = L_p$.
+
+\subsection{Porta NAND3 - $Y = \overline{A \cdot B \cdot C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} 3 transistores (A, B, C) em \textbf{Série}.
+    \item \textbf{PUN (PMOS):} 3 transistores (A, B, C) em \textbf{Paralelo}.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para NAND3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: Apenas 1 PMOS ligado & $W_{p,eff} = W_p$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: 3 PMOS ligados em paralelo & $W_{p,eff} = 3 W_p$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: 3 NMOS ligados em série & $W_{n,eff} = W_n / 3$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: 3 NMOS ligados em série & $W_{n,eff} = W_n / 3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Porta NOR3 - $Y = \overline{A + B + C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} 3 transistores (A, B, C) em \textbf{Paralelo}.
+    \item \textbf{PUN (PMOS):} 3 transistores (A, B, C) em \textbf{Série}.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para NOR3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: 3 PMOS ligados em série & $W_{p,eff} = W_p / 3$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: 3 PMOS ligados em série & $W_{p,eff} = W_p / 3$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: Apenas 1 NMOS ligado & $W_{n,eff} = W_n$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: 3 NMOS ligados em paralelo & $W_{n,eff} = 3 W_n$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Porta AOI21 - $Y = \overline{(A \cdot B) + C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} (A e B em \textbf{Série}) em \textbf{Paralelo} com C.
+    \item \textbf{PUN (PMOS):} (A e B em \textbf{Paralelo}) em \textbf{Série} com C.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para AOI21}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: Caminho por A e C (ou B e C) & $W_{p,eff} = W_p / 2$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: Caminho por (A$\parallel$B) e C & $W_{p,eff} = (2W_p) / 3$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: Caminho por A e B em série & $W_{n,eff} = W_n / 2$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: Caminho por C & $W_{n,eff} = W_n$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Porta OAI21 - $Y = \overline{(A + B) \cdot C}$}
+\begin{itemize}
+    \item \textbf{PDN (NMOS):} (A e B em \textbf{Paralelo}) em \textbf{Série} com C.
+    \item \textbf{PUN (PMOS):} (A e B em \textbf{Série}) em \textbf{Paralelo} com C.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Largura Efetiva ($W_{eff}$) para OAI21}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Caso} & \textbf{Caminho Ativo} & \textbf{$W_{eff}$} \\
+\midrule
+Pior Subida ($t_{PLH,worst}$) & PUN: Caminho por A e B em série & $W_{p,eff} = W_p / 2$ \\
+Melhor Subida ($t_{PLH,best}$) & PUN: Caminho por C & $W_{p,eff} = W_p$ \\
+\midrule
+Pior Descida ($t_{PHL,worst}$) & PDN: Caminho por A e C (ou B e C) & $W_{n,eff} = W_n / 2$ \\
+Melhor Descida ($t_{PHL,best}$) & PDN: Caminho por (A$\parallel$B) e C & $W_{n,eff} = (2W_n) / 3$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}[htb] % 'htb' é uma sugestão de posicionamento (here, top, bottom)
+    \centering % Centraliza todo o conteúdo da figura
+    
+    % --- Primeira Linha ---
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{nand3.png}
+        \caption{Diagrama esquemático da Porta NAND3}
+        \label{fig:nand3}
+    \end{subfigure}
+    \hfill % Adiciona espaço horizontal flexível entre as colunas
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{nor3.png}
+        \caption{Diagrama esquemático da NOR3}
+        \label{fig:nor3}
+    \end{subfigure}
+    
+    \vspace{0.5cm} % Adiciona um pequeno espaço vertical entre as linhas
+    
+    % --- Segunda Linha ---
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{aoi21.jpeg}
+        \caption{Diagrama esquemático da AOI21}
+        \label{fig:aoi21}
+    \end{subfigure}
+    \hfill % Adiciona espaço horizontal flexível entre as colunas
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{oai21.png}
+        \caption{Diagrama esquemático da OAI21}
+        \label{fig:oai21} % <-- Corrigi este label (estava duplicado)
+    \end{subfigure}
+    
+    % \caption{Caption geral para todas as figuras (opcional)}
+    % \label{fig:todos_diagramas}
+\end{figure}
+
+\newpage
+
+
+\subsection[\textcolor{red}{Exemplos Práticos de Provas}]{\textcolor{red}{Exemplos Práticos de Provas}}
+(Usando $r = 2.94$ para consistência com os cálculos originais)
+
+\subsubsection[\textcolor{red}{Exemplo 1: Prova 2016b (OAI21)}]{\textcolor{red}{Exemplo 1: Prova 2016b (OAI21)}}
+\begin{itemize}
+    \item \textbf{Lógica:} $D = \neg((A+B) \cdot C)$ (Porta OAI21).
+    \item \textbf{Dado:} $W_n = 3 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,worst}$ (pior subida = pior descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Pior Descida):} Da tabela OAI21, o pior caminho na PDN é por A-C (ou B-C).
+    \[ W_{n,eff} = \frac{W_n}{2} = \frac{3 \mu m}{2} = 1.5 \mu m \]
+    
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} Da tabela OAI21, o pior caminho na PUN é por A-B.
+    \[ W_{p,eff} = \frac{W_p}{2} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ \frac{W_p}{2} = r \cdot \left( \frac{W_n}{2} \right) \]
+    \[ W_p = r \cdot W_n \]
+    \[ W_p = 2.94 \cdot (3 \mu m) = \mathbf{8.82 \mu m} \]
+\end{enumerate}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Exemplo 2: Prova 2022a (AOI21)}]{\textcolor{red}{Exemplo 2: Prova 2022a (AOI21)}}
+\begin{itemize}
+    \item \textbf{Lógica:} $\neg(a \cdot b + c)$ (Porta AOI21).
+    \item \textbf{Dado:} $W_n = 4 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,best}$ (pior subida = melhor descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Melhor Descida):} Da tabela AOI21, o melhor caminho na PDN é pelo transistor C.
+    \[ W_{n,eff} = W_n = 4 \mu m \]
+    
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} Da tabela AOI21, o pior caminho na PUN é por A-C (ou B-C).
+    \[ W_{p,eff} = \frac{W_p}{2} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ \frac{W_p}{2} = r \cdot W_n \]
+    \[ W_p = 2 \cdot r \cdot W_n \]
+    \[ W_p = 2 \cdot 2.94 \cdot (4 \mu m) = \mathbf{23.52 \mu m} \]
+\end{enumerate}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Exemplo 3: Prova 2024 (OAI21)}]{\textcolor{red}{Exemplo 3: Prova 2024 (OAI21)}}
+(Nota: A prova pede a função $a(b+c)$. Uma porta CMOS estática é inerentemente inversora, então assumimos a implementação da função OAI21 $Y = \overline{A \cdot (B+C)}$ (que é topologicamente idêntica a $\overline{C \cdot (A+B)}$) e ignoramos a inversão final).
+\begin{itemize}
+    \item \textbf{Lógica (Assumida):} $Y = \overline{A \cdot (B+C)}$ (Porta OAI21).
+    \item \textbf{Dado:} $W_p = 15 \mu m$ (para todos os PMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,best}$ (pior subida = melhor descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} Da tabela OAI21 (assumindo $Y=\overline{C(A+B)}$), o pior caminho na PUN é A e B em série.
+    \[ W_{p,eff} = \frac{W_p}{2} = \frac{15 \mu m}{2} = 7.5 \mu m \]
+
+    \item \textbf{$W_{n,eff}$ (Melhor Descida):} Da tabela OAI21, o melhor caminho na PDN é (A$\parallel$B) e C em série.
+    \[ W_{n,eff} = \frac{1}{\frac{1}{W_n + W_n} + \frac{1}{W_n}} = \frac{1}{\frac{1}{2W_n} + \frac{1}{W_n}} = \frac{2W_n}{3} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ 7.5 \mu m = r \cdot \left( \frac{2W_n}{3} \right) \]
+    \[ W_n = \frac{3 \cdot 7.5 \mu m}{2 \cdot r} \]
+    \[ W_n = \frac{22.5 \mu m}{2 \cdot 2.94} = \frac{22.5 \mu m}{5.88} = \mathbf{3.83 \mu m} \]
+\end{enumerate}
+
+\newpage
+
+\subsection[\textcolor{red}{Exemplos Complementares (Topologias Básicas)}]{\textcolor{red}{Exemplos Complementares (Topologias Básicas)}}
+Estas questões cobrem topologias fundamentais (NAND e NOR) não presentes explicitamente nos enunciados das provas acima, mas essenciais para o entendimento.
+
+\subsubsection[\textcolor{red}{Exemplo Extra A: Porta NAND3}]{\textcolor{red}{Exemplo Extra A: Porta NAND3}}
+\begin{itemize}
+    \item \textbf{Lógica:} $Y = \overline{A \cdot B \cdot C}$ (NAND de 3 entradas).
+    \item \textbf{Dado:} $W_n = 6 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,worst}$ (pior subida = pior descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Pior Descida):} A rede PDN da NAND3 possui 3 transistores em série (A-B-C).
+    \[ W_{n,eff} = \frac{W_n}{3} = \frac{6 \mu m}{3} = 2.0 \mu m \]
+
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} A rede PUN possui 3 transistores em paralelo. O pior caso ocorre quando apenas 1 transistor conduz (maior resistência).
+    \[ W_{p,eff} = W_p \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ W_p = r \cdot (2.0 \mu m) \]
+    \[ W_p = 2.94 \cdot 2.0 \mu m = \mathbf{5.88 \mu m} \]
+\end{enumerate}
+
+\subsubsection[\textcolor{red}{Exemplo Extra B: Porta NOR3}]{\textcolor{red}{Exemplo Extra B: Porta NOR3}}
+\begin{itemize}
+    \item \textbf{Lógica:} $Y = \overline{A + B + C}$ (NOR de 3 entradas).
+    \item \textbf{Dado:} $W_n = 2 \mu m$ (para todos os NMOS).
+    \item \textbf{Condição:} $t_{PLH,worst} = t_{PHL,best}$ (pior subida = melhor descida).
+\end{itemize}
+
+\textbf{Cálculo:}
+\begin{enumerate}
+    \item \textbf{$W_{n,eff}$ (Melhor Descida):} A rede PDN da NOR3 possui 3 transistores em paralelo. O melhor caso ocorre quando todos os 3 conduzem.
+    \[ W_{n,eff} = 3 \cdot W_n = 3 \cdot 2 \mu m = 6 \mu m \]
+
+    \item \textbf{$W_{p,eff}$ (Pior Subida):} A rede PUN da NOR3 possui 3 transistores em série.
+    \[ W_{p,eff} = \frac{W_p}{3} \]
+
+    \item \textbf{Equacionar:} $W_{p,eff} = r \cdot W_{n,eff}$
+    \[ \frac{W_p}{3} = r \cdot (6 \mu m) \]
+    \[ W_p = 3 \cdot 2.94 \cdot 6 \mu m = \mathbf{52.92 \mu m} \]
+    (Nota: O valor elevado de $W_p$ deve-se à condição extrema de comparar 3 PMOS em série com 3 NMOS em paralelo).
+\end{enumerate}
+
+\newpage
+

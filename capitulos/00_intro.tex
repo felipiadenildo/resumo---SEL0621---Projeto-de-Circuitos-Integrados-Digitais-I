@@ -1,0 +1,71 @@
+% ####################################################################
+% #                     CAPA CUSTOMIZADA (Titlepage)                 #
+% ####################################################################
+%
+% Esta é a estrutura da sua capa, usando as definições do preâmbulo.
+% Você pode colocar isso no início do seu \begin{document}.
+
+\begin{titlepage}
+    \centering
+    \makeatletter % Permite o uso de comandos com '@' (ex: \@title)
+
+    % --- CABEÇALHO DA UNIVERSIDADE ---
+    {\fontsize{16}{18}\selectfont\bfseries UNIVERSIDADE DE SÃO PAULO\par}
+    {\fontsize{14}{16}\selectfont ESCOLA DE ENGENHARIA DE SÃO CARLOS\par}
+    {\fontsize{12}{14}\selectfont Departamento de Engenharia Elétrica e de Computação\par}
+    
+    \vspace{2.5cm}
+    
+    % --- TÍTULO DO RELATÓRIO ---
+    % Usa o \title definido no preâmbulo
+    {\huge\bfseries \@title\par}
+    
+    \vfill % Adiciona espaço flexível
+    
+
+    % --- INFORMAÇÕES DO PROFESSOR ---
+    \begin{minipage}{0.9\textwidth}
+        \large
+        \begin{flushleft}
+            \textbf{Professor:} \\
+            \professor
+        \end{flushleft}
+    \end{minipage}
+
+    \vspace{1.5cm}
+
+    % --- INFORMAÇÕES DOS ALUNOS ---
+    \begin{minipage}{0.9\textwidth}
+        \large
+        \begin{flushleft}
+            \textbf{Aluno:} \\
+            \@author
+        \end{flushleft}
+    \end{minipage}
+    
+    \vfill % Adiciona mais espaço flexível
+    
+    % --- LOCAL E DATA ---
+    % Usa o \dataEntrega definido no preâmbulo
+    {\large São Carlos - SP\par}
+    {\large \dataEntrega\par}
+    
+    \makeatother % Restaura o comportamento normal do '@'
+\end{titlepage}
+
+
+% ####################################################################
+% #                          ÍNDICE (Sumário)                        #
+% ####################################################################
+\newpage
+\tableofcontents
+\thispagestyle{empty} % Remove cabeçalho e rodapé da pág. do índice
+
+\newpage
+
+% ####################################################################
+% #                    INÍCIO DO CONTEÚDO DO DOCUMENTO               #
+% ####################################################################
+
+
+\newpage

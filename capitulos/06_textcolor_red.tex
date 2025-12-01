@@ -1,0 +1,77 @@
+\section{\textcolor{red}
+{Exemplos de Prova: Estratégias de Layout}}
+
+\subsection[\textcolor{red}{Layout de Portas Lógicas (Manual / AutoInst)}]{\textcolor{red}{Layout de Portas Lógicas (Manual / AutoInst)}}
+Aplicável para: \textbf{Prova 2016b (Q2)}, \textbf{Prova 2022a (Q2)} e \textbf{Prova 2024 (Q3)}.
+
+Nestas questões, o objetivo é criar o layout físico de uma única porta (ex: OAI21) otimizando a área.
+
+\textbf{Fluxo de Trabalho Recomendado:}
+\begin{enumerate}
+    \item \textbf{Geração Inicial:} No ICStation, use \texttt{DLA Layout $\rightarrow$ AutoInst}. Isso trará os transistores com as dimensões definidas no esquemático.
+    \item \textbf{Otimização (Merge):}
+    \begin{itemize}
+        \item Identifique transistores que compartilham o mesmo sinal de dreno/source.
+        \item Mova-os para que as áreas de difusão se sobreponham (merge).
+        \item Use o comando \textbf{Flip} (atalho 'f') se necessário para alinhar dreno com dreno ou source com source.
+    \end{itemize}
+    \item \textbf{Contatos de Substrato (Bulks):}
+    \begin{itemize}
+        \item Adicione manualmente os contatos de poço (taps).
+        \item Use \texttt{pdm1} para o poço N (PMOS) conectando ao VDD.
+        \item Use \texttt{ndm1} para o substrato P (NMOS) conectando ao VSS.
+        \item \textit{Regra Crítica:} Mantenha a distância correta entre a difusão e o poço.
+    \end{itemize}
+    \item \textbf{Ports e Textos:} Coloque ports em Metal 1 para A, B, C, OUT, VDD e VSS. Adicione \textbf{Text on Ports} na camada \texttt{M1NET} para o LVS.
+\end{enumerate}
+
+\subsection[\textcolor{red}{Layout Automático (Standard Cells)}]{\textcolor{red}{Layout Automático (Standard Cells)}}
+Aplicável para: \textbf{Prova 2016b (Q7)}, \textbf{Prova 2022a (Q7)} e \textbf{Prova 2024 (Q7)}.
+
+Nestas questões, você está fazendo o layout de um contador ou circuito complexo que usa células prontas da \texttt{CORELIB}. Não desenhamos transistores aqui.
+
+\textbf{Fluxo de Trabalho (ICStation):}
+\begin{enumerate}
+    \item \textbf{Preparação:} Não use AutoInst.
+    \item \textbf{Definição da Área (Floorplanning):}
+    \begin{itemize}
+        \item Vá em \texttt{Place \& Route $\rightarrow$ Autofp}.
+        \item Em \textbf{Aspect Ratio}, defina \textbf{Upper = 2} (ou 1 para quadrado).
+        \item Clique em \textbf{StdCell} e desenhe um retângulo na tela onde as células ficarão.
+    \end{itemize}
+    \item \textbf{Configuração de Alimentação (Crítico):}
+    \begin{itemize}
+        \item Antes de rotear, configure a largura dos trilhas de energia.
+        \item \texttt{ARoute Net Classes $\rightarrow$ Edit $\rightarrow$ New}.
+        \item Nome: \texttt{power}. Largura: \textbf{1.8} (para MET1 e MET2).
+        \item Atribua os nets \texttt{VDD} e \texttt{VSS} a esta classe.
+    \end{itemize}
+    \item \textbf{Roteamento:}
+    \begin{itemize}
+        \item Execute \texttt{ARoute $\rightarrow$ Run}.
+        \item Verifique se não sobraram conexões abertas (overflows).
+    \end{itemize}
+\end{enumerate}
+
+\subsection[\textcolor{red}{Adição de PADs (Prova 2022a Q4)}]{\textcolor{red}{Adição de PADs (Prova 2022a Q4)}}
+Requisito específico da prova de 2022, mas útil saber para todas.
+
+\textbf{Procedimento:}
+\begin{enumerate}
+    \item \textbf{Instanciar PADs:}
+    \begin{itemize}
+        \item Vá em \texttt{Objects $\rightarrow$ Add $\rightarrow$ Cell}.
+        \item Selecione a biblioteca \textbf{IOLIB\_4M}.
+        \item Escolha a célula \textbf{g\_padonly} (geralmente a última da lista).
+        \item Adicione duas instâncias: uma para VDD e outra para VSS.
+    \end{itemize}
+    \item \textbf{Posicionamento:} Coloque os PADs nas bordas do seu layout (longe do circuito principal para evitar violações de DRC de poço).
+    \item \textbf{Conexão:}
+    \begin{itemize}
+        \item Desenhe um \textbf{Shape} (retângulo) de Metal 1 ou Metal 2 largo.
+        \item Conecte o pino do PAD ao anel/trilha de alimentação correspondente (VDD ou VSS) do seu circuito.
+    \end{itemize}
+    \item \textbf{Verificação:} Rode o DRC. Erros comuns envolvem espaçamento insuficiente entre o PAD e outros metais ou poços.
+\end{enumerate}
+
+\newpage

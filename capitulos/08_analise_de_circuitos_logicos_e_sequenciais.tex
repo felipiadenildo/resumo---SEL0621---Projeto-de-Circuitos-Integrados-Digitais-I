@@ -1,0 +1,581 @@
+\section{Análise de Circuitos Lógicos e Sequenciais}
+
+
+A análise precisa de circuitos digitais requer a configuração correta de estímulos transientes, o uso de medições automáticas (\texttt{.meas}) para quantificar desempenho e a interpretação correta das formas de onda no visualizador (EZWave). Esta seção detalha o fluxo de trabalho para caracterizar atrasos, potência e limites de frequência, cobrindo os requisitos das Provas de 2016, 2022 e 2024.
+
+\subsection{Configuração de Estímulos Transientes}
+
+\subsubsection{Onda Quadrada Precisa (Pulse)}
+A definição correta da fonte de tensão é o primeiro passo para evitar erros de simulação. Um erro comum é definir a largura do pulso (\texttt{pulse\_width}) simplesmente como $T/2$. Como os tempos de subida ($t_r$) e descida ($t_f$) ocupam tempo, isso resulta em um \textit{duty cycle} incorreto (menor que 50\%), o que altera a medição de potência dinâmica.
+
+\textbf{O Código Robusto:}
+O script abaixo calcula a largura do pulso descontando as transições, garantindo simetria perfeita.
+
+\begin{lstlisting}[language=pspice, caption={Configuração Robusta de Onda Quadrada (Copiar e Colar)}]
+* --- PARAMETROS DE TEMPO ---
+* Ajuste 'period' conforme a frequencia desejada (Ex: 10n = 100MHz)
+.Param period = 10n
+.Param frequency = '1/period'
+
+* --- NIVEIS DE TENSAO ---
+* Ajuste 'high_value' conforme VDD da prova (3.0V ou 3.3V)
+.Param low_value = 0 
+.Param high_value = 3.0V  
+.Param delay = 0
+
+* --- TEMPOS DE TRANSICAO ---
+* Provas pedem geralmente 5% a 10% do periodo ou fixo (0.1ns a 0.5ns)
+.Param rise_time = 0.2ns 
+.Param fall_time = 0.2ns
+
+* --- CALCULO AUTOMATICO DA LARGURA (PULSE WIDTH) ---
+* Subtrai a media das bordas para garantir 50% de Duty Cycle exato
+.Param pulse_width = 'period/2 - ((rise_time + fall_time)/2)'
+
+* --- FONTE DE TENSAO ---
+* Sintaxe: PULSE(Vlow Vhigh delay tr tf pw per)
+Va A 0 pulse(low_value high_value delay rise_time fall_time pulse_width period)
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Ilustração dos parâmetros da fonte Pulse no ELDO: observe como o PW é ajustado para manter o duty cycle.}
+\end{figure}
+
+\newpage
+
+\subsection{Análise de Desempenho (Sweep de Carga e Potência)}
+
+\subsubsection{Teoria e Análise}
+Em circuitos CMOS, dois parâmetros são críticos e dependentes da carga:
+\begin{enumerate}
+    \item \textbf{Atraso ($t_{pd}$):} Aumenta linearmente com a capacitância de carga ($C_L$).
+    \item \textbf{Potência ($P_{avg}$):} Aumenta com a frequência e a carga ($P \approx f C V^2$).
+\end{enumerate}
+Para analisar isso em uma única execução, utilizamos o comando \texttt{SWEEP} dentro da análise \texttt{.tran}.
+
+\textbf{Código Completo:}
+Este script carrega o netlist extraído (PEX), aplica o modelo "Worst Power" (comum em provas) e gera os dados de potência e atraso.
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Carga e Potência}]
+* 1. INCLUDES E MODELOS (CRITICO)
+* Altere o nome do arquivo para o seu .pex.netlist
+.include "minha_celula.pex.netlist"
+
+* Modelos de transistor (WP = Worst Power, comum na Q4 2024)
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP"
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. SETUP DE FONTES
+.Param VDD_ANALISE = 3.3V
+Vdd VDD 0 DC VDD_ANALISE
+Vss VSS 0 DC 0
+
+* Capacitor Variavel (Valor inicial dummy, sera sobrescrito pelo SWEEP)
+CL OUT 0 50fF  
+
+* 3. ESTIMULO (Onda Quadrada - Inserir parametros do exemplo anterior aqui)
+.Param period=10n ... (copiar parametros de tempo)
+Va A 0 pulse(...) 
+
+* 4. MEDICOES AUTOMATICAS (.MEAS)
+* --- Potencia Media ---
+* P = VDD * I_media. O sinal '-' corrige o sentido da corrente no SPICE.
+.meas tran corrente_media AVG I(Vdd)
+.meas tran potencia_consumida param='VDD_ANALISE * -corrente_media'
+
+* --- Atrasos de Propagacao (50% a 50%) ---
+.meas tran atraso_subida trig V(A) val='VDD_ANALISE/2' fall=5 targ V(OUT) val='VDD_ANALISE/2' rise=5
+.meas tran atraso_descida trig V(A) val='VDD_ANALISE/2' rise=5 targ V(OUT) val='VDD_ANALISE/2' fall=5
+
+* 5. SIMULACAO COM SWEEP
+* Sintaxe: .tran passo final SWEEP var INCR passo inicio fim
+* Aqui: Varre CL de 0fF a 300fF com passos de 50fF
+.Param sweep_start=0.0fF sweep_end=300.0fF sweep_step=50.0fF
+.tran 0.1n '10*period' 0 0.01n SWEEP CL INCR sweep_step sweep_start sweep_end
+\end{lstlisting}
+
+\subsubsection{Análise Passo a Passo no EZWave}
+Após rodar a simulação (\texttt{eldo arquivo.cir}), siga estes passos para gerar os gráficos exigidos na prova:
+
+\begin{enumerate}
+    \item Abra o arquivo de resultados (\texttt{.wdb}).
+    \item No menu superior, vá em \textbf{View $\rightarrow$ Measurement Results} (Atalho: \texttt{CTRL+M} em algumas versões, ou procure o ícone de tabela).
+    \item Uma janela se abrirá listando as medições: \texttt{potencia\_consumida}, \texttt{atraso\_subida}, etc.
+    \item \textbf{Selecionar e Plotar:} Clique na medição desejada e arraste para a área de plotagem.
+    \item \textbf{Eixo X Automático:} O EZWave detecta automaticamente que a variável varrida foi $C_L$ e a coloca no eixo X.
+    \item \textbf{Destaque dos Pontos:} Para provar que você simulou 5 ou mais pontos (conforme pede a prova), clique com o botão direito na curva $\rightarrow$ \textbf{Properties} $\rightarrow$ ative \textbf{Data Point Symbol}.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Exemplo de gráfico Potência vs Carga ($C_L$) gerado. Note a linearidade.}
+\end{figure}
+
+\newpage
+
+\subsection{Análise de Frequência Máxima ($F_{max}$)}
+
+\subsubsection{Teoria e Critério de Falha}
+A $F_{max}$ é a frequência limite onde o circuito deixa de fornecer níveis lógicos válidos na saída devido ao tempo insuficiente para carga/descarga dos capacitores parasitas.
+\begin{itemize}
+    \item \textbf{Critério de Aceitação (Degradação):}
+    \begin{itemize}
+        \item Nível lógico "1" deve chegar a pelo menos 95\% de $V_{DD}$.
+        \item Nível lógico "0" deve descer até no máximo 5\% de $V_{DD}$.
+    \end{itemize}
+\end{itemize}
+
+\textbf{Código Completo:}
+Este script varre a frequência e usa a função \texttt{FIND} do ELDO para monitorar os picos de tensão.
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Frequência para Fmax}]
+* ... (Includes e Modelos iguais ao anterior) ...
+
+* 1. ESTIMULO COM FREQUENCIA VARIAVEL
+* Observe que usamos a variavel 'f' no parametro period
+.Param f = 100Meg
+.Param period = '1/f'
+* Definir Rise/Fall como porcentagem pequena do periodo (ex: 5%)
+.Param tr = '0.05 * period'
+Va IN 0 pulse(0 3.3V 0 tr tr 'period/2 - tr' period)
+
+* 2. MEDICOES DE DEGRADACAO
+* Encontra o valor MAXIMO que o nivel BAIXO atinge (Ideal = 0V)
+* Se subir muito (ex: > 0.15V), falhou.
+.meas tran minZero find v(OUT) when v(IN)='3.3V * 0.95' fall=5
+
+* Encontra o valor MINIMO que o nivel ALTO atinge (Ideal = 3.3V)
+* Se cair muito (ex: < 3.15V), falhou.
+.meas tran maxUm find v(OUT) when v(IN)='3.3V * 0.05' rise=5
+
+* 3. SIMULACAO
+* Varre 'f' de 100MHz a 2GHz
+.tran 0.1n '20*period' SWEEP f INCR 100Meg 100Meg 2G
+\end{lstlisting}
+
+\subsubsection{Análise Detalhada no EZWave (Ferramenta Crossing)}
+Esta análise requer precisão para encontrar o ponto exato da falha.
+
+\begin{enumerate}
+    \item Plote as curvas \texttt{maxUm} e \texttt{minZero} em função da frequência.
+    \item Use a ferramenta **Crossing** (\texttt{CTRL + M} $\rightarrow$ Selecione \textbf{All Types} $\rightarrow$ \textbf{Crossing}).
+    \item \textbf{Configurar Limites:}
+    \begin{itemize}
+        \item Para a curva \texttt{minZero}: Defina \textbf{Y Level} = 0.165V (5\% de 3.3V).
+        \item Para a curva \texttt{maxUm}: Defina \textbf{Y Level} = 3.135V (95\% de 3.3V).
+    \end{itemize}
+    \item \textbf{Resultado:} O EZWave marcará a frequência exata onde o sinal cruza esses limites. A $F_{max}$ do circuito é o **menor** valor de frequência entre os dois eventos.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Degradação dos níveis lógicos com a frequência. O ponto de cruzamento define a $F_{max}$.}
+\end{figure}
+
+\newpage
+
+\subsection{Análise Estatística (Monte Carlo)}
+
+\subsubsection{Teoria e Código}
+A análise de Monte Carlo executa a simulação $N$ vezes, variando aleatoriamente os parâmetros dos transistores (como $V_{th}$ e mobilidade) dentro das tolerâncias da fábrica. Isso gera uma distribuição estatística do desempenho.
+
+\textbf{Código Completo:}
+Atenção: O comando `.MC` é especial e não deve ser misturado na mesma linha do `.tran`.
+
+\begin{lstlisting}[language=pspice, caption={Configuração Monte Carlo (Prova 2022a)}]
+* 1. INCLUDES ESPECIFICOS PARA MC
+* Necessario carregar o arquivo de estatisticas (wc53.lib mc)
+.INCLUDE /local/tools/dkit/ams_3.70_mgc/eldo/c35/profile.opt
+.LIB /local/tools/dkit/ams_3.70_mgc/eldo/c35/wc53.lib mc
+
+.include "minha_porta.pex.netlist"
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. PARAMETROS
+.Param VDD_VAL = 2.8V
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. COMANDO MONTE CARLO
+* 75 rodadas, variacao mismatch (local) e process (global)
+.MC 75 NBBINS=20 mismatch process
+
+* 4. MEDICAO
+.meas tran tphl trig V(IN) val='VDD_VAL/2' rise=1 targ V(OUT) val='VDD_VAL/2' fall=1
+
+* 5. EXECUCAO
+.tran 0 50n 0 0.1n
+\end{lstlisting}
+
+\subsubsection{Análise Detalhada no EZWave (Histograma)}
+Não se analisa as ondas no domínio do tempo diretamente, pois haverá 75 curvas sobrepostas ("nuvem de curvas").
+\begin{enumerate}
+    \item Vá em \textbf{Plot $\rightarrow$ Monte Carlo $\rightarrow$ Histogram}.
+    \item Selecione a medição desejada (ex: \texttt{tphl}).
+    \item O gráfico mostrará barras indicando a frequência de cada valor de atraso.
+    \item Observe a legenda do gráfico: ela mostrará a \textbf{Mean} (Média) e \textbf{Sigma} (Desvio Padrão). Estes são os valores que devem ser anotados na prova.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    
+    \caption{Histograma de Monte Carlo. Uma distribuição estreita indica um circuito robusto.}
+\end{figure}
+
+\newpage
+
+% --- PARTE DE EXEMPLOS DE PROVAS ---
+
+\subsection[\textcolor{red}{Exemplos Práticos de Provas}]{\textcolor{red}{Exemplos Práticos de Provas}}
+
+\subsubsection[\textcolor{red}{Prova 2024 Q4: Sweep de Carga e Potência (Resolução Completa)}]{\textcolor{red}{Prova 2024 Q4: Sweep de Carga e Potência (Resolução Completa)}}
+
+\textbf{Objetivo:} Determinar como a potência dinâmica e o atraso da porta variam ao aumentar a carga capacitiva na saída. Isso simula o efeito de ligar a porta a vários outros blocos ou a fios longos.
+
+\textbf{Teoria Rápida:}
+Em circuitos CMOS digitais, a Potência Dinâmica é dada por:
+\[ P_{dyn} = f \cdot C_L \cdot V_{DD}^2 \]
+Portanto, esperamos que o gráfico \textbf{Potência vs. $C_L$} seja uma \textbf{reta (linear)} com inclinação positiva.
+
+\textbf{1. Preparação do Netlist (.cir)}
+Este script realiza uma simulação transiente (\texttt{.tran}) enquanto varia o valor do capacitor $C_L$ (\texttt{SWEEP}).
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Carga (Q4 2024)}]
+* 
+* 1. INCLUDES E MODELOS
+* Substitua pelo seu arquivo PEX (extraido com R+C ou C+CC)
+.include "minha_celula.pex.netlist"
+
+* --- MODELO WORST POWER (WP) ---
+* O enunciado exige WP (transistores rapidos, consumo maximo)
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloWP"
+* Mapeamento dos modelos (Do PEX para o .MOD)
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. PARAMETROS GERAIS
+.Param VDD_VAL = 3.3V
+.Param TEMP_VAL = 27
+.Option TEMP = TEMP_VAL
+
+* 3. FONTES DE ALIMENTACAO
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 4. ESTIMULO (Onda Quadrada precisa)
+* Frequencia de operacao (ex: 100MHz)
+.Param period = 10n
+.Param tr = 0.2n
+.Param tf = 0.2n
+* Largura do pulso calculada para 50% de Duty Cycle exato
+.Param pw = 'period/2 - (tr+tf)/2'
+
+* Fonte de entrada (Injetada no pino A)
+Va A 0 PULSE(0 VDD_VAL 0 tr tf pw period)
+
+* 5. CARGA CAPACITIVA VARIAVEL
+* Define o capacitor CL no no de saida (OUT)
+* O valor '1fF' eh dummy, sera sobrescrito pelo SWEEP
+CL OUT 0 1fF
+
+* 6. MEDICOES AUTOMATICAS (.MEAS)
+
+* --- A) Potencia Media ---
+* Medimos a corrente media fornecida pelo VDD.
+* O sinal negativo (-) corrige o sentido da corrente do SPICE (que sai da fonte).
+.meas tran I_media AVG I(Vdd)
+.meas tran Potencia_Total param='-I_media * VDD_VAL'
+
+* --- B) Atrasos (Opcional, mas enriquece a resposta "Graficos de Saida") ---
+.meas tran tplh trig v(A) val='VDD_VAL/2' fall=1 targ v(OUT) val='VDD_VAL/2' rise=1
+.meas tran tphl trig v(A) val='VDD_VAL/2' rise=1 targ v(OUT) val='VDD_VAL/2' fall=1
+.meas tran t_medio param='(tplh + tphl)/2'
+
+* 7. SIMULACAO COM SWEEP (O CORACAO DA QUESTAO)
+* Sintaxe: .tran passo fim SWEEP var INCR passo inicio fim
+* Faixa: 0fF a 300fF (cobre cargas leves e pesadas)
+* Passo: 50fF (Gera os pontos: 0, 50, 100, 150, 200, 250, 300 = 7 pontos)
+* Garantindo o requisito de "pelo menos 5 valores".
+
+.tran 0.01n '5*period' SWEEP CL INCR 50fF 0fF 300fF
+\end{lstlisting}
+
+\textbf{2. Procedimento de Simulação e Análise}
+
+\begin{enumerate}
+    \item \textbf{Executar:} Rode o comando \texttt{eldo nome\_arquivo.cir} no terminal.
+    \item \textbf{Abrir Resultados:} Abra o EZWave (\texttt{ezwave nome\_arquivo.wdb}).
+    \item \textbf{Visualizar a Tabela de Medições:}
+    \begin{itemize}
+        \item Vá em \textbf{View $\rightarrow$ Measurement Results} (ou use o atalho, ícone de tabela).
+        \item Uma janela listará \texttt{Potencia\_Total}, \texttt{t\_medio}, etc.
+    \end{itemize}
+    \item \textbf{Plotar o Gráfico:}
+    \begin{itemize}
+        \item Selecione \texttt{Potencia\_Total} na tabela.
+        \item Arraste para a área de gráficos.
+        \item O eixo X será automaticamente $C_L$ (Load Capacitance) e o eixo Y será a Potência (Watts).
+    \end{itemize}
+    \item \textbf{Destacar os Pontos (Dica de Ouro):}
+    \begin{itemize}
+        \item Para provar ao professor que você simulou os 5+ pontos exigidos:
+        \item Clique com o botão direito na linha do gráfico $\rightarrow$ \textbf{Properties}.
+        \item Vá na aba \textbf{Attributes} (ou Trace) e ative a opção \textbf{Data Point Symbol} (escolha círculos ou xis).
+        \item Isso fará com que cada ponto simulado (0, 50, 100...) fique marcado visualmente sobre a reta.
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{3. O que escrever na folha da prova?}
+\begin{itemize}
+    \item \textbf{Comportamento:} "O gráfico mostra que a potência consumida aumenta linearmente com a capacitância de carga $C_L$."
+    \item \textbf{Justificativa:} "Isso está de acordo com a teoria de potência dinâmica em circuitos CMOS ($P = f \cdot C_L \cdot V_{DD}^2$), onde a carga e descarga do capacitor de saída domina o consumo no modelo Worst Power."
+    \item \textbf{Valores:} Cite o valor mínimo (em 0fF, que é a capacitância parasita interna) e o máximo (em 300fF) para dar dimensão à resposta.
+\end{itemize}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2024 Q8: Relação $F_{in}/F_{out}$ em Contador (Resolução Completa)}]{\textcolor{red}{Prova 2024 Q8: Relação $F_{in}/F_{out}$ em Contador (Resolução Completa)}}
+
+\textbf{Objetivo:} Determinar experimentalmente a taxa de divisão de um contador ($N = F_{in}/F_{out}$) e encontrar a frequência máxima ($F_{max}$) na qual o circuito para de dividir corretamente.
+
+\textbf{Teoria Rápida:}
+Um contador de $k$ bits funciona como um divisor de frequência por $2^k$.
+\begin{itemize}
+    \item Ex: Contador de 4 bits $\rightarrow$ Divide por $2^4 = 16$.
+    \item \textbf{Comportamento esperado:} O gráfico de $F_{in}/F_{out}$ deve ser uma linha reta horizontal no valor de divisão (ex: 16) até atingir a $F_{max}$.
+    \item \textbf{Falha:} Acima de $F_{max}$, o atraso de propagação supera o período do clock. O contador perde pulsos e a relação cai ou torna-se caótica.
+\end{itemize}
+
+\textbf{1. O Script de Simulação (.cir)}
+O segredo aqui é parametrizar o período em função de uma frequência variável \texttt{f} e usar o comando \texttt{SWEEP} no \texttt{.tran}.
+
+\begin{lstlisting}[language=pspice, caption={Script de Varredura de Frequência para Contador}]
+* 
+* 1. INCLUDES
+.include "meu_contador.pex.netlist"
+.include "/local/tools/dkit/ams_3.70_mgc/eldo/c35/modeloMOD"
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. ALIMENTACAO
+.Param VDD_VAL = 3.3V
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. ESTIMULO DE CLOCK (VARIAVEL COM 'f')
+* Definimos uma frequencia inicial dummy (sera varrida)
+.Param f = 10MEG
+.Param period = '1/f'
+
+* Configura bordas rapidas (proporcionais ao periodo para nao falhar em alta freq)
+.Param tr = '0.05 * period'
+.Param tf = '0.05 * period'
+.Param pw = 'period/2 - (tr+tf)/2'
+
+* Clock aplicado na entrada CLK
+Vclk CLK 0 PULSE(0 VDD_VAL 0 tr tf pw period)
+
+* Reset (Necessario para contadores assincronos/sincronos iniciarem conhecidos)
+* Pulso inicial de Reset e depois fica em 0
+Vrst RST 0 PULSE(0 VDD_VAL 0 1n 1n 5n 1000u)
+
+* 4. MEDICOES AUTOMATICAS (.MEAS)
+* Objetivo: Medir Periodo de Entrada (T_in) e Saida (T_out)
+
+* --- Medir T_IN (Periodo do Clock) ---
+* Mede entre a 10a e 11a borda de subida (estabilidade)
+.meas tran T_IN trig v(CLK) val='VDD_VAL/2' rise=10 targ v(CLK) val='VDD_VAL/2' rise=11
+
+* --- Medir T_OUT (Periodo da Saida Q_final) ---
+* O periodo da saida eh MUITO maior. Precisamos pegar uma oscilacao completa.
+* CUIDADO: Se o contador divide por 16, a saida so sobe na borda 8 e 24 do clock.
+* Usamos rise=2 e rise=3 para garantir que o reset ja passou.
+.meas tran T_OUT trig v(SAIDA_Q3) val='VDD_VAL/2' rise=2 targ v(SAIDA_Q3) val='VDD_VAL/2' rise=3
+
+* --- Calcular a Relacao (M = Tout / Tin = Fin / Fout) ---
+.meas tran RELACAO param='T_OUT/T_IN'
+
+* 5. SIMULACAO COM SWEEP DE FREQUENCIA
+* Varredura: 10 MHz ate 2 GHz (ajuste conforme necessidade)
+* O tempo total de simulacao ('100*period') deve ser suficiente para 
+* haver pelo menos 3 ou 4 oscilacoes completas da SAIDA (que eh lenta).
+* Se o contador for de 4 bits (div 16), precisamos de min 50 clocks.
+
+.tran 0 '100*period' SWEEP f DEC 10 10MEG 2G
+\end{lstlisting}
+
+\textbf{2. Análise no EZWave}
+
+\begin{enumerate}
+    \item \textbf{Rodar:} Execute o ELDO.
+    \item \textbf{Tabela de Resultados:} Abra \textbf{View $\rightarrow$ Measurement Results}.
+    \item \textbf{Plotar:} Arraste a medição \texttt{RELACAO} para o gráfico.
+    \item \textbf{Interpretação Visual:}
+    \begin{itemize}
+        \item O eixo X será a Frequência ($f$).
+        \item O gráfico deve mostrar uma linha reta horizontal perfeita no valor da divisão (ex: 16.0).
+        \item Em uma certa frequência alta, a linha começará a cair, oscilar ou desaparecer.
+    \end{itemize}
+    \item \textbf{Identificar $F_{max}$:} O ponto exato onde a linha deixa de ser constante (sai do patamar de 16.0) é a frequência máxima de operação.
+\end{enumerate}
+
+
+
+\textbf{3. Dicas Críticas para a Prova}
+\begin{itemize}
+    \item \textbf{Tempo de Simulação:} Se o gráfico da relação aparecer "zerado" ou vazio, aumente o tempo final do `.tran`. Um contador divide a frequência. Se você simular pouco tempo, o sinal de saída (que é lento) não terá completado um ciclo inteiro ($T_{out}$) para ser medido pelo `.meas`. Use pelo menos \texttt{'100*period'}.
+    \item \textbf{Nome da Saída:} Verifique no netlist qual é o nome do bit mais significativo (MSB) do contador (ex: Q3, Q4, OUT). É nele que você mede o $T_{out}$.
+    \item \textbf{Resposta Escrita:} "A simulação mostra que a relação $F_{in}/F_{out}$ mantém-se constante em 16 (para 4 bits) até a frequência de $X$ GHz. Após este ponto, as violações de tempo de propagação impedem a comutação correta dos flip-flops."
+\end{itemize}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2022a Q3: Monte Carlo de Timing (Resolução Completa)}]{\textcolor{red}{Prova 2022a Q3: Monte Carlo de Timing (Resolução Completa)}}
+
+\textbf{Objetivo:} Realizar uma análise estatística para determinar a variação esperada nos tempos de propagação do circuito devido a imperfeições do processo de fabricação (mismatch e variações globais).
+
+\textbf{Teoria Rápida:}
+Em vez de simular um transistor "ideal", o Monte Carlo roda a simulação $N$ vezes (aqui, 75), sorteando aleatoriamente parâmetros como $V_{th}$ (tensão de limiar) e $\mu$ (mobilidade) baseados em curvas de distribuição reais da fábrica.
+\begin{itemize}
+    \item \textbf{Resultado:} Um histograma (distribuição Gaussiana).
+    \item \textbf{Métrica:} Devemos anotar a \textbf{Média} ($\mu$) e o \textbf{Desvio Padrão} ($\sigma$). Um $\sigma$ alto indica um circuito pouco robusto.
+\end{itemize}
+
+\textbf{1. O Script de Simulação (.cir)}
+Atenção especial à inclusão das bibliotecas de estatística (`.lib ... mc`) e ao comando `.MC`.
+
+\begin{lstlisting}[language=pspice, caption={Script de Monte Carlo (75 iterações)}]
+* 
+* 1. INCLUDES E BIBLIOTECAS ESTATISTICAS (CRITICO)
+* Para MC, nao usamos os modelos simples (.mod). 
+* Precisamos do arquivo de estatisticas (wc53.lib ou similar com flag 'mc')
+.INCLUDE /local/tools/dkit/ams_3.70_mgc/eldo/c35/profile.opt
+.LIB /local/tools/dkit/ams_3.70_mgc/eldo/c35/wc53.lib mc
+
+* Seu netlist extraido (PEX)
+.include "minha_celula.pex.netlist"
+
+* Mapeamento (as vezes necessario dependendo de como o PEX gerou)
+.defmod pmos4 modp
+.defmod nmos4 modn
+
+* 2. PARAMETROS FIXOS (Do Enunciado)
+.Param VDD_VAL = 2.8V
+.Param C_LOAD  = 25fF
+
+* Fontes
+Vdd VDD 0 DC VDD_VAL
+Vss VSS 0 0
+
+* 3. CARGA FIXA
+* Diferente do Sweep, aqui o CL eh fixo.
+CL OUT 0 C_LOAD
+
+* 4. ESTIMULO
+.Param period = 10n
+.Param tr = 0.2n
+Va IN 0 PULSE(0 VDD_VAL 0 tr tr 'period/2' period)
+
+* 5. CONFIGURACAO DO MONTE CARLO (.MC)
+* Sintaxe: .MC <num_runs> [opcoes] <tipo_variacao>
+* NBBINS=20 define a resolucao do histograma (barras).
+* 'mismatch': Variacao entre transistores do mesmo chip.
+* 'process': Variacao global de wafer para wafer.
+.MC 75 NBBINS=20 mismatch process
+
+* 6. MEDICOES DE TIMING
+* O enunciado pede "tempos de subida e descida". 
+* Interpretacao 1: Atraso de Propagacao (tpLH, tpHL) - O mais comum para "timing".
+.meas tran tpLH trig V(IN) val='VDD_VAL/2' fall=1 targ V(OUT) val='VDD_VAL/2' rise=1
+.meas tran tpHL trig V(IN) val='VDD_VAL/2' rise=1 targ V(OUT) val='VDD_VAL/2' fall=1
+
+* Interpretacao 2: Tempo de Transicao (Rise/Fall Time 10-90%) - Caso o prof. peca a inclinacao.
+.meas tran t_rise trig V(OUT) val='VDD_VAL*0.1' rise=1 targ V(OUT) val='VDD_VAL*0.9' rise=1
+.meas tran t_fall trig V(OUT) val='VDD_VAL*0.9' fall=1 targ V(OUT) val='VDD_VAL*0.1' fall=1
+
+* 7. ANALISE TRANSIENTE
+* O tempo deve ser suficiente para capturar a primeira transicao completa.
+.tran 0 20n 0 0.01n
+\end{lstlisting}
+
+\textbf{2. Procedimento de Análise no EZWave}
+
+Diferente das outras simulações, você \textbf{não deve} analisar as formas de onda sobrepostas ("nuvem de linhas"), pois é confuso. Você deve gerar o histograma.
+
+\begin{enumerate}
+    \item \textbf{Rodar:} Execute o ELDO. Note que demorará 75x mais que uma simulação comum.
+    \item \textbf{Abrir EZWave:} Carregue o `.wdb`.
+    \item \textbf{Gerar Histograma:}
+    \begin{itemize}
+        \item No menu superior, vá em \textbf{Plot $\rightarrow$ Monte Carlo $\rightarrow$ Histogram} (ou procure o ícone de gráfico de barras).
+        \item Uma janela se abrirá listando suas medições (`tpLH`, `tpHL`, etc.).
+        \item Selecione, por exemplo, `tpHL` e clique em OK.
+    \end{itemize}
+    \item \textbf{Leitura dos Dados:}
+    \begin{itemize}
+        \item O gráfico mostrará uma distribuição (formato de sino).
+        \item Olhe a legenda ou as propriedades do gráfico para encontrar:
+        \begin{itemize}
+            \item \textbf{Mean (Média):} O atraso típico esperado.
+            \item \textbf{Sigma (Desvio Padrão):} A variabilidade.
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+
+
+\textbf{3. O que escrever na folha da prova?}
+\begin{itemize}
+    \item \textbf{Resultados:} "A simulação de Monte Carlo com 75 pontos indicou um tempo de propagação médio ($t_{pHL}$) de $X$ ps com um desvio padrão ($\sigma$) de $Y$ ps."
+    \item \textbf{Análise (Opcional):} "Considerando uma variação de $3\sigma$ (que cobre 99.7\% dos casos), o atraso máximo esperado seria $\mu + 3\sigma$."
+    \item \textbf{Gráfico:} Desenhe um esboço simplificado do histograma mostrando onde está a média.
+\end{itemize}
+
+\newpage
+
+\subsubsection[\textcolor{red}{Prova 2016b Q4: Cálculo Teórico de $F_{max}$}]{\textcolor{red}{Prova 2016b Q4: Cálculo Teórico de $F_{max}$}}
+
+\textbf{Enunciado:} Suponha que o atraso de cada porta lógica seja $0.2\,\text{ns}$. O atraso ($T_D$), o setup ($T_{set}$) e o holding time ($T_{holding}$) dos D-FFs estão indicados na Figura 1 ($T_D=0.4\,\text{ns}, T_{set}=0.1\,\text{ns}$). Qual será o máximo clock permitido?
+
+
+
+\textbf{Solução Detalhada:}
+
+Para encontrar a frequência máxima ($F_{max}$), devemos identificar o **Caminho Crítico**, que é o trajeto lógico mais longo entre a saída ($Q$) de um Flip-Flop e a entrada ($D$) do próximo.
+
+\textbf{1. Análise dos Caminhos Combinacionais ($T_{logic}$):}
+Observando a imagem, o sinal pode percorrer dois caminhos distintos:
+\begin{itemize}
+    \item \textbf{Caminho Superior:} Passa por 2 portas XOR.
+    \[ T_{sup} = 2 \times 0.2\,\text{ns} = 0.4\,\text{ns} \]
+    \item \textbf{Caminho Inferior:} Passa por 2 portas AND e depois pela porta XOR final (totalizando 3 portas em série).
+    \[ T_{inf} = 3 \times 0.2\,\text{ns} = \mathbf{0.6\,\text{ns}} \]
+\end{itemize}
+O atraso lógico a ser considerado é sempre o maior: $\mathbf{T_{logic} = 0.6\,\text{ns}}$.
+
+\textbf{2. Cálculo do Período Mínimo ($T_{min}$):}
+O período do clock deve ser suficiente para cobrir o atraso de propagação do FF inicial, o tempo da lógica e o tempo de preparação (setup) do FF final.
+\[ T_{min} \ge T_{clk-q} + T_{logic} + T_{setup} \]
+
+Substituindo os valores dados na figura:
+\[ T_{min} \ge 0.4\,\text{ns} + 0.6\,\text{ns} + 0.1\,\text{ns} \]
+\[ T_{min} = 1.1\,\text{ns} \]
+
+\textbf{3. Cálculo da Frequência Máxima ($F_{max}$):}
+\[ F_{max} = \frac{1}{T_{min}} = \frac{1}{1.1 \times 10^{-9}\,\text{s}} \]
+\[ F_{max} \approx 909.09 \times 10^6\,\text{Hz} \]
+
+\[ \boxed{F_{max} \approx 909\,\text{MHz}} \]
+
+\textbf{Nota:} O parâmetro $T_{holding} = 0.08\,\text{ns}$ e $0.075\,\text{ns}$ serve para verificar violações de tempo de retenção (corrida de sinais), mas \textbf{não influencia} o cálculo da frequência máxima de operação.
+
+\newpage
+
