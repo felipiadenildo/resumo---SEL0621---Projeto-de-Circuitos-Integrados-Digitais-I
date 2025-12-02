@@ -1,124 +1,120 @@
-
+% !TeX root = main.tex
+% !TeX program = lualatex
 % ####################################################################
 % #                     PREÂMBULO DO DOCUMENTO                       #
 % ####################################################################
-
+\pdfvariable minorversion=7
 \documentclass[a4paper, 11pt]{article}
-% regex \
 
 % --- PACOTES BÁSICOS ---
 \usepackage{multirow}
 \usepackage{subcaption}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
-\usepackage{amsmath, amssymb} % Pacotes de matemática
+\usepackage{amsmath, amssymb}       % Pacotes de matemática
 \usepackage{graphicx}
 \usepackage[margin=1.5cm]{geometry} % Margens conforme originais
-\usepackage{parskip}                % Espaçamento entre parágrafos (sem indentação)
+\usepackage{parskip}                % Espaçamento entre parágrafos
 \usepackage{float}                  % Para usar [H]
 
+% --- FONTES (ESSENCIAL PARA LUALATEX) ---
+\usepackage{fontspec} 
+
+\setmonofont{DejaVu Sans Mono}[Scale=0.9]
+
 % --- PACOTES DE TIPOGRAFIA E MELHORIAS ---
-\usepackage{microtype} % Melhora sutilmente a justificação e o espaçamento
-\usepackage{fancyhdr}  % Para cabeçalhos e rodapés
-\usepackage{booktabs}  % Para tabelas profissionais
-\usepackage{array}     % Para controle avançado de colunas em tabelas
+\usepackage{microtype} % Melhora justificação e espaçamento
+\usepackage{fancyhdr}  % Cabeçalhos e rodapés
+\usepackage{booktabs}  % Tabelas profissionais
+\usepackage{array}     % Controle avançado de tabelas
 
 % --- PACOTES PARA LISTAGEM DE CÓDIGO ---
-\usepackage{xcolor}   % Necessário para definir cores
-\usepackage{listings} % O pacote de code listing
+\usepackage{xcolor}
+\usepackage{listings}
 
 % --- PACOTES DE NAVEGAÇÃO (CARREGAR POR ÚLTIMO) ---
-\usepackage[hidelinks]{hyperref} % Para índice clicável e links internos
+\usepackage[hidelinks]{hyperref}
 
 % --- DEFINIÇÃO DAS CORES PARA O CÓDIGO ---
 \definecolor{codegray}{rgb}{0.95,0.95,0.95}
 \definecolor{commentgreen}{rgb}{0,0.5,0}
 \definecolor{keywordblue}{rgb}{0.0,0.0,0.6}
 \definecolor{stringpurple}{rgb}{0.5,0.0.5}
-\definecolor{bashcommand}{rgb}{0.6,0.1,0.1} % Nova cor para comandos bash
+\definecolor{bashcommand}{rgb}{0.6,0.1,0.1}
 
 % --- CONFIGURAÇÃO GLOBAL DO `listings` ---
-% Esta é a aparência base para TODOS os blocos de código
 \lstset{
- backgroundcolor=\color{white},         % Fundo branco
- commentstyle=\color{commentgreen},     % Cor dos comentários
- keywordstyle=\bfseries\color{keywordblue},% Estilo das palavras-chave
- stringstyle=\color{stringpurple},        % Cor das strings
- basicstyle=\ttfamily,                  % Fonte de máquina de escrever simples
- showstringspaces=false,                % Não mostrar espaços em strings
- breaklines=true,                       % Quebra de linha automática
- frame=single,                          % Borda simples
- framerule=0.5pt,
- rulecolor=\color{black},
- tabsize=4,
- numbers=none,                          % Desligar números de linha por padrão
- numberstyle=\tiny\color{gray},
- inputencoding=utf8,
- extendedchars=true,
- literate={Ω}{{$\Omega$}}1 {µ}{{$\mu$}}1, % Adicione esta linha!
+    backgroundcolor=\color{white},
+    commentstyle=\color{commentgreen},
+    keywordstyle=\bfseries\color{keywordblue},
+    stringstyle=\color{stringpurple},
+    basicstyle=\small\ttfamily,      % \small ajuda a caber linhas longas
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{black},
+    tabsize=4,
+    numbers=none,
+    numberstyle=\tiny\color{gray},
+    % --- CONFIGURAÇÃO LUALATEX ---
+    % Não usamos inputencoding nem extendedchars aqui.
+    % Apenas tratamos símbolos especiais que não estão na fonte mono:
+    literate={Ω}{{$\Omega$}}1 {µ}{{$\mu$}}1 {°}{{$^\circ$}}1,
 }
 
 % --- DEFINIÇÃO DE LINGUAGENS CUSTOMIZADAS ---
 
 % 1. Linguagem para PSpice (SPICE)
 \lstdefinelanguage{pspice}{%
- sensitive=false, % pspice não é case-sensitive
- morekeywords={.param, .global, .subckt, .ends, .lib, .include, .tran,
- .dc, .ac, .meas, .mc, .option, .plot, .probe, .ic, .nodeset,
- VDD, VSS, PULSE, sweep, trig, targ, rise, fall, param, abs,
- WHEN, FIND, AVG, STDDEV, MAX, MIN, INCR,
- MODN, MODP, RPOLYH, VERT10,
- NMOS4, PMOS4, V, I, Is, Vout, Vdd},
- morecomment=[l]{*}, % Comentários começam com *
+    sensitive=false,
+    morekeywords={.param,.global,.subckt,.ends,.lib,.include,.tran,.dc,.ac,.meas,.mc,.option,.plot,.probe,.ic,.nodeset,
+    VDD,VSS,PULSE,sweep,trig,targ,rise,fall,param,abs,
+    WHEN,FIND,AVG,STDDEV,MAX,MIN,INCR,
+    MODN,MODP,RPOLYH,VERT10,
+    NMOS4,PMOS4,V,I,Is,Vout,Vdd},
+    morecomment=[l]{*},
 }
 
 % 2. Linguagem para Bash/Terminal
 \lstdefinelanguage{bash}{%
- sensitive=true,
- morekeywords={cd, source, ams_ics, eldo, ezwave, calibre, xwd, convert,
- grep, find, cat, touch, vim, nano, cp, rm, mkdir,
- DRC, LVS, PEX, history, exit, touch,},
- keywordstyle=\bfseries\color{bashcommand},
- morecomment=[l]{\#}, % Comentários começam com #
- morestring=[b]", % Strings em aspas duplas
- morestring=[b]', % Strings em aspas simples
+    sensitive=true,
+    morekeywords={cd, source, ams_ics, eldo, ezwave, calibre, xwd, convert,
+    grep, find, cat, touch, vim, nano, cp, rm, mkdir,
+    DRC, LVS, PEX, history, exit, python3, latexmk},
+    keywordstyle=\bfseries\color{bashcommand},
+    morecomment=[l]{\#},
+    morestring=[b]",
+    morestring=[b]',
 }
 
 % --- CONFIGURAÇÃO DO CABEÇALHO E RODAPÉ ---
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{\footnotesize \nouppercase{\leftmark}} % Mostra a Seção atual
-\rhead{\footnotesize \nouppercase{\rightmark}} % Mostra a Subseção atual
+\lhead{\footnotesize \nouppercase{\leftmark}} 
+\rhead{\footnotesize \nouppercase{\rightmark}} 
 \cfoot{\footnotesize \thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
-% --- AJUSTE PARA \leftmark E \rightmark FUNCIONAREM COM \section ---
+% Ajuste de marcas
 \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
 \renewcommand{\subsectionmark}[1]{\markright{#1}}
-
 
 % ####################################################################
 % #           INFORMAÇÕES DA CAPA (DEFINIÇÕES GLOBAIS)               #
 % ####################################################################
-%
-% Estas definições alimentam a \begin{titlepage} abaixo.
 
 \title{Material de Consulta\\ \large SEL0621 - Projeto de Circuitos Integrados Digitais I}
 
 \author{
-    Felipi Adenildo Soares Sousa \\ felipiadenildo(at)usp.br
+    Felipi Adenildo Soares Sousa \\ felipiadenildo@usp.br
 }
 
-\newcommand{\professor}{Prof. Dr. João Navarro Soares Júnior \\ navarro(at)sc.usp.br}
+\newcommand{\professor}{Prof. Dr. João Navarro Soares Júnior \\ navarro@sc.usp.br}
 \newcommand{\dataEntrega}{13 de novembro de 2025}
 
 % ####################################################################
 % #                        FIM DO PREÂMBULO                          #
 % ####################################################################
 
-
-
-% Configuração adicionada pelo script
 \graphicspath{{./imagens/}}
 \usepackage{pdfpages}
